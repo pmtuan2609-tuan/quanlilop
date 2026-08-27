@@ -520,13 +520,13 @@
               <div class="space-y-4">
                 <div>
                   <div class="text-[10px] md:text-xs font-black text-slate-400 mb-2 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500"></i> Buổi Sáng</div>
-                  <div id="teacher-today-timetable-list-morning" class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  <div id="teacher-today-timetable-list-morning" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <!-- Morning slots -->
                   </div>
                 </div>
                 <div>
                   <div class="text-[10px] md:text-xs font-black text-slate-400 mb-2 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="sunset" class="w-3.5 h-3.5 text-indigo-500"></i> Buổi Chiều</div>
-                  <div id="teacher-today-timetable-list-afternoon" class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  <div id="teacher-today-timetable-list-afternoon" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <!-- Afternoon slots -->
                   </div>
                 </div>
@@ -2947,20 +2947,19 @@
         }
         
         const periodTimes = {
-            1: "07:00 - 07:45",
-            2: "07:45 - 08:30",
-            3: "08:55 - 09:40",
-            4: "09:40 - 10:25",
-            5: "10:25 - 11:10",
-            6: "13:00 - 13:45",
-            7: "13:45 - 14:30",
-            8: "14:45 - 15:30",
-            9: "15:30 - 16:15"
+            1: "07:30 - 08:15",
+            2: "08:15 - 09:00",
+            3: "09:30 - 10:15",
+            4: "10:15 - 11:00",
+            5: "13:30 - 14:15",
+            6: "14:15 - 15:00",
+            7: "15:30 - 16:15",
+            8: "16:15 - 17:00"
         };
         
         let html = ''; 
-        for(let period = 1; period <= 9; period++) { 
-            if (period === 6) {
+        for(let period = 1; period <= 8; period++) { 
+            if (period === 5) {
                 html += `<tr>
                     <td colspan="7" class="bg-indigo-50/50 text-indigo-700 font-black text-xs md:text-sm py-2.5 uppercase tracking-widest text-center border border-slate-200">
                         <div class="flex items-center justify-center gap-1.5"><i data-lucide="sun" class="w-4 h-4 text-indigo-600"></i> Buổi Chiều</div>
@@ -2968,7 +2967,7 @@
                 </tr>`;
             }
             
-            const periodLabel = period <= 5 ? `Tiết ${period}` : `Tiết ${period - 5} (Chiều)`;
+            const periodLabel = period <= 4 ? `Tiết ${period}` : `Tiết ${period - 4} (Chiều)`;
             
             html += `<tr>
                 <td class="border border-slate-200 p-2 font-black bg-slate-50 w-24 text-center">
@@ -3048,7 +3047,7 @@
             subject = val;
         }
         
-        const periodLabel = period <= 5 ? `Tiết ${period}` : `Tiết ${period - 5} (Chiều)`;
+        const periodLabel = period <= 4 ? `Tiết ${period}` : `Tiết ${period - 4} (Chiều)`;
         document.getElementById('timetable-period-modal-title').innerText = `${periodLabel} - Thứ ${day}`;
         document.getElementById('modal-period-subject').value = subject;
         
@@ -3698,7 +3697,7 @@
       const grid = document.getElementById('seating-grid'); if(!grid) return; let html = ''; 
       for(let d=1; d<=4; d++) { 
           html += `<div class="flex flex-col gap-2 md:gap-3 bg-slate-100/50 p-3 md:p-4 rounded-3xl border border-slate-200 shadow-sm"><div class="text-center font-black text-[10px] md:text-xs text-slate-400 mb-1 md:mb-2 tracking-widest uppercase border-b border-slate-200 pb-2 md:pb-3">Dãy ${d}</div>`; 
-          for(let b=7; b>=1; b--) { 
+          for(let b=5; b>=1; b--) { 
               html += `<div class="bg-white border border-slate-200 p-1.5 md:p-2 rounded-2xl grid grid-cols-2 gap-1.5 md:gap-2 shadow-sm relative group hover:border-[var(--c1)] transition"><div id="seat-d${d}-b${b}-1" onclick="handleSeatClick('d${d}-b${b}-1')" class="seat-slot border-2 border-dashed border-slate-200 h-[36px] md:h-[44px] rounded-xl flex items-center justify-center cursor-pointer hover:bg-theme-light hover:border-[var(--c1)] transition relative overflow-hidden bg-slate-50/50"><i data-lucide="plus" class="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-slate-300"></i></div><div id="seat-d${d}-b${b}-2" onclick="handleSeatClick('d${d}-b${b}-2')" class="seat-slot border-2 border-dashed border-slate-200 h-[36px] md:h-[44px] rounded-xl flex items-center justify-center cursor-pointer hover:bg-theme-light hover:border-[var(--c1)] transition relative overflow-hidden bg-slate-50/50"><i data-lucide="plus" class="w-3.5 h-3.5 md:w-4.5 md:h-4.5 text-slate-300"></i></div></div>`; 
           } html += `</div>`; 
       } grid.innerHTML = html; lucide.createIcons(); 
@@ -4200,15 +4199,14 @@
           }
           
           const periods = [
-              { num: 1, time: "07:00 - 07:45" },
-              { num: 2, time: "07:45 - 08:30" },
-              { num: 3, time: "08:55 - 09:40" },
-              { num: 4, time: "09:40 - 10:25" },
-              { num: 5, time: "10:25 - 11:10" },
-              { num: 6, time: "13:00 - 13:45" },
-              { num: 7, time: "13:45 - 14:30" },
-              { num: 8, time: "14:45 - 15:30" },
-              { num: 9, time: "15:30 - 16:15" }
+              { num: 1, time: "07:30 - 08:15" },
+              { num: 2, time: "08:15 - 09:00" },
+              { num: 3, time: "09:30 - 10:15" },
+              { num: 4, time: "10:15 - 11:00" },
+              { num: 5, time: "13:30 - 14:15" },
+              { num: 6, time: "14:15 - 15:00" },
+              { num: 7, time: "15:30 - 16:15" },
+              { num: 8, time: "16:15 - 17:00" }
           ];
           
           let morningHtml = '';
@@ -4232,7 +4230,7 @@
                   }
               }
               
-              const periodLabel = p.num <= 5 ? `Tiết ${p.num}` : `Tiết ${p.num - 5} (Chiều)`;
+              const periodLabel = p.num <= 4 ? `Tiết ${p.num}` : `Tiết ${p.num - 4} (Chiều)`;
               
               const cardHtml = `
               <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col justify-between hover:bg-slate-100/50 transition shadow-sm">
@@ -4246,7 +4244,7 @@
                 </div>
               </div>`;
               
-              if (p.num <= 5) {
+              if (p.num <= 4) {
                   morningHtml += cardHtml;
               } else {
                   afternoonHtml += cardHtml;
