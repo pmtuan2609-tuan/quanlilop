@@ -260,7 +260,7 @@
         <button onclick="logout()" class="text-white/50 hover:text-white bg-white/5 hover:bg-white/20 p-2.5 rounded-xl transition shrink-0" title="Đăng xuất"><i data-lucide="log-out" class="w-4 h-4"></i></button>
       </div>
       <div class="mt-2 text-[9px] text-white/35 font-normal italic leading-relaxed text-center border-t border-white/5 pt-1.5">
-         Copyright © bản quyền thuộc Thầy Tuấn GV Toán TT GDNN - GDTX Quận 12
+         Copyright © bản quyền thuộc Cô Hà - GV KHTN THCS Nguyễn An Khương
       </div>
     </div>
   </aside>
@@ -368,7 +368,6 @@
           <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-slate-100 pb-4">
             <div>
               <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Trang chủ</h1>
-              <p class="text-xs md:text-sm text-slate-500 font-medium">Tổng quan tình hình và hoạt động học tập hôm nay</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
@@ -431,7 +430,7 @@
                 <div class="space-y-1">
                   <h2 class="text-xl md:text-2xl font-black text-slate-800"><span id="teacher-banner-greeting">Chào buổi học</span>, <span id="teacher-banner-name" class="text-theme-grad">Thầy/Cô</span>! 👋</h2>
                   <p id="teacher-banner-sub" class="text-xs font-bold text-slate-400">Giáo viên chủ nhiệm</p>
-                  <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed max-w-xl">Chúc thầy/cô một ngày dạy học tràn ngập tiếng cười và nhiều niềm vui cùng tập thể lớp <span id="teacher-banner-class" class="font-bold text-theme">...</span>.</p>
+                  <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed max-w-xl">Chúc quý thầy cô một ngày làm việc hiệu quả và tràn đầy niềm vui cùng tập thể lớp <span id="teacher-banner-class" class="font-bold text-theme">...</span>.</p>
                 </div>
               </div>
               
@@ -1951,7 +1950,7 @@
             }; img.src = event.target.result; 
         }; reader.readAsDataURL(file); 
     }
-    function generateCode(className, year, index) { className = className || "12A1"; year = year || "2026"; let yMatch = year.match(/\d{4}/g); let yStr = yMatch ? yMatch[yMatch.length - 1].slice(-2) : "00"; let gMatch = className.match(/^(\d{1,2})/); let gStr = gMatch ? gMatch[1].padStart(2, '0') : "00"; let sMatch = className.match(/[A-Za-z]+(\d+)/); let sStr = sMatch ? sMatch[1].padStart(2, '0') : "00"; return `${yStr}${gStr}${sStr}${index.toString().padStart(2, '0')}`; }
+    function generateCode(className, year, index) { className = className || "12A1"; year = year || "2026"; let yMatch = year.match(/\d{4}/g); let yStr = yMatch ? yMatch[yMatch.length - 1].slice(-2) : "00"; let gMatch = className.match(/^(\d{1,2})/); let gStr = gMatch ? gMatch[1] : "0"; let sMatch = className.match(/[A-Za-z]+(\d+)/); let sStr = sMatch ? sMatch[1].padStart(2, '0') : "00"; return `${yStr}${gStr}${sStr}${index.toString().padStart(2, '0')}`; }
     function ensureStudentCodes() { let changed = false; students.forEach((s, idx) => { if (!s.code) { s.code = generateCode(currentUser.className, currentUser.year, idx + 1); changed = true; } }); if (changed) saveAppData(); }
     function parseExcelDate(excelValue) { if (!excelValue) return ''; if (typeof excelValue === 'number') { const date = new Date(Math.round((excelValue - 25569) * 86400 * 1000)); return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`; } return String(excelValue).trim(); }
 
