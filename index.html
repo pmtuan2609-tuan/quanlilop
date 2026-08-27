@@ -1700,7 +1700,7 @@
         key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3aWhmbGttYnV4ZXRlYnVib3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MDk5OTUsImV4cCI6MjEwMjQ4NTk5NX0.HcxdM6ifXniM66b0xVcf5pmtCZzbApEjQzIgzDhnVss'  
     };
 
-    const MOCK_ADMIN = { id: 'thaytuan', pass: 'minhtuan' };
+    const MOCK_ADMIN = { id: 'covietha', pass: 'vietha' };
     const THEMES = { 
         emerald: { c1: '#10b981', c2: '#14b8a6', s1: '#064e3b', s2: '#022c22' }, 
         violet: { c1: '#8b5cf6', c2: '#d946ef', s1: '#1e1b4b', s2: '#312e81' }, 
@@ -2130,10 +2130,10 @@
                     const row = await callSupabaseRest('GET', id);
                     if (row && row.data && row.data.currentUser) {
                         const cloudUser = row.data.currentUser;
-                        const cloudPass = cloudUser.pass || 'minhtuan';
+                        const cloudPass = cloudUser.pass || 'vietha';
                         if (cloudPass === pass) {
                             if (!cloudUser.pass) {
-                                cloudUser.pass = 'minhtuan';
+                                cloudUser.pass = 'vietha';
                             }
                             currentUser = cloudUser;
                             students = row.data.students || [];
@@ -2246,7 +2246,7 @@
             }
 
             // 3. Local Fallback Auth for Teacher
-            if (id === 'thaytuan') {
+            if (id === 'covietha') {
                 let fetchedUser = null;
                 let fetchedData = null;
                 
@@ -2255,7 +2255,7 @@
                     if (res.ok) {
                         const backendData = await res.json();
                         const userObj = backendData.currentUser || backendData.user;
-                        if (userObj && userObj.id === 'thaytuan') {
+                        if (userObj && userObj.id === 'covietha') {
                             fetchedUser = userObj;
                             fetchedData = backendData;
                         }
@@ -2270,7 +2270,7 @@
                         if (res.ok) {
                             const backendData = await res.json();
                             const userObj = backendData.currentUser || backendData.user;
-                            if (userObj && userObj.id === 'thaytuan') {
+                            if (userObj && userObj.id === 'covietha') {
                                 fetchedUser = userObj;
                                 fetchedData = backendData;
                             }
@@ -2280,11 +2280,11 @@
                     }
                 }
                 
-                let expectedPass = 'minhtuan';
+                let expectedPass = 'vietha';
                 if (fetchedUser && fetchedUser.pass) {
                     expectedPass = fetchedUser.pass;
                 } else {
-                    const localSavedStr = localStorage.getItem('user_thaytuan');
+                    const localSavedStr = localStorage.getItem('user_covietha');
                     if (localSavedStr) {
                         const localUser = JSON.parse(localSavedStr);
                         if (localUser.pass) expectedPass = localUser.pass;
@@ -2308,10 +2308,10 @@
                         localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
                         localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
                     } else {
-                        let adminData = localStorage.getItem('user_thaytuan');
+                        let adminData = localStorage.getItem('user_covietha');
                         if(!adminData) {
-                            adminData = { id: 'thaytuan', pass: 'minhtuan' };
-                            localStorage.setItem('user_thaytuan', JSON.stringify(adminData));
+                            adminData = { id: 'covietha', pass: 'vietha' };
+                            localStorage.setItem('user_covietha', JSON.stringify(adminData));
                         } else adminData = JSON.parse(adminData);
                         currentUser = adminData;
                     }
@@ -2319,7 +2319,7 @@
                     currentUserRole = 'teacher';
                     currentStudent = null;
                     localStorage.setItem('currentUserRole', 'teacher');
-                    localStorage.setItem('user_thaytuan', JSON.stringify(currentUser));
+                    localStorage.setItem('user_covietha', JSON.stringify(currentUser));
                     loginSuccess(currentUser);
                     return;
                 } else {
@@ -4818,7 +4818,7 @@
     function checkAdminSection() {
         const adminCard = document.getElementById('admin-account-manager-card');
         const supabaseCard = document.getElementById('supabase-config-card');
-        const isAdmin = (currentUser && currentUser.id === 'thaytuan');
+        const isAdmin = (currentUser && currentUser.id === 'covietha');
         
         if (adminCard) {
             if (isAdmin) {
@@ -4867,7 +4867,7 @@
                 const cloudUser = cloudData.currentUser || cloudData.user || {};
                 const name = cloudUser.teacherName || 'Chưa cập nhật';
                 const className = cloudUser.className || 'Chưa thiết lập';
-                const pass = cloudUser.pass || 'minhtuan';
+                const pass = cloudUser.pass || 'vietha';
                 const isSelf = r.id === currentUser.id;
                 
                 // Initials avatar
@@ -5160,7 +5160,7 @@
 
     function teacherSelfChangePassword() {
         if (!currentUser) return;
-        const currentPass = currentUser.pass || 'minhtuan';
+        const currentPass = currentUser.pass || 'vietha';
         showPrompt("Đổi Mật Khẩu Giáo Viên", "Nhập mật khẩu mới của bạn (tối thiểu 4 ký tự):", currentPass, (newPass) => {
             const trimmed = newPass.trim();
             if (trimmed.length < 4) {
