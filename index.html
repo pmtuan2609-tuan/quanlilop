@@ -569,10 +569,12 @@
       <section id="tab-students" class="tab-section hidden space-y-4">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100 gap-4">
           <h3 class="font-bold text-slate-700 text-base md:text-lg whitespace-nowrap">Danh Sách Lớp (<span id="student-count" class="text-theme">0</span>)</h3>
-          <div class="flex gap-2 w-full sm:w-auto">
-            <button onclick="document.getElementById('excel-upload').click()" class="flex-[1] sm:flex-auto flex items-center justify-center gap-2 bg-emerald-50 text-emerald-600 border border-emerald-200 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-100 transition shadow-sm whitespace-nowrap"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Nhập Excel</button>
+          <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+            <button onclick="downloadStudentTemplate()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-sky-50 text-sky-700 border border-sky-200 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-bold hover:bg-sky-100 transition shadow-sm whitespace-nowrap" title="Tải file Excel mẫu chuẩn (.xlsx)"><i data-lucide="file-down" class="w-4 h-4 text-sky-600"></i> Tải file mẫu</button>
+            <button onclick="openStudentTemplateGuideModal()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-bold hover:bg-amber-100 transition shadow-sm whitespace-nowrap" title="Xem hướng dẫn cấu trúc file mẫu"><i data-lucide="help-circle" class="w-4 h-4 text-amber-600"></i> Hướng dẫn mẫu</button>
+            <button onclick="document.getElementById('excel-upload').click()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-bold hover:bg-emerald-100 transition shadow-sm whitespace-nowrap"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Nhập Excel</button>
             <input type="file" id="excel-upload" accept=".xlsx, .xls" class="hidden" onchange="handleExcelUpload(event)">
-            <button onclick="deleteAllStudents()" class="flex-[1] sm:flex-auto flex items-center justify-center gap-2 bg-rose-50 text-rose-600 border border-rose-200 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-rose-100 transition shadow-sm whitespace-nowrap" title="Xóa toàn bộ học sinh"><i data-lucide="trash-2" class="w-4 h-4"></i> Xóa tất cả</button>
+            <button onclick="deleteAllStudents()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-rose-50 text-rose-600 border border-rose-200 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-bold hover:bg-rose-100 transition shadow-sm whitespace-nowrap" title="Xóa toàn bộ học sinh"><i data-lucide="trash-2" class="w-4 h-4"></i> Xóa tất cả</button>
           </div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -707,7 +709,6 @@
                         <th class="border border-slate-200 p-3 bg-slate-50 text-theme font-black uppercase text-xs md:text-sm">Thứ 4</th>
                         <th class="border border-slate-200 p-3 bg-slate-50 text-theme font-black uppercase text-xs md:text-sm">Thứ 5</th>
                         <th class="border border-slate-200 p-3 bg-slate-50 text-theme font-black uppercase text-xs md:text-sm">Thứ 6</th>
-                        <th class="border border-slate-200 p-3 bg-slate-50 text-theme font-black uppercase text-xs md:text-sm">Thứ 7</th>
                     </tr>
                 </thead>
                 <tbody id="timetable-tbody"></tbody>
@@ -952,6 +953,150 @@
   <!-- ========================================== -->
   <!-- MODALS (POPUPS)                            -->
   <!-- ========================================== -->
+
+  <!-- Modal Hướng Dẫn File Mẫu Excel Danh Sách Học Sinh -->
+  <div id="student-template-guide-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[650] p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-[2rem] p-5 md:p-7 w-full max-w-3xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh] border border-white/20" id="student-template-guide-content">
+      <!-- Header -->
+      <div class="flex justify-between items-start mb-4 pb-3 border-b border-slate-100 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
+            <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg md:text-xl font-black text-slate-800 tracking-tight">Hướng Dẫn File Mẫu Danh Sách Học Sinh</h3>
+            <p class="text-xs text-slate-400 font-bold mt-0.5">Cấu trúc các cột và quy cách định dạng khi tải file Excel lên hệ thống</p>
+          </div>
+        </div>
+        <button onclick="closeModalUi('student-template-guide-modal', 'student-template-guide-content')" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <!-- Scrollable Body -->
+      <div class="overflow-y-auto custom-scrollbar flex-1 pr-1 space-y-4">
+        <!-- Download banner -->
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-4 md:p-5 rounded-2xl text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
+          <div class="space-y-1 text-center sm:text-left">
+            <div class="font-black text-sm md:text-base flex items-center justify-center sm:justify-start gap-2">
+              <i data-lucide="download" class="w-5 h-5"></i> File Excel mẫu chuẩn (.xlsx)
+            </div>
+            <p class="text-xs text-emerald-50">Đã điền sẵn 14 cột tiêu chuẩn cùng dữ liệu mẫu để bạn chỉ cần nhập danh sách vào.</p>
+          </div>
+          <button onclick="downloadStudentTemplate()" class="bg-white text-emerald-700 hover:bg-emerald-50 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg transition whitespace-nowrap flex items-center gap-1.5 shrink-0 hover:scale-[1.02]">
+            <i data-lucide="file-down" class="w-4 h-4"></i> Tải file mẫu (.xlsx)
+          </button>
+        </div>
+
+        <!-- Table of column rules -->
+        <div>
+          <h4 class="text-xs font-black uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+            <i data-lucide="table" class="w-4 h-4 text-emerald-600"></i> Quy định thứ tự 14 cột (Từ Cột A đến Cột N)
+          </h4>
+          <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+            <table class="w-full text-left text-xs border-collapse min-w-[550px]">
+              <thead class="bg-slate-50 text-slate-700 uppercase font-black tracking-wider text-[10px]">
+                <tr>
+                  <th class="p-2.5 border-b border-slate-200 text-center w-14">Cột</th>
+                  <th class="p-2.5 border-b border-slate-200">Trường thông tin</th>
+                  <th class="p-2.5 border-b border-slate-200 text-center w-24">Tính chất</th>
+                  <th class="p-2.5 border-b border-slate-200">Quy cách nhập & Ví dụ mẫu</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-600">
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 text-center font-mono font-bold text-slate-400">A</td>
+                  <td class="p-2.5 font-bold text-slate-800">STT</td>
+                  <td class="p-2.5 text-center"><span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full font-bold">Tùy chọn</span></td>
+                  <td class="p-2.5">Số thứ tự 1, 2, 3...</td>
+                </tr>
+                <tr class="hover:bg-rose-50/40 bg-rose-50/20">
+                  <td class="p-2.5 text-center font-mono font-bold text-rose-600">B</td>
+                  <td class="p-2.5 font-black text-rose-700">Họ và Tên</td>
+                  <td class="p-2.5 text-center"><span class="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full font-black">Bắt buộc</span></td>
+                  <td class="p-2.5 font-medium text-slate-800">Họ tên đầy đủ học sinh. Ví dụ: <span class="font-bold text-slate-900">Nguyễn Văn An</span></td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 text-center font-mono font-bold text-slate-400">C</td>
+                  <td class="p-2.5 font-bold text-slate-800">Giới tính</td>
+                  <td class="p-2.5 text-center"><span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full font-bold">Tùy chọn</span></td>
+                  <td class="p-2.5">Nhập <span class="font-bold">Nam</span> hoặc <span class="font-bold">Nữ</span> (hoặc chữ <span class="font-bold">x</span> là Nữ). Mặc định là Nam nếu để trống.</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 text-center font-mono font-bold text-slate-400">D</td>
+                  <td class="p-2.5 font-bold text-slate-800">Ngày sinh</td>
+                  <td class="p-2.5 text-center"><span class="bg-amber-50 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold">Khuyên có</span></td>
+                  <td class="p-2.5">Định dạng chuẩn <span class="font-bold font-mono">dd/mm/yyyy</span> (VD: <span class="font-bold">15/03/2012</span>) hoặc ô Date Excel.</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 text-center font-mono font-bold text-slate-400">E</td>
+                  <td class="p-2.5 font-bold text-slate-800">Số CCCD / Định danh</td>
+                  <td class="p-2.5 text-center"><span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full font-bold">Tùy chọn</span></td>
+                  <td class="p-2.5 font-mono">Mã định danh cá nhân / CCCD 12 số (VD: 079201001234)</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 text-center font-mono font-bold text-slate-400">F</td>
+                  <td class="p-2.5 font-bold text-slate-800">Nơi sinh</td>
+                  <td class="p-2.5 text-center"><span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full font-bold">Tùy chọn</span></td>
+                  <td class="p-2.5">Tỉnh/Thành phố nơi sinh (VD: TP. Hồ Chí Minh)</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 text-center font-mono font-bold text-slate-400">G</td>
+                  <td class="p-2.5 font-bold text-slate-800">Số điện thoại HS</td>
+                  <td class="p-2.5 text-center"><span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full font-bold">Tùy chọn</span></td>
+                  <td class="p-2.5 font-mono">Số điện thoại của học sinh (nếu có)</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 text-center font-mono font-bold text-slate-400">H</td>
+                  <td class="p-2.5 font-bold text-slate-800">Địa chỉ thường trú</td>
+                  <td class="p-2.5 text-center"><span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full font-bold">Tùy chọn</span></td>
+                  <td class="p-2.5">Địa chỉ nơi cư trú hiện tại của học sinh</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 text-center font-mono font-bold text-slate-400">I, J, K</td>
+                  <td class="p-2.5 font-bold text-slate-800">Thông tin Cha</td>
+                  <td class="p-2.5 text-center"><span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full font-bold">Tùy chọn</span></td>
+                  <td class="p-2.5">Cột I: Họ tên Cha, Cột J: CCCD Cha, Cột K: SĐT Cha</td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 text-center font-mono font-bold text-slate-400">L, M, N</td>
+                  <td class="p-2.5 font-bold text-slate-800">Thông tin Mẹ</td>
+                  <td class="p-2.5 text-center"><span class="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full font-bold">Tùy chọn</span></td>
+                  <td class="p-2.5">Cột L: Họ tên Mẹ, Cột M: CCCD Mẹ, Cột N: SĐT Mẹ</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Notes / Tips -->
+        <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 space-y-2 text-xs text-amber-900">
+          <div class="font-black flex items-center gap-1.5 text-amber-800">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600"></i> Các lưu ý quan trọng:
+          </div>
+          <ul class="list-disc list-inside space-y-1 text-[11px] leading-relaxed text-amber-900/90 font-medium pl-1">
+            <li><strong>Dòng 1 luôn là tiêu đề:</strong> Hệ thống tự động bỏ qua dòng 1 và bắt đầu đọc danh sách học sinh từ dòng số 2.</li>
+            <li><strong>Chỉ cần cột Họ và Tên:</strong> Các cột thông tin lý lịch khác nếu chưa có bạn có thể để trống và bổ sung sau.</li>
+            <li><strong>Mã học sinh tự động:</strong> Bạn không cần nhập mã học sinh, hệ thống sẽ tự sinh mã 7 chữ số (ví dụ: <code class="bg-white px-1 py-0.5 rounded font-bold font-mono text-amber-950">2760401</code>) theo niên khóa và lớp học.</li>
+            <li><strong>Cập nhật thông minh:</strong> Khi tải lại file Excel, nếu học sinh trùng cả <em>Họ và tên</em> và <em>Ngày sinh</em>, hệ thống sẽ cập nhật thông tin lý lịch mới và giữ nguyên số sao/điểm cũng như mã ID đã có.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-2 pt-4 mt-2 border-t border-slate-100 shrink-0">
+        <button onclick="downloadStudentTemplate()" class="w-full sm:w-auto bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 font-bold px-4 py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+          <i data-lucide="file-down" class="w-4 h-4 text-sky-600"></i> Tải file Excel mẫu (.xlsx)
+        </button>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <button onclick="closeModalUi('student-template-guide-modal', 'student-template-guide-content'); document.getElementById('excel-upload').click();" class="flex-1 sm:flex-none bg-theme-grad text-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5 hover:scale-[1.02]">
+            <i data-lucide="upload" class="w-4 h-4"></i> Chọn file Excel tải lên
+          </button>
+          <button onclick="closeModalUi('student-template-guide-modal', 'student-template-guide-content')" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-4 py-2.5 rounded-xl text-xs transition">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Xem Tất Cả Hoạt Động -->
   <div id="all-activities-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[600] p-4 opacity-0 transition-opacity duration-300">
@@ -2966,7 +3111,7 @@
         for(let period = 1; period <= 8; period++) { 
             if (period === 5) {
                 html += `<tr>
-                    <td colspan="7" class="bg-indigo-50/50 text-indigo-700 font-black text-xs md:text-sm py-2.5 uppercase tracking-widest text-center border border-slate-200">
+                    <td colspan="6" class="bg-indigo-50/50 text-indigo-700 font-black text-xs md:text-sm py-2.5 uppercase tracking-widest text-center border border-slate-200">
                         <div class="flex items-center justify-center gap-1.5"><i data-lucide="sun" class="w-4 h-4 text-indigo-600"></i> Buổi Chiều</div>
                     </td>
                 </tr>`;
@@ -2979,7 +3124,7 @@
                     <div class="text-slate-500 font-extrabold text-[10px] md:text-xs tracking-widest uppercase">${periodLabel}</div>
                     <div class="text-[9px] text-slate-400 font-bold mt-0.5 whitespace-nowrap">${periodTimes[period]}</div>
                 </td>`; 
-            for(let day = 2; day <= 7; day++) { 
+            for(let day = 2; day <= 6; day++) { 
                 const key = `d${day}_p${period}`; 
                 const val = t.data[key] || ''; 
                 
@@ -3290,6 +3435,53 @@
     function generateMonthlyReport() { const monthStr = document.getElementById('report-month').value; if(!monthStr) return; const [yyyy, mm] = monthStr.split('-'); const daysInMonth = new Date(yyyy, mm, 0).getDate(); let html = '<table class="w-full text-center text-sm border-collapse table-sticky"><thead class="bg-slate-50 border-b border-slate-200 shadow-sm"><tr><th class="p-3 text-left whitespace-nowrap font-black text-slate-600 min-w-[180px]">Học sinh</th>'; for(let d=1; d<=daysInMonth; d++) { html += `<th class="border-r border-slate-100 p-2 w-8 text-[10px] text-slate-500">${d}</th>`; } html += '</tr></thead><tbody class="divide-y divide-slate-100">'; students.forEach(s => { html += `<tr><td class="p-3 text-left font-bold text-xs text-slate-800 whitespace-nowrap min-w-[180px]" title="${s.name}">${s.name}</td>`; for(let d=1; d<=daysInMonth; d++) { const dateKey = `${yyyy}-${mm}-${String(d).padStart(2, '0')}`; const dailyRecord = attendanceData[dateKey] || {}; const status = dailyRecord[s.id]; let cellClass = "border-r border-slate-100 p-1 text-[10px] font-black "; let text = ""; if(status === 'present') { cellClass += "bg-emerald-100/50 text-emerald-600"; text = ""; } else if(status === 'excused') { cellClass += "bg-blue-50 text-blue-600"; text = "P"; } else if(status === 'unexcused') { cellClass += "bg-rose-50 text-rose-600"; text = "K"; } else if(status === 'late') { cellClass += "bg-amber-50 text-amber-600"; text = "T"; } html += `<td class="${cellClass}">${text}</td>`; } html += '</tr>'; }); html += '</tbody></table>'; document.getElementById('monthly-report-container').innerHTML = html; }
 
     // --- XỬ LÝ HỌC SINH (EXCEL, CRUD) ---
+    function openStudentTemplateGuideModal() {
+      openModalUi('student-template-guide-modal', 'student-template-guide-content');
+      lucide.createIcons();
+    }
+
+    function downloadStudentTemplate() {
+      try {
+        const headers = [
+          "STT", "Họ và Tên", "Giới Tính", "Ngày Sinh", "Số CCCD", "Nơi Sinh", 
+          "Số Điện Thoại", "Địa Chỉ", "Họ Tên Cha", "CCCD Cha", "SĐT Cha", 
+          "Họ Tên Mẹ", "CCCD Mẹ", "SĐT Mẹ"
+        ];
+        const sampleRows = [
+          [1, "Nguyễn Văn An", "Nam", "15/03/2012", "079201001234", "TP. Hồ Chí Minh", "0901234567", "123 Lê Văn Khương, P. Hiệp Thành, Q.12", "Nguyễn Văn Bình", "079075001234", "0912345678", "Trần Thị Mai", "079180001234", "0987654321"],
+          [2, "Trần Thị Bích", "Nữ", "22/08/2012", "079301005678", "Long An", "0902345678", "45/6 Nguyễn Ảnh Thủ, P. Trung Mỹ Tây, Q.12", "Trần Văn Chung", "079072005678", "0934567890", "Lê Thị Lan", "079181005678", "0976543210"],
+          [3, "Lê Hoàng Cường", "Nam", "05/11/2012", "079201009876", "Bình Dương", "0903456789", "789 Hà Huy Giáp, P. Thạnh Lộc, Q.12", "Lê Văn Dũng", "079070009876", "0945678901", "Phạm Thị Cúc", "079183009876", "0965432109"]
+        ];
+        const wsData = [headers, ...sampleRows];
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        ws['!cols'] = [
+          { wch: 6 },  // STT
+          { wch: 22 }, // Họ và Tên
+          { wch: 12 }, // Giới Tính
+          { wch: 14 }, // Ngày Sinh
+          { wch: 16 }, // Số CCCD
+          { wch: 18 }, // Nơi Sinh
+          { wch: 15 }, // Số Điện Thoại
+          { wch: 40 }, // Địa Chỉ
+          { wch: 20 }, // Họ Tên Cha
+          { wch: 16 }, // CCCD Cha
+          { wch: 14 }, // SĐT Cha
+          { wch: 20 }, // Họ Tên Mẹ
+          { wch: 16 }, // CCCD Mẹ
+          { wch: 14 }  // SĐT Mẹ
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "DanhSachHocSinh");
+        XLSX.writeFile(wb, "Mau_Danh_Sach_Hoc_Sinh.xlsx");
+        showModal('success', 'Thành công', 'Đã tải xuống file mẫu "Mau_Danh_Sach_Hoc_Sinh.xlsx"!');
+      } catch (err) {
+        console.error("Download template error:", err);
+        showModal('error', 'Lỗi', 'Không thể tạo file mẫu Excel: ' + err.message);
+      }
+    }
+
     function handleExcelUpload(e) {
       const file = e.target.files[0]; if(!file) return; e.target.value = ''; 
       showModal('info', 'Đang xử lý...', 'Vui lòng chờ hệ thống nạp dữ liệu.');
@@ -4015,7 +4207,11 @@
       const tbody = document.getElementById('full-student-table');
       if(!tbody) return;
       document.getElementById('student-count').innerText = students.length;
-      if(students.length === 0) { tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400 italic">Chưa có học sinh nào.</td></tr>`; loadAttendance(); renderRecentActivity(); return; }
+      if(students.length === 0) { 
+        tbody.innerHTML = `<tr><td colspan="10" class="py-12 px-4 text-center"><div class="max-w-md mx-auto flex flex-col items-center"><div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-3 border border-emerald-100 shadow-sm"><i data-lucide="file-spreadsheet" class="w-7 h-7"></i></div><h4 class="font-black text-slate-700 text-sm md:text-base mb-1">Danh sách học sinh đang trống</h4><p class="text-xs text-slate-400 font-medium mb-4">Bạn có thể tải file Excel mẫu chuẩn về để điền danh sách học sinh, hoặc xem hướng dẫn cấu trúc file.</p><div class="flex flex-wrap items-center justify-center gap-2"><button onclick="downloadStudentTemplate()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"><i data-lucide="file-down" class="w-4 h-4 text-sky-600"></i> Tải file mẫu Excel</button><button onclick="openStudentTemplateGuideModal()" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"><i data-lucide="help-circle" class="w-4 h-4 text-amber-600"></i> Hướng dẫn mẫu file</button><button onclick="document.getElementById('excel-upload').click()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md"><i data-lucide="upload" class="w-4 h-4"></i> Nhập file Excel</button></div></div></td></tr>`; 
+        lucide.createIcons();
+        loadAttendance(); renderRecentActivity(); return; 
+      }
       tbody.innerHTML = students.map((s, index) => `<tr class="hover:bg-slate-50 transition border-b border-slate-50"><td class="p-3 md:p-4 font-bold text-slate-400 text-center">${index + 1}</td><td class="p-3 md:p-4"><span class="bg-slate-100 text-slate-600 font-mono text-[10px] md:text-xs px-2 py-1 rounded border border-slate-200">${s.code || '...'}</span></td><td class="p-3 md:p-4"><div class="font-bold text-slate-800 whitespace-nowrap">${s.name}</div>${s.role ? `<div class="text-[10px] text-theme font-bold mt-0.5 uppercase">${s.role}</div>` : ''}</td><td class="p-3 md:p-4 text-xs text-slate-600 font-medium whitespace-nowrap">${s.gender || '-'}</td><td class="p-3 md:p-4 text-xs text-slate-500 font-medium whitespace-nowrap">${s.dob || '-'}</td><td class="p-3 md:p-4 text-xs text-slate-600 font-medium whitespace-nowrap">${s.cccd || '-'}</td><td class="p-3 md:p-4 text-center"><button onclick="openAvatarModal(${s.id})" class="w-10 h-10 md:w-12 md:h-12 mx-auto flex items-center justify-center text-2xl md:text-3xl hover:scale-110 hover:-translate-y-1 transition-all duration-200 rounded-full bg-slate-50 border border-slate-100 shadow-sm relative group cursor-pointer overflow-hidden" title="Đổi Avatar">${getAvatarHtml(s.avatar)}<span class="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i data-lucide="edit-2" class="w-4 h-4"></i></span></button></td><td class="p-3 md:p-4 text-center"><span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-1 rounded-md font-bold text-[10px] md:text-xs shadow-sm whitespace-nowrap">${s.loginCount || 0} lần</span></td><td class="p-3 md:p-4"><span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-md font-black text-[10px] md:text-xs shadow-sm whitespace-nowrap">${s.points} ⭐</span></td><td class="p-3 md:p-4 text-right"><div class="flex items-center justify-end gap-1.5"><button class="bg-amber-50 p-1.5 md:p-2 rounded-lg text-amber-500 hover:text-white hover:bg-amber-500 transition shadow-sm" title="Chấm sao / Lập biên bản" onclick="openGradingModal(${s.id})"><i data-lucide="star" class="w-4 h-4 fill-amber-500 hover:fill-white"></i></button><button class="bg-blue-50 p-1.5 md:p-2 rounded-lg text-blue-500 hover:text-white hover:bg-blue-500 transition shadow-sm" title="Sửa thông tin" onclick="openEditModal(${s.id})"><i data-lucide="pen-line" class="w-4 h-4"></i></button><button class="bg-rose-50 p-1.5 md:p-2 rounded-lg text-rose-400 hover:text-white hover:bg-rose-500 transition shadow-sm" title="Xóa học sinh" onclick="deleteStudent(${s.id})"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`).join(''); lucide.createIcons();
       loadAttendance(); renderRecentActivity();
     }
