@@ -212,7 +212,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-xs font-bold text-slate-600">Họ tên GVCN</label>
-            <input type="text" id="ob-teacher" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: Thầy Tuấn / Cô Hà">
+            <input type="text" id="ob-teacher" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: Thầy Nam / Cô Hoa">
           </div>
           <div>
             <label class="text-xs font-bold text-slate-600">Giới tính GVCN</label>
@@ -223,10 +223,10 @@
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="text-xs font-bold text-slate-600">Lớp</label><input type="text" id="ob-class" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: 6A4"></div>
+          <div><label class="text-xs font-bold text-slate-600">Lớp</label><input type="text" id="ob-class" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: 6A1"></div>
           <div><label class="text-xs font-bold text-slate-600">Năm học</label><input type="text" id="ob-year" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" value="2026 - 2027"></div>
         </div>
-        <div><label class="text-xs font-bold text-slate-600">Khẩu hiệu / Trường</label><input type="text" id="ob-slogan" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: THCS Nguyễn An Khương"></div>
+        <div><label class="text-xs font-bold text-slate-600">Khẩu hiệu / Trường</label><input type="text" id="ob-slogan" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: THCS Chu Văn An"></div>
         <button onclick="saveOnboarding()" class="w-full bg-theme-grad text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] transition mt-3 flex items-center justify-center gap-2">
           <i data-lucide="check-circle" class="w-4 h-4"></i> Lưu & Bắt đầu tạo lớp
         </button>
@@ -927,36 +927,36 @@
                    </div>
 
                    <div class="space-y-3.5 mt-4">
-                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                       <div>
-                         <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5 text-indigo-500"></i> Họ tên GVCN</label>
-                         <input type="text" id="settings-teacher-name" placeholder="VD: Thầy Tuấn / Cô Hà" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
-                       </div>
-                       <div>
-                         <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5 text-indigo-500"></i> Giới tính</label>
-                         <select id="settings-teacher-gender" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-bold text-slate-700 cursor-pointer">
-                           <option value="Nữ">Nữ (Cô)</option>
-                           <option value="Nam">Nam (Thầy)</option>
-                         </select>
-                       </div>
-                     </div>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5 text-indigo-500"></i> Họ tên GVCN</label>
+                          <input type="text" id="settings-teacher-name" placeholder="VD: Thầy Nam / Cô Hoa" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                        </div>
+                        <div>
+                          <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5 text-indigo-500"></i> Giới tính</label>
+                          <select id="settings-teacher-gender" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-bold text-slate-700 cursor-pointer">
+                            <option value="Nữ">Nữ (Cô)</option>
+                            <option value="Nam">Nam (Thầy)</option>
+                          </select>
+                        </div>
+                      </div>
 
-                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                       <div>
-                         <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-500"></i> Tên Lớp</label>
-                         <input type="text" id="settings-class-name" placeholder="VD: 6A4" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
-                       </div>
-                       <div>
-                         <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i> Niên khóa</label>
-                         <input type="text" id="settings-year" placeholder="VD: 2026 - 2027" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
-                       </div>
-                     </div>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-500"></i> Tên Lớp</label>
+                          <input type="text" id="settings-class-name" placeholder="VD: 6A1" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                        </div>
+                        <div>
+                          <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i> Niên khóa</label>
+                          <input type="text" id="settings-year" placeholder="VD: 2026 - 2027" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                        </div>
+                      </div>
 
-                     <div>
-                       <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i> Khẩu hiệu / Bộ môn</label>
-                       <input type="text" id="settings-slogan" placeholder="VD: THCS Nguyễn An Khương - KHTN" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
-                     </div>
-                   </div>
+                      <div>
+                        <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i> Khẩu hiệu / Bộ môn</label>
+                        <input type="text" id="settings-slogan" placeholder="VD: THCS Chu Văn An - Lớp học yêu thương" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                      </div>
+                    </div>
                  </div>
 
                  <div class="pt-4 mt-3 border-t border-indigo-100 flex items-center justify-between gap-3">
@@ -1012,6 +1012,7 @@
                     <input type="file" id="import-upload" accept=".json" class="hidden" onchange="importData(event)">
                     <button onclick="resetAllPoints()" class="bg-rose-50 text-rose-600 border border-rose-200 px-3.5 py-2.5 rounded-xl font-bold hover:bg-rose-100 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset điểm</button>
                     <button onclick="cleanAndResetAllClassData()" class="bg-rose-600 hover:bg-rose-700 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-xs" title="Làm sạch trắng dữ liệu học sinh, điểm danh, sơ đồ"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Làm sạch dữ liệu lớp</button>
+                    <button onclick="factoryResetAllData()" class="bg-slate-800 hover:bg-black text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-xs" title="Xóa sạch toàn bộ dữ liệu, tài khoản và đưa web về trạng thái mới tinh 100%"><i data-lucide="power" class="w-3.5 h-3.5 text-rose-400"></i> Xóa sạch toàn bộ (Reset 100%)</button>
                  </div>
               </div>
 
@@ -2003,10 +2004,18 @@
         return false;
     };
 
-    // Cấu hình cố định Supabase để sử dụng trên nhiều thiết bị mà không cần nhập lại:
+    // Tự động làm sạch toàn bộ dữ liệu LocalStorage của trình duyệt để đảm bảo website mới 100% không vướng dữ liệu cũ
+    const CLEAN_APP_RESET_FLAG = 'qllh_clean_reset_fresh_start_2026';
+    if (localStorage.getItem('qllh_app_reset_flag') !== CLEAN_APP_RESET_FLAG) {
+        localStorage.clear();
+        sessionStorage.clear();
+        localStorage.setItem('qllh_app_reset_flag', CLEAN_APP_RESET_FLAG);
+    }
+
+    // Cấu hình Supabase (để trống - Thầy/Cô có thể tự kết nối với Supabase mới trong mục Cài đặt):
     const SUPABASE_CONFIG = {
-        url: 'https://qwihflkmbuxetebubovi.supabase.co', 
-        key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3aWhmbGttYnV4ZXRlYnVib3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MDk5OTUsImV4cCI6MjEwMjQ4NTk5NX0.HcxdM6ifXniM66b0xVcf5pmtCZzbApEjQzIgzDhnVss'  
+        url: '', 
+        key: ''  
     };
 
     const MOCK_ADMIN = { id: 'admin', pass: 'admin' };
@@ -2928,7 +2937,7 @@
                 errorMsg.classList.add('hidden');
                 try {
                     let row = await callSupabaseRest('GET', id);
-                    if (!row && (id === 'admin' || id === 'coha' || id === 'cohakhtn')) {
+                    if (!row && id === 'admin') {
                         const allRes = await fetch(`${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data,updated_at&order=updated_at.desc&limit=1`, {
                             method: 'GET',
                             headers: {
@@ -2945,7 +2954,7 @@
                     if (row && row.data && row.data.currentUser) {
                         const cloudUser = row.data.currentUser;
                         const cloudPass = cloudUser.pass || 'admin';
-                        if (cloudPass === pass || pass === 'admin' || pass === 'coha') {
+                        if (cloudPass === pass || pass === 'admin') {
                             if (!cloudUser.pass) {
                                 cloudUser.pass = 'admin';
                             }
@@ -3582,19 +3591,19 @@
             if (teacherBannerGreeting) teacherBannerGreeting.innerText = greeting;
             const teacherBannerName = document.getElementById('teacher-banner-name');
             if (teacherBannerName) {
-                const title = currentUser.gender === 'Nữ' ? 'Cô' : 'Thầy';
-                teacherBannerName.innerText = `${title} ${currentUser.teacherName || 'Hà'}`;
+                const title = currentUser.gender === 'Nam' ? 'Thầy' : 'Cô';
+                teacherBannerName.innerText = currentUser.teacherName ? `${title} ${currentUser.teacherName}` : 'Thầy/Cô';
             }
             const teacherBannerClass = document.getElementById('teacher-banner-class');
-            if (teacherBannerClass) teacherBannerClass.innerText = currentUser.className || '6A4';
+            if (teacherBannerClass) teacherBannerClass.innerText = currentUser.className || '...';
             const teacherBannerSubClass = document.getElementById('teacher-banner-sub-class');
-            if (teacherBannerSubClass) teacherBannerSubClass.innerText = currentUser.className || '6A4';
+            if (teacherBannerSubClass) teacherBannerSubClass.innerText = currentUser.className || '...';
             const teacherBannerDesc = document.getElementById('teacher-banner-desc');
             if (teacherBannerDesc) {
-                const title = currentUser.gender === 'Nữ' ? 'Cô' : 'Thầy';
-                const name = currentUser.teacherName || 'Hà';
-                const cls = currentUser.className || '6A4';
-                teacherBannerDesc.innerText = `Chúc ${title} ${name} và các em học sinh lớp ${cls} một ngày học tập sôi nổi, tràn đầy hứng khởi và nhiều niềm vui!`;
+                const title = currentUser.gender === 'Nam' ? 'Thầy' : 'Cô';
+                const name = currentUser.teacherName ? `${title} ${currentUser.teacherName}` : 'Thầy/Cô';
+                const cls = currentUser.className || 'lớp học';
+                teacherBannerDesc.innerText = `Chúc ${name} và các em học sinh ${cls} một ngày học tập sôi nổi, tràn đầy hứng khởi và nhiều niềm vui!`;
             }
             
             const teacherHeaderAvatar = document.getElementById('teacher-header-avatar');
@@ -5643,6 +5652,14 @@
             initSeatingCharts();
             
             showModal('success', 'Đã làm sạch dữ liệu', `Hệ thống đã được làm sạch hoàn toàn về trạng thái ban đầu của lớp ${cName} và đồng bộ lên Đám mây! Thầy/Cô có thể tải lên danh sách học sinh mới ngay bây giờ.`);
+        });
+    }
+
+    function factoryResetAllData() {
+        showModal('confirm', 'RESET TOÀN BỘ HỆ THỐNG', 'CẢNH BÁO NGUY HIỂM:\n\nThao tác này sẽ XÓA SẠCH 100% TOÀN BỘ DỮ LIỆU: danh sách học sinh, sơ đồ lớp, điểm danh, thời khóa biểu, tài khoản và ngắt kết nối Đám mây để đưa website về trạng thái hoàn toàn mới ban đầu.\n\nBạn có chắc chắn muốn thực hiện không?', () => {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.reload();
         });
     }
 
