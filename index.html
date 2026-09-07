@@ -183,6 +183,11 @@
         <button id="auth-btn" onclick="handleAuth()" class="w-full bg-theme-grad text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] transition-all">Đăng Nhập</button>
       </div>
       <div class="mt-4 text-center text-sm"><span class="text-slate-500" id="auth-toggle-text">Chưa có tài khoản?</span> <button onclick="toggleAuthMode()" class="text-theme font-bold hover:underline" id="auth-toggle-btn">Đăng ký ngay</button></div>
+      <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
+        <button type="button" onclick="manualCloudPull()" class="w-full bg-emerald-50 text-emerald-700 border border-emerald-200 py-2.5 rounded-xl font-bold hover:bg-emerald-100 transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+          <i data-lucide="cloud-download" class="w-4 h-4 text-emerald-600"></i> Tải nhanh dữ liệu từ Đám mây
+        </button>
+      </div>
     </div>
   </div>
 
@@ -273,8 +278,13 @@
         <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"><i data-lucide="menu" class="w-6 h-6"></i></button>
         <h2 id="header-title" class="text-lg md:text-xl font-black text-theme-grad uppercase tracking-tight line-clamp-1">Tổng Quan Lớp</h2>
       </div>
-      <div class="flex items-center gap-3 md:gap-4 shrink-0">
+      <div class="flex items-center gap-2 md:gap-3 shrink-0">
         <button id="header-search-btn" onclick="openGlobalSearch()" class="hidden md:flex items-center gap-1.5 text-xs bg-white px-3 py-2 rounded-full font-bold shadow-sm border border-slate-200 text-slate-500 hover:text-theme transition"><i data-lucide="search" class="w-3.5 h-3.5"></i> Tra cứu</button>
+        <!-- Cloud Sync Status Indicator & Pull Action -->
+        <div id="header-cloud-sync-status" onclick="manualCloudPull()" class="cursor-pointer flex items-center gap-1.5 text-xs px-2.5 sm:px-3 py-1.5 rounded-full font-bold border transition shadow-sm bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" title="Trạng thái đám mây. Bấm để kéo/đồng bộ dữ liệu từ Đám mây về máy này">
+          <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0" id="header-cloud-dot"></span>
+          <span id="header-cloud-text" class="whitespace-nowrap flex items-center gap-1"><i data-lucide="cloud" class="w-3.5 h-3.5 inline text-slate-400"></i> Đám mây</span>
+        </div>
         <span id="header-year" class="hidden md:inline-flex text-xs bg-theme-light px-3 py-1.5 rounded-full font-bold shadow-sm items-center gap-1.5 border border-slate-100 whitespace-nowrap"><i data-lucide="calendar" class="w-3 h-3"></i> Năm học ...</span>
         <div class="relative group cursor-pointer shrink-0" onclick="document.getElementById('avatar-upload').click()" title="Đổi ảnh đại diện GV">
           <div id="header-avatar" class="w-10 h-10 rounded-full bg-theme-grad text-white flex items-center justify-center font-bold text-sm shadow-md border-2 border-white overflow-hidden transition transform group-hover:scale-105">GV</div>
@@ -902,10 +912,15 @@
                 </div>
                 <div>
                   <div class="flex gap-2.5 pt-4">
-                    <button id="btn-supabase-connect" onclick="testAndSaveSupabase()" class="flex-1 bg-theme-grad text-white px-4 py-2.5 rounded-xl font-bold shadow-md hover:scale-[1.02] transition text-xs flex items-center justify-center gap-1.5"><i data-lucide="link" class="w-4 h-4"></i> Kết nối & Đồng bộ</button>
+                    <button id="btn-supabase-connect" onclick="testAndSaveSupabase()" class="flex-1 bg-theme-grad text-white px-4 py-2.5 rounded-xl font-bold shadow-md hover:scale-[1.02] transition text-xs flex items-center justify-center gap-1.5"><i data-lucide="link" class="w-4 h-4"></i> Kết nối lại</button>
                     <button onclick="disconnectSupabase()" class="bg-rose-50 text-rose-600 border border-rose-100 px-4 py-2.5 rounded-xl font-bold hover:bg-rose-100 transition text-xs flex items-center justify-center gap-1.5"><i data-lucide="link-2" class="w-4 h-4"></i> Ngắt kết nối</button>
                   </div>
                   <div id="supabase-status-text" class="text-[10px] md:text-xs font-bold text-slate-400 mt-1.5 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block animate-pulse"></span> Chưa kết nối đám mây</div>
+                  <!-- Quick Push / Pull buttons -->
+                  <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-sky-200/60">
+                    <button onclick="manualCloudPush()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Đẩy toàn bộ dữ liệu từ máy này lên Đám mây để máy khác cùng thấy"><i data-lucide="upload-cloud" class="w-4 h-4"></i> Đẩy lên Mây (Push)</button>
+                    <button onclick="manualCloudPull()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2.5 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Kéo dữ liệu mới nhất từ Đám mây về máy này"><i data-lucide="download-cloud" class="w-4 h-4"></i> Kéo về máy (Pull)</button>
+                  </div>
                 </div>
               </div>
           </div>
@@ -915,14 +930,14 @@
               <!-- QUẢN LÝ HỆ THỐNG & DỮ LIỆU -->
               <div class="bg-rose-50 p-5 md:p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
                  <div>
-                   <h3 class="text-lg md:text-xl font-black text-slate-800 mb-2">Quản lý hệ thống & Dữ liệu</h3>
-                   <p class="text-xs md:text-sm text-slate-500 mb-4 md:mb-6 font-medium">Sao lưu, khôi phục hoặc xóa dữ liệu lớp học.</p>
+                   <h3 class="text-lg md:text-xl font-black text-slate-800 mb-2">Sao Lưu & Quản Lý Dữ Liệu</h3>
+                   <p class="text-xs md:text-sm text-slate-500 mb-4 md:mb-6 font-medium">Xuất file JSON để chuyển sang máy khác, hoặc nạp file để khôi phục.</p>
                  </div>
                  <div class="flex flex-wrap gap-2.5 pt-3 justify-start">
-                    <button onclick="exportData()" class="bg-blue-50 text-blue-600 border border-blue-200 px-3.5 py-2 rounded-xl font-bold hover:bg-blue-100 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="download-cloud" class="w-3.5 h-3.5"></i> Sao lưu</button>
-                    <button onclick="document.getElementById('import-upload').click()" class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-3.5 py-2 rounded-xl font-bold hover:bg-emerald-100 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i> Khôi phục</button>
+                    <button onclick="exportData()" class="bg-blue-600 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="download" class="w-3.5 h-3.5"></i> Xuất file sao lưu (.json)</button>
+                    <button onclick="document.getElementById('import-upload').click()" class="bg-emerald-600 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Nạp từ file (.json)</button>
                     <input type="file" id="import-upload" accept=".json" class="hidden" onchange="importData(event)">
-                    <button onclick="resetAllPoints()" class="bg-rose-50 text-rose-600 border border-rose-200 px-3.5 py-2 rounded-xl font-bold hover:bg-rose-100 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset</button>
+                    <button onclick="resetAllPoints()" class="bg-rose-50 text-rose-600 border border-rose-200 px-3.5 py-2.5 rounded-xl font-bold hover:bg-rose-100 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset điểm</button>
                  </div>
               </div>
 
@@ -2026,6 +2041,38 @@
         }
     }
 
+    // Update cloud sync status indicator in header
+    function updateCloudSyncStatus(status, message = '') {
+        const dot = document.getElementById('header-cloud-dot');
+        const text = document.getElementById('header-cloud-text');
+        const container = document.getElementById('header-cloud-sync-status');
+        if (!container) return;
+
+        container.classList.remove('hidden');
+        if (status === 'syncing') {
+            if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0";
+            if (text) text.innerHTML = `<i data-lucide="refresh-cw" class="w-3 h-3 inline animate-spin text-amber-500"></i> Đang đồng bộ...`;
+            container.className = "cursor-pointer hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-bold border transition shadow-sm bg-amber-50 text-amber-700 border-amber-200";
+        } else if (status === 'synced') {
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-500 shrink-0";
+            if (text) text.innerHTML = `<i data-lucide="cloud-check" class="w-3.5 h-3.5 inline text-emerald-500"></i> Mây: ${timeStr}`;
+            container.className = "cursor-pointer hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-bold border transition shadow-sm bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100";
+            container.setAttribute('title', `Đã đồng bộ lên đám mây lúc ${timeStr}. Bấm để kéo dữ liệu về máy.`);
+        } else if (status === 'error') {
+            if (dot) dot.className = "w-2 h-2 rounded-full bg-rose-500 shrink-0";
+            if (text) text.innerHTML = `<i data-lucide="cloud-off" class="w-3.5 h-3.5 inline text-rose-500"></i> Lỗi đồng bộ`;
+            container.className = "cursor-pointer hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-bold border transition shadow-sm bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100";
+            container.setAttribute('title', message || "Chưa thể đồng bộ lên đám mây. Bấm để thử lại.");
+        } else {
+            if (dot) dot.className = "w-2 h-2 rounded-full bg-slate-300 shrink-0";
+            if (text) text.innerHTML = `<i data-lucide="cloud" class="w-3.5 h-3.5 inline text-slate-400"></i> Đám mây`;
+            container.className = "cursor-pointer hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-bold border transition shadow-sm bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100";
+        }
+        lucide.createIcons();
+    }
+
     // Native fetch client to perform Supabase queries directly (Bypasses CDN libraries entirely)
     async function callSupabaseRest(method, id, payload = null) {
         if (!isSupabaseConnected) throw new Error("Supabase is not connected");
@@ -2043,16 +2090,48 @@
             const data = await res.json();
             return data && data.length > 0 ? data[0] : null;
         } else if (method === 'UPSERT') {
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    ...headers,
-                    'Prefer': 'resolution=merge-duplicates'
-                },
-                body: JSON.stringify({ id, data: payload, updated_at: new Date().toISOString() })
-            });
-            if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-            return true;
+            // Bước 1: Thử PostgREST UPSERT chuẩn với ?on_conflict=id
+            try {
+                const upsertUrl = `${url}?on_conflict=id`;
+                const res = await fetch(upsertUrl, {
+                    method: 'POST',
+                    headers: {
+                        ...headers,
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
+                    body: JSON.stringify({ id, data: payload, updated_at: new Date().toISOString() })
+                });
+                if (res.ok) return true;
+                console.warn(`PostgREST direct upsert returned ${res.status}, running fallback check/patch...`);
+            } catch (err) {
+                console.warn("Direct upsert network error, running fallback:", err);
+            }
+
+            // Bước 2: Fallback an toàn tuyệt đối (GET kiểm tra rồi PATCH hoặc POST)
+            try {
+                const checkUrl = `${url}?id=eq.${id}&select=id`;
+                const checkRes = await fetch(checkUrl, { method: 'GET', headers });
+                const existing = checkRes.ok ? await checkRes.json() : [];
+                if (existing && existing.length > 0) {
+                    const patchRes = await fetch(`${url}?id=eq.${id}`, {
+                        method: 'PATCH',
+                        headers: { ...headers, 'Prefer': 'return=minimal' },
+                        body: JSON.stringify({ data: payload, updated_at: new Date().toISOString() })
+                    });
+                    if (!patchRes.ok) throw new Error(`PATCH HTTP error ${patchRes.status}`);
+                    return true;
+                } else {
+                    const insertRes = await fetch(url, {
+                        method: 'POST',
+                        headers: { ...headers, 'Prefer': 'return=minimal' },
+                        body: JSON.stringify({ id, data: payload, updated_at: new Date().toISOString() })
+                    });
+                    if (!insertRes.ok) throw new Error(`POST HTTP error ${insertRes.status}`);
+                    return true;
+                }
+            } catch (fallbackErr) {
+                throw fallbackErr;
+            }
         }
     }
 
@@ -2075,6 +2154,7 @@
         // Update input field visually
         document.getElementById('set-supabase-url').value = url;
         updateSupabaseStatus(false, "Đang kiểm tra kết nối...");
+        updateCloudSyncStatus('syncing');
         
         try {
             // Test query on the database using native fetch
@@ -2092,6 +2172,7 @@
             localStorage.setItem('supabase_key', key);
             isSupabaseConnected = { url, key };
             updateSupabaseStatus(true, "Kết nối thành công & Đồng bộ");
+            updateCloudSyncStatus('synced');
             
             showModal('success', 'Thành công', 'Đã kết nối với Supabase và kiểm tra bảng classroom_data thành công!');
             
@@ -2101,6 +2182,7 @@
         } catch (e) {
             console.error("Supabase test failed:", e);
             updateSupabaseStatus(false, "Kết nối thất bại");
+            updateCloudSyncStatus('error', e.message);
             showModal('error', 'Lỗi kết nối', `Không thể kết nối Supabase. Lỗi: ${e.message || 'Hãy kiểm tra lại URL/Key hoặc chắc chắn đã chạy SQL tạo bảng classroom_data trên Supabase'}`);
         }
     }
@@ -2112,7 +2194,149 @@
         document.getElementById('set-supabase-url').value = '';
         document.getElementById('set-supabase-key').value = '';
         updateSupabaseStatus(false, "Đã ngắt kết nối");
+        updateCloudSyncStatus('disconnected');
         showModal('info', 'Thông báo', 'Đã ngắt kết nối đám mây. Hệ thống sẽ lưu trữ offline/local.');
+    }
+
+    // Đẩy dữ liệu từ máy này lên Đám mây (Manual Push)
+    async function manualCloudPush() {
+        if (!isSupabaseConnected) {
+            return showModal('warning', 'Chưa kết nối', 'Vui lòng kết nối với Supabase trước khi đẩy dữ liệu.');
+        }
+        if (!currentUser) return showModal('warning', 'Chưa đăng nhập', 'Vui lòng đăng nhập trước khi đẩy dữ liệu.');
+        
+        showModal('info', 'Đang đẩy dữ liệu...', 'Đang đồng bộ dữ liệu hiện tại lên đám mây Supabase...');
+        updateCloudSyncStatus('syncing');
+
+        const payload = {
+            currentUser: currentUser,
+            students: students,
+            seatingCharts: seatingCharts,
+            timetables: timetables,
+            teacherTimetable: teacherTimetable,
+            attendanceData: attendanceData,
+            announcements: announcements
+        };
+
+        try {
+            await callSupabaseRest('UPSERT', currentUser.id, payload);
+            updateCloudSyncStatus('synced');
+            closeModalUi('custom-modal', 'custom-modal-content');
+            setTimeout(() => {
+                showModal('success', 'Đã lưu đám mây', `Đã đồng bộ thành công toàn bộ dữ liệu lớp "${currentUser.className || ''}" (${students.length} học sinh) lên Đám mây!\nBây giờ bạn có thể mở ở bất kỳ thiết bị/web nào khác và tải về.`);
+            }, 350);
+        } catch (err) {
+            updateCloudSyncStatus('error', err.message);
+            closeModalUi('custom-modal', 'custom-modal-content');
+            setTimeout(() => {
+                showModal('error', 'Lỗi đẩy đám mây', 'Không thể đẩy dữ liệu lên đám mây: ' + err.message);
+            }, 350);
+        }
+    }
+
+    // Kéo dữ liệu từ Đám mây về máy này (Manual Pull)
+    async function manualCloudPull() {
+        if (!isSupabaseConnected) {
+            return showModal('warning', 'Chưa kết nối', 'Vui lòng kết nối với Supabase trước khi lấy dữ liệu.');
+        }
+        
+        const targetId = (currentUser && currentUser.id) || 'covietha';
+        showModal('info', 'Đang tìm dữ liệu...', `Đang kết nối Đám mây để tìm dữ liệu lớp học...`);
+        updateCloudSyncStatus('syncing');
+
+        try {
+            // Thử lấy dữ liệu của targetId trước
+            let row = await callSupabaseRest('GET', targetId);
+            
+            // Nếu targetId chưa có dữ liệu, quét các phòng học khác trên Supabase
+            if (!row || !row.data) {
+                const url = `${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data&limit=5`;
+                const res = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': isSupabaseConnected.key,
+                        'Authorization': `Bearer ${isSupabaseConnected.key}`
+                    }
+                });
+                if (res.ok) {
+                    const rows = await res.json();
+                    if (rows && rows.length > 0) {
+                        const found = rows.find(r => r.data && r.data.students && r.data.students.length > 0) || rows[0];
+                        if (found && found.data) row = found;
+                    }
+                }
+            }
+
+            if (!row || !row.data) {
+                closeModalUi('custom-modal', 'custom-modal-content');
+                updateCloudSyncStatus('error', 'Không tìm thấy dữ liệu trên Đám mây');
+                setTimeout(() => {
+                    showModal('warning', 'Đám mây trống', `Không tìm thấy dữ liệu lớp nào trên Đám mây Supabase.\nHãy chắc chắn rằng ở bên web có dữ liệu, bạn đã bấm nút "Đẩy lên Mây (Push)" trước!`);
+                }, 350);
+                return;
+            }
+
+            const cloudData = row.data;
+            const cloudUser = cloudData.currentUser || cloudData.user || { id: targetId, className: '6A4', teacherName: 'Cô Hà' };
+            const cloudStudents = cloudData.students || [];
+
+            closeModalUi('custom-modal', 'custom-modal-content');
+            setTimeout(() => {
+                showModal('confirm', 'Tải dữ liệu từ Đám mây', `Đã tìm thấy lớp "${cloudUser.className || ''}" của GV ${cloudUser.teacherName || targetId} với ${cloudStudents.length} học sinh trên Đám mây.\nBạn có muốn nạp dữ liệu này vào web hiện tại không?`, () => {
+                    currentUser = cloudUser;
+                    students = cloudStudents;
+                    seatingCharts = cloudData.seatingCharts || [];
+                    timetables = cloudData.timetables || [];
+                    teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                    attendanceData = cloudData.attendanceData || {};
+                    announcements = cloudData.announcements || [];
+                    currentUserRole = 'teacher';
+                    currentStudent = null;
+
+                    localStorage.setItem('currentUserRole', 'teacher');
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('user_' + currentUser.id, JSON.stringify(currentUser));
+                    localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
+                    localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
+                    localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
+                    localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
+                    localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
+                    localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
+
+                    const authScreen = document.getElementById('auth-screen');
+                    if (authScreen) {
+                        authScreen.classList.add('hidden');
+                        authScreen.classList.remove('flex');
+                    }
+                    const obScreen = document.getElementById('onboarding-screen');
+                    if (obScreen) {
+                        obScreen.classList.add('hidden');
+                        obScreen.classList.remove('flex');
+                    }
+
+                    restoreRoleState();
+                    applyTheme(currentUser.theme || 'emerald');
+                    ensureStudentCodes();
+                    initAttendance();
+                    initTimetables();
+                    updateUI();
+                    renderAll();
+                    initSeatingCharts();
+                    checkAdminSection();
+                    updateCloudSyncStatus('synced');
+
+                    setTimeout(() => {
+                        showModal('success', 'Hoàn tất', `Đã nạp thành công ${students.length} học sinh từ Đám mây về web này!`);
+                    }, 350);
+                });
+            }, 350);
+        } catch (err) {
+            updateCloudSyncStatus('error', err.message);
+            closeModalUi('custom-modal', 'custom-modal-content');
+            setTimeout(() => {
+                showModal('error', 'Lỗi tải đám mây', 'Không thể kết nối tải dữ liệu: ' + err.message);
+            }, 350);
+        }
     }
 
     function removeAccents(str) { return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D'); }
@@ -2142,9 +2366,16 @@
 
         // Sync to Supabase if connected
         if (isSupabaseConnected) {
+            updateCloudSyncStatus('syncing');
             callSupabaseRest('UPSERT', currentUser.id, payload)
-                .then(() => console.log("Data synced to Supabase successfully!"))
-                .catch(err => console.error("Supabase sync error:", err));
+                .then(() => {
+                    console.log("Data synced to Supabase successfully!");
+                    updateCloudSyncStatus('synced');
+                })
+                .catch(err => {
+                    console.error("Supabase sync error:", err);
+                    updateCloudSyncStatus('error', err.message);
+                });
         }
 
         fetch('/api/data', {
@@ -2161,6 +2392,11 @@
             updateSaveTime();
         });
         updateSaveTime();
+        try {
+            if (typeof BroadcastChannel !== 'undefined') {
+                new BroadcastChannel('qllh_classroom_channel').postMessage({ type: 'DATA_UPDATED' });
+            }
+        } catch(e) {}
     }
     function getAvatarHtml(avatarStr, extraClass = "") { if(!avatarStr) return ''; if(avatarStr.startsWith('data:image')) return `<img src="${avatarStr}" class="w-full h-full object-cover rounded-full ${extraClass}">`; return `<span class="${extraClass}">${avatarStr}</span>`; }
     function compressImage(file, maxWidth, maxHeight, callback, quality = 0.95) { 
@@ -2219,40 +2455,251 @@
       }, 300);
     }
 
+    // --- Cross-Tab & Cross-Window Communication (BroadcastChannel & window.postMessage) ---
+    try {
+        if (typeof BroadcastChannel !== 'undefined') {
+            const syncChannel = new BroadcastChannel('qllh_classroom_channel');
+            syncChannel.onmessage = (e) => {
+                if (e.data && e.data.type === 'DATA_UPDATED') {
+                    console.log("Detected data change in another tab, updating state...");
+                    const currentId = (currentUser && currentUser.id) || 'covietha';
+                    const savedStudents = localStorage.getItem('students_' + currentId);
+                    if (savedStudents) {
+                        try {
+                            students = JSON.parse(savedStudents);
+                            const savedCharts = localStorage.getItem('seating_' + currentId);
+                            if (savedCharts) seatingCharts = JSON.parse(savedCharts);
+                            const savedTkb = localStorage.getItem('timetables_' + currentId);
+                            if (savedTkb) timetables = JSON.parse(savedTkb);
+                            const savedTeacherTkb = localStorage.getItem('teacherTimetable_' + currentId);
+                            if (savedTeacherTkb) teacherTimetable = JSON.parse(savedTeacherTkb);
+                            const savedAtt = localStorage.getItem('attendance_' + currentId);
+                            if (savedAtt) attendanceData = JSON.parse(savedAtt);
+                            const savedAnn = localStorage.getItem('announcements_' + currentId);
+                            if (savedAnn) announcements = JSON.parse(savedAnn);
+                            renderAll();
+                            initTimetables();
+                            initAttendance();
+                            initSeatingCharts();
+                        } catch(err){}
+                    }
+                }
+            };
+        }
+    } catch(e) {}
+
+    // PostMessage API support for cross-domain / iframe / parent web linking
+    window.addEventListener('message', async (event) => {
+        if (!event.data || typeof event.data !== 'object') return;
+        
+        if (event.data.type === 'QLLH_SYNC_DATA' || event.data.type === 'SYNC_DATA') {
+            const p = event.data.payload || event.data.data;
+            if (p) {
+                if (p.currentUser || p.user) currentUser = p.currentUser || p.user;
+                if (p.students) students = p.students;
+                if (p.seatingCharts) seatingCharts = p.seatingCharts;
+                if (p.timetables) timetables = p.timetables;
+                if (p.teacherTimetable) teacherTimetable = p.teacherTimetable;
+                if (p.attendanceData) attendanceData = p.attendanceData;
+                if (p.announcements) announcements = p.announcements;
+                
+                saveAppData();
+                const authScreen = document.getElementById('auth-screen');
+                if (authScreen) authScreen.classList.add('hidden');
+                restoreRoleState();
+                updateUI();
+                renderAll();
+                initAttendance();
+                initTimetables();
+                initSeatingCharts();
+                updateCloudSyncStatus('synced');
+                
+                if (event.source && typeof event.source.postMessage === 'function') {
+                    event.source.postMessage({ type: 'QLLH_SYNC_SUCCESS', count: students.length }, '*');
+                }
+            }
+        } else if (event.data.type === 'QLLH_REQUEST_DATA' || event.data.type === 'REQUEST_DATA') {
+            if (event.source && typeof event.source.postMessage === 'function') {
+                event.source.postMessage({
+                    type: 'QLLH_SYNC_DATA',
+                    payload: {
+                        currentUser,
+                        students,
+                        seatingCharts,
+                        timetables,
+                        teacherTimetable,
+                        attendanceData,
+                        announcements
+                    }
+                }, '*');
+            }
+        }
+    });
+
+    try {
+        if (window.opener && typeof window.opener.postMessage === 'function') {
+            window.opener.postMessage({ type: 'QLLH_READY' }, '*');
+        }
+        if (window.parent && window.parent !== window && typeof window.parent.postMessage === 'function') {
+            window.parent.postMessage({ type: 'QLLH_READY' }, '*');
+        }
+    } catch(e) {}
+
     // --- Auth & Config ---
     async function checkAuth() {
         const authScreen = document.getElementById('auth-screen');
         let loaded = false;
 
-        // 1. Try to load from Supabase first if configured
-        if (isSupabaseConnected) {
+        // A. Parse URL search & hash parameters (Deep Linking from other websites, bookmarks, or portals)
+        const urlParams = new URLSearchParams(window.location.search);
+        let hashStr = window.location.hash || '';
+        if (hashStr.startsWith('#')) hashStr = hashStr.slice(1);
+        const hashParams = new URLSearchParams(hashStr);
+
+        const paramTeacher = urlParams.get('teacher') || urlParams.get('user') || urlParams.get('id') || hashParams.get('teacher') || hashParams.get('user') || hashParams.get('id');
+        const paramRole = urlParams.get('role') || hashParams.get('role');
+        const paramStudent = urlParams.get('student') || urlParams.get('code') || hashParams.get('student') || hashParams.get('code');
+        const paramData = urlParams.get('data') || hashParams.get('data');
+
+        // Check if direct data payload is embedded in URL (e.g. ?data=...)
+        if (paramData && !loaded) {
             try {
-                const savedUserStr = localStorage.getItem('currentUser');
-                if (savedUserStr) {
-                    const savedUser = JSON.parse(savedUserStr);
-                    const row = await callSupabaseRest('GET', savedUser.id);
-                    if (row && row.data) {
-                        const cloudData = row.data;
-                        currentUser = cloudData.currentUser || cloudData.user;
-                        students = cloudData.students || [];
-                        seatingCharts = cloudData.seatingCharts || [];
-                        timetables = cloudData.timetables || [];
-                        teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
-                        attendanceData = cloudData.attendanceData || {};
-                        announcements = cloudData.announcements || [];
-                        loaded = true;
-                        
-                        restoreRoleState();
-                        console.log("Loaded data from Supabase successfully!");
-                    }
+                let decoded = decodeURIComponent(paramData);
+                let parsed = null;
+                if (decoded.startsWith('{')) {
+                    parsed = JSON.parse(decoded);
+                } else {
+                    parsed = JSON.parse(decodeURIComponent(escape(atob(decoded))));
                 }
-            } catch (e) {
-                console.warn("Supabase fetch failed, trying local server:", e);
-                alert("Lỗi tải đám mây trong checkAuth: " + (e.message || e));
+                if (parsed) {
+                    currentUser = parsed.currentUser || parsed.user;
+                    students = parsed.students || [];
+                    seatingCharts = parsed.seatingCharts || [];
+                    timetables = parsed.timetables || [];
+                    teacherTimetable = parsed.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                    attendanceData = parsed.attendanceData || {};
+                    announcements = parsed.announcements || [];
+                    loaded = true;
+                    saveAppData();
+                }
+            } catch (err) {
+                console.warn("Could not parse data from URL query:", err);
             }
         }
 
-        // 2. Fallback to Local Server API
+        // B. Try to load from Supabase Cloud
+        if (!loaded && isSupabaseConnected) {
+            updateCloudSyncStatus('syncing');
+            try {
+                const savedUserStr = localStorage.getItem('currentUser');
+                let targetId = paramTeacher;
+                
+                if (!targetId && savedUserStr) {
+                    try { 
+                        const su = JSON.parse(savedUserStr);
+                        targetId = su.id; 
+                    } catch(e){}
+                }
+                
+                // If opening on a fresh web/browser without targetId, target default teacher 'covietha'
+                if (!targetId) {
+                    targetId = 'covietha';
+                }
+
+                let row = null;
+                if (targetId) {
+                    try {
+                        row = await callSupabaseRest('GET', targetId);
+                    } catch(err) {
+                        console.warn("Failed GET for targetId:", targetId, err);
+                    }
+                }
+
+                // If targetId has no data, scan Supabase for any existing classroom with students
+                if (!row || !row.data) {
+                    try {
+                        const scanUrl = `${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data&limit=5`;
+                        const res = await fetch(scanUrl, {
+                            method: 'GET',
+                            headers: {
+                                'apikey': isSupabaseConnected.key,
+                                'Authorization': `Bearer ${isSupabaseConnected.key}`
+                            }
+                        });
+                        if (res.ok) {
+                            const rows = await res.json();
+                            if (rows && rows.length > 0) {
+                                const found = rows.find(r => r.data && r.data.students && r.data.students.length > 0) || rows[0];
+                                if (found && found.data) {
+                                    row = found;
+                                }
+                            }
+                        }
+                    } catch(scanErr) {
+                        console.warn("Classroom scan failed:", scanErr);
+                    }
+                }
+
+                if (row && row.data) {
+                    const cloudData = row.data;
+                    currentUser = cloudData.currentUser || cloudData.user || { id: row.id || targetId, className: '6A4', teacherName: 'Cô Hà' };
+                    students = cloudData.students || [];
+                    seatingCharts = cloudData.seatingCharts || [];
+                    timetables = cloudData.timetables || [];
+                    teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                    attendanceData = cloudData.attendanceData || {};
+                    announcements = cloudData.announcements || [];
+
+                    // Determine Role: check if opening via student link
+                    if (paramStudent) {
+                        const st = students.find(s => String(s.code) === paramStudent || String(s.id) === paramStudent);
+                        if (st) {
+                            currentUserRole = 'student';
+                            currentStudent = st;
+                            currentTeacherId = row.id || targetId;
+                            localStorage.setItem('currentUserRole', 'student');
+                            localStorage.setItem('currentStudent', JSON.stringify(st));
+                            localStorage.setItem('currentTeacherId', currentTeacherId);
+                        }
+                    } else if (paramRole === 'student') {
+                        currentUserRole = 'student';
+                        localStorage.setItem('currentUserRole', 'student');
+                    } else {
+                        const savedRole = localStorage.getItem('currentUserRole');
+                        if (savedRole === 'student') {
+                            currentUserRole = 'student';
+                            const savedSt = localStorage.getItem('currentStudent');
+                            if (savedSt) {
+                                try { currentStudent = JSON.parse(savedSt); } catch(e){}
+                            }
+                        } else {
+                            currentUserRole = 'teacher';
+                            currentStudent = null;
+                            localStorage.setItem('currentUserRole', 'teacher');
+                        }
+                    }
+
+                    // Save to localStorage for instant offline access in future
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('user_' + currentUser.id, JSON.stringify(currentUser));
+                    localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
+                    localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
+                    localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
+                    localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
+                    localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
+                    localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
+
+                    loaded = true;
+                    updateCloudSyncStatus('synced');
+                    console.log("Loaded data from Supabase successfully!");
+                }
+            } catch (e) {
+                console.warn("Supabase fetch failed in checkAuth:", e);
+                updateCloudSyncStatus('error', 'Lỗi tải đám mây');
+            }
+        }
+
+        // C. Fallback to Local Server API
         if (!loaded) {
             try {
                 const res = await fetch('/api/data?t=' + Date.now());
@@ -2275,7 +2722,7 @@
             }
         }
 
-        // 3. Fallback to static data.json
+        // D. Fallback to static data.json
         if (!loaded) {
             try {
                 const res = await fetch('./data.json');
@@ -2295,6 +2742,15 @@
                 }
             } catch(e) {
                 console.warn("Static data.json not available, falling back to LocalStorage.");
+            }
+        }
+
+        // E. Fallback to LocalStorage if not already loaded
+        if (!loaded) {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                loaded = true;
             }
         }
 
@@ -2321,20 +2777,8 @@
                 checkAdminSection();
             }
         } else {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                authScreen.classList.add('hidden');
-                authScreen.classList.remove('flex');
-                if (!currentUser.className) {
-                    const obScreen = document.getElementById('onboarding-screen');
-                    obScreen.classList.remove('hidden');
-                    obScreen.classList.add('flex');
-                } else loadUserData();
-            } else {
-                authScreen.classList.remove('hidden');
-                authScreen.classList.add('flex');
-            }
+            authScreen.classList.remove('hidden');
+            authScreen.classList.add('flex');
         }
     }
     function toggleAuthMode() { isLoginMode = !isLoginMode; document.getElementById('auth-title').innerText = isLoginMode ? 'Đăng Nhập' : 'Tạo Tài Khoản'; document.getElementById('auth-btn').innerText = isLoginMode ? 'Đăng Nhập' : 'Đăng Ký Nhanh'; document.getElementById('auth-toggle-text').innerText = isLoginMode ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'; document.getElementById('auth-toggle-btn').innerText = isLoginMode ? 'Đăng ký ngay' : 'Đăng nhập'; document.getElementById('auth-error').classList.add('hidden'); const authLoading = document.getElementById('auth-loading'); if (authLoading) authLoading.classList.add('hidden'); }
@@ -2742,14 +3186,16 @@
                     students = cloudData.students || [];
                     seatingCharts = cloudData.seatingCharts || [];
                     timetables = cloudData.timetables || [];
+                    teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
                     attendanceData = cloudData.attendanceData || {};
                     announcements = cloudData.announcements || [];
                     loadedFromCloud = true;
+                    updateCloudSyncStatus('synced');
                     console.log("Loaded student data from Supabase successfully!");
                 }
             } catch(e) {
                 console.warn("Failed to load student data from Supabase, trying local storage:", e);
-                alert("Lỗi tải đám mây trong loadUserData: " + (e.message || e));
+                updateCloudSyncStatus('error', e.message);
             }
         }
 
@@ -2758,6 +3204,12 @@
             students = savedStudents ? JSON.parse(savedStudents) : []; 
             const savedCharts = localStorage.getItem('seating_' + currentUser.id); 
             seatingCharts = savedCharts ? JSON.parse(savedCharts) : []; 
+            const savedTkb = localStorage.getItem('timetables_' + currentUser.id);
+            if (savedTkb) timetables = JSON.parse(savedTkb);
+            const savedTeacherTkb = localStorage.getItem('teacherTimetable_' + currentUser.id);
+            if (savedTeacherTkb) teacherTimetable = JSON.parse(savedTeacherTkb);
+            const savedAtt = localStorage.getItem('attendance_' + currentUser.id);
+            if (savedAtt) attendanceData = JSON.parse(savedAtt);
             const savedAnnouncements = localStorage.getItem('announcements_' + currentUser.id);
             announcements = savedAnnouncements ? JSON.parse(savedAnnouncements) : []; 
         }
