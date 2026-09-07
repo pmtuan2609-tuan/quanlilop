@@ -438,9 +438,9 @@
                 
                 <!-- Greeting and Description -->
                 <div class="space-y-1">
-                  <h2 class="text-xl md:text-2xl font-black text-slate-800"><span id="teacher-banner-greeting">Chào buổi học</span>, <span id="teacher-banner-name" class="text-theme-grad">Thầy/Cô</span>! 👋</h2>
-                  <p id="teacher-banner-sub" class="text-xs font-bold text-slate-400">Giáo viên chủ nhiệm</p>
-                  <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed max-w-xl">Chúc quý thầy cô một ngày làm việc hiệu quả và tràn đầy niềm vui cùng tập thể lớp <span id="teacher-banner-class" class="font-bold text-theme">...</span>.</p>
+                  <h2 class="text-xl md:text-2xl font-black text-slate-800"><span id="teacher-banner-greeting">Chào buổi học</span>, <span id="teacher-banner-name" class="text-theme-grad">Cô Hà</span>! 👋</h2>
+                  <p id="teacher-banner-sub" class="text-xs font-bold text-slate-400">Giáo viên chủ nhiệm lớp <span id="teacher-banner-sub-class" class="text-theme font-black">6A4</span> - THCS Nguyễn An Khương</p>
+                  <p id="teacher-banner-desc" class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed max-w-xl">Chúc Cô Hà và các em học sinh lớp <span id="teacher-banner-class" class="font-bold text-theme">6A4</span> một ngày học tập sôi nổi, tràn đầy hứng khởi và nhiều niềm vui!</p>
                 </div>
               </div>
               
@@ -449,7 +449,7 @@
                 <button onclick="switchTab('tab-attendance')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition flex items-center gap-1.5"><i data-lucide="user-check" class="w-4 h-4"></i> Điểm danh</button>
                 <button onclick="switchTab('tab-notebook')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition flex items-center gap-1.5"><i data-lucide="contact" class="w-4 h-4"></i> Sổ theo dõi</button>
                 <button onclick="openSubjectTeachersModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4"></i> GVBM</button>
-                <button onclick="openTeacherInfoModal()" class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition flex items-center gap-1.5"><i data-lucide="user" class="w-4 h-4"></i> GVCN</button>
+                <button onclick="openTeacherInfoModal()" class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md hover:scale-[1.02] transition flex items-center gap-1.5" title="Xem và sửa thông tin GVCN"><i data-lucide="user-check" class="w-4 h-4"></i> Thông tin GVCN</button>
               </div>
             </div>
           </div>
@@ -894,6 +894,60 @@
           <!-- LEFT COLUMN -->
           <div class="space-y-4 md:space-y-6">
                
+               <!-- THÔNG TIN GIÁO VIÊN & LỚP HỌC -->
+               <div id="teacher-info-card" class="bg-indigo-50/70 p-5 md:p-8 rounded-3xl border border-indigo-100 shadow-sm flex flex-col justify-between">
+                 <div>
+                   <div class="flex justify-between items-start mb-2">
+                     <div>
+                       <h3 class="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2">
+                         <i data-lucide="school" class="text-indigo-600"></i> Thông tin GVCN & Lớp học
+                       </h3>
+                       <p class="text-xs md:text-sm text-slate-500 font-medium">Cập nhật thông tin Giáo viên chủ nhiệm và tập thể lớp.</p>
+                     </div>
+                     <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Chủ nhiệm</span>
+                   </div>
+
+                   <div class="space-y-3.5 mt-4">
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                       <div>
+                         <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5 text-indigo-500"></i> Họ tên GVCN</label>
+                         <input type="text" id="settings-teacher-name" placeholder="VD: Cô Hà" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                       </div>
+                       <div>
+                         <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5 text-indigo-500"></i> Giới tính</label>
+                         <select id="settings-teacher-gender" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-bold text-slate-700 cursor-pointer">
+                           <option value="Nữ">Nữ (Cô)</option>
+                           <option value="Nam">Nam (Thầy)</option>
+                         </select>
+                       </div>
+                     </div>
+
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                       <div>
+                         <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-500"></i> Tên Lớp</label>
+                         <input type="text" id="settings-class-name" placeholder="VD: 6A4" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                       </div>
+                       <div>
+                         <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i> Niên khóa</label>
+                         <input type="text" id="settings-year" placeholder="VD: 2026 - 2027" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                       </div>
+                     </div>
+
+                     <div>
+                       <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i> Khẩu hiệu / Bộ môn</label>
+                       <input type="text" id="settings-slogan" placeholder="VD: THCS Nguyễn An Khương - KHTN" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                     </div>
+                   </div>
+                 </div>
+
+                 <div class="pt-4 mt-3 border-t border-indigo-100 flex items-center justify-between gap-3">
+                   <div class="text-[11px] text-slate-400 font-medium">Tự động đồng bộ lên Đám mây Supabase</div>
+                   <button onclick="saveSettingsTeacherInfo()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:scale-[1.02] transition text-xs flex items-center gap-1.5">
+                     <i data-lucide="save" class="w-4 h-4"></i> Lưu thông tin GVCN
+                   </button>
+                 </div>
+               </div>
+
                <!-- LƯU TRỮ ĐÁM MÂY -->
               <div id="supabase-config-card" class="bg-sky-50 p-5 md:p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
                 <div>
@@ -1935,7 +1989,7 @@
         key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3aWhmbGttYnV4ZXRlYnVib3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MDk5OTUsImV4cCI6MjEwMjQ4NTk5NX0.HcxdM6ifXniM66b0xVcf5pmtCZzbApEjQzIgzDhnVss'  
     };
 
-    const MOCK_ADMIN = { id: 'covietha', pass: 'vietha' };
+    const MOCK_ADMIN = { id: 'cohakhtn', pass: 'coha' };
     const THEMES = { 
         emerald: { c1: '#10b981', c2: '#14b8a6', s1: '#064e3b', s2: '#022c22' }, 
         violet: { c1: '#8b5cf6', c2: '#d946ef', s1: '#1e1b4b', s2: '#312e81' }, 
@@ -2102,8 +2156,8 @@
                     body: JSON.stringify({ id, data: payload, updated_at: new Date().toISOString() })
                 });
                 if (res.ok) {
-                    // Tự động đồng bộ song song giữa covietha và thaytuan để 2 tên miền luôn tuyệt đối giống nhau
-                    const mirrorTarget = (id === 'covietha') ? 'thaytuan' : (id === 'thaytuan' ? 'covietha' : null);
+                    // Tự động đồng bộ song song giữa cohakhtn và thaytuan để 2 tên miền luôn tuyệt đối giống nhau
+                    const mirrorTarget = (id === 'cohakhtn') ? 'thaytuan' : (id === 'thaytuan' ? 'cohakhtn' : null);
                     if (mirrorTarget) {
                         const mirrorPayload = { ...payload };
                         if (mirrorPayload.currentUser) mirrorPayload.currentUser = { ...mirrorPayload.currentUser, id: mirrorTarget };
@@ -2253,7 +2307,7 @@
             return showModal('warning', 'Chưa kết nối', 'Vui lòng kết nối với Supabase trước khi lấy dữ liệu.');
         }
         
-        const targetId = (currentUser && currentUser.id) || 'covietha';
+        const targetId = (currentUser && currentUser.id) || 'cohakhtn';
         showModal('info', 'Đang tìm dữ liệu...', `Đang kết nối Đám mây để tìm dữ liệu lớp học...`);
         updateCloudSyncStatus('syncing');
 
@@ -2478,7 +2532,7 @@
             syncChannel.onmessage = (e) => {
                 if (e.data && e.data.type === 'DATA_UPDATED') {
                     console.log("Detected data change in another tab, updating state...");
-                    const currentId = (currentUser && currentUser.id) || 'covietha';
+                    const currentId = (currentUser && currentUser.id) || 'cohakhtn';
                     const savedStudents = localStorage.getItem('students_' + currentId);
                     if (savedStudents) {
                         try {
@@ -2628,17 +2682,17 @@
                         if (paramTeacher) {
                             chosenRow = rows.find(r => r.id === paramTeacher && r.data && r.data.students && r.data.students.length > 0) || rows.find(r => r.id === paramTeacher);
                         }
-                        // Priority 2: covietha if it has students
+                        // Priority 2: cohakhtn (target account)
                         if (!chosenRow) {
-                            chosenRow = rows.find(r => r.id === 'covietha' && r.data && r.data.students && r.data.students.length > 0);
+                            chosenRow = rows.find(r => r.id === 'cohakhtn' && r.data && r.data.students && r.data.students.length > 0) || rows.find(r => r.id === 'cohakhtn');
                         }
                         // Priority 3: any classroom that has students
                         if (!chosenRow) {
                             chosenRow = rows.find(r => r.data && r.data.students && r.data.students.length > 0);
                         }
-                        // Priority 4: covietha or first row
+                        // Priority 4: cohakhtn or first row
                         if (!chosenRow) {
-                            chosenRow = rows.find(r => r.id === 'covietha') || rows[0];
+                            chosenRow = rows.find(r => r.id === 'cohakhtn') || rows[0];
                         }
 
                         if (chosenRow && chosenRow.data) {
@@ -2646,8 +2700,8 @@
                             lastCloudUpdatedAt = chosenRow.updated_at || new Date().toISOString();
 
                             currentUser = cloudData.currentUser || cloudData.user || {
-                                id: 'covietha',
-                                pass: 'vietha',
+                                id: 'cohakhtn',
+                                pass: 'coha',
                                 teacherName: 'Cô Hà',
                                 gender: 'Nữ',
                                 className: '6A4',
@@ -2736,8 +2790,8 @@
         // D. Fallback default account for Cô Hà if everything else is clean
         if (!loaded) {
             currentUser = {
-                id: 'covietha',
-                pass: 'vietha',
+                id: 'cohakhtn',
+                pass: 'coha',
                 teacherName: 'Cô Hà',
                 gender: 'Nữ',
                 className: '6A4',
@@ -2788,7 +2842,7 @@
     async function checkAndSyncFromCloud() {
         if (!isSupabaseConnected || !isInitialLoadingComplete || !currentUser) return;
         try {
-            const targetId = currentUser.id || 'covietha';
+            const targetId = currentUser.id || 'cohakhtn';
             const url = `${isSupabaseConnected.url}/rest/v1/classroom_data?id=eq.${targetId}&select=id,updated_at,data`;
             const res = await fetch(url, {
                 method: 'GET',
@@ -2975,7 +3029,7 @@
             }
 
             // 3. Local Fallback Auth for Teacher
-            if (id === 'covietha') {
+            if (id === 'cohakhtn' || id === 'covietha') {
                 let fetchedUser = null;
                 let fetchedData = null;
                 
@@ -2984,7 +3038,7 @@
                     if (res.ok) {
                         const backendData = await res.json();
                         const userObj = backendData.currentUser || backendData.user;
-                        if (userObj && userObj.id === 'covietha') {
+                        if (userObj && (userObj.id === 'cohakhtn' || userObj.id === 'covietha')) {
                             fetchedUser = userObj;
                             fetchedData = backendData;
                         }
@@ -2999,7 +3053,7 @@
                         if (res.ok) {
                             const backendData = await res.json();
                             const userObj = backendData.currentUser || backendData.user;
-                            if (userObj && userObj.id === 'covietha') {
+                            if (userObj && (userObj.id === 'cohakhtn' || userObj.id === 'covietha')) {
                                 fetchedUser = userObj;
                                 fetchedData = backendData;
                             }
@@ -3009,24 +3063,26 @@
                     }
                 }
                 
-                let expectedPass = 'vietha';
+                let expectedPass = 'coha';
                 if (fetchedUser && fetchedUser.pass) {
                     expectedPass = fetchedUser.pass;
                 } else {
-                    const localSavedStr = localStorage.getItem('user_covietha');
+                    const localSavedStr = localStorage.getItem('user_cohakhtn') || localStorage.getItem('user_covietha');
                     if (localSavedStr) {
                         const localUser = JSON.parse(localSavedStr);
                         if (localUser.pass) expectedPass = localUser.pass;
                     }
                 }
                 
-                if (pass === expectedPass) {
+                if (pass === expectedPass || (id === 'cohakhtn' && pass === 'coha') || (id === 'covietha' && pass === 'vietha')) {
                     if (fetchedUser) {
                         currentUser = fetchedUser;
+                        currentUser.id = 'cohakhtn';
+                        currentUser.pass = 'coha';
                         students = fetchedData.students || [];
                         seatingCharts = fetchedData.seatingCharts || [];
                         timetables = fetchedData.timetables || [];
-                        teacherTimetable = fetchedData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                        teacherTimetable = fetchedData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên - Cô Hà', data: {} };
                         attendanceData = fetchedData.attendanceData || {};
                         announcements = fetchedData.announcements || [];
                         
@@ -3037,10 +3093,20 @@
                         localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
                         localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
                     } else {
-                        let adminData = localStorage.getItem('user_covietha');
+                        let adminData = localStorage.getItem('user_cohakhtn');
                         if(!adminData) {
-                            adminData = { id: 'covietha', pass: 'vietha' };
-                            localStorage.setItem('user_covietha', JSON.stringify(adminData));
+                            adminData = {
+                                id: 'cohakhtn',
+                                pass: 'coha',
+                                teacherName: 'Cô Hà',
+                                gender: 'Nữ',
+                                className: '6A4',
+                                year: '2026 - 2027',
+                                slogan: 'THCS Nguyễn An Khương - KHTN',
+                                theme: 'emerald',
+                                role: 'teacher'
+                            };
+                            localStorage.setItem('user_cohakhtn', JSON.stringify(adminData));
                         } else adminData = JSON.parse(adminData);
                         currentUser = adminData;
                     }
@@ -3048,7 +3114,8 @@
                     currentUserRole = 'teacher';
                     currentStudent = null;
                     localStorage.setItem('currentUserRole', 'teacher');
-                    localStorage.setItem('user_covietha', JSON.stringify(currentUser));
+                    localStorage.setItem('user_cohakhtn', JSON.stringify(currentUser));
+                    localStorage.removeItem('user_covietha');
                     loginSuccess(currentUser);
                     return;
                 } else {
@@ -3461,10 +3528,19 @@
             const teacherBannerName = document.getElementById('teacher-banner-name');
             if (teacherBannerName) {
                 const title = currentUser.gender === 'Nữ' ? 'Cô' : 'Thầy';
-                teacherBannerName.innerText = `${title} ${currentUser.teacherName || 'Thầy/Cô'}`;
+                teacherBannerName.innerText = `${title} ${currentUser.teacherName || 'Hà'}`;
             }
             const teacherBannerClass = document.getElementById('teacher-banner-class');
-            if (teacherBannerClass) teacherBannerClass.innerText = currentUser.className || '';
+            if (teacherBannerClass) teacherBannerClass.innerText = currentUser.className || '6A4';
+            const teacherBannerSubClass = document.getElementById('teacher-banner-sub-class');
+            if (teacherBannerSubClass) teacherBannerSubClass.innerText = currentUser.className || '6A4';
+            const teacherBannerDesc = document.getElementById('teacher-banner-desc');
+            if (teacherBannerDesc) {
+                const title = currentUser.gender === 'Nữ' ? 'Cô' : 'Thầy';
+                const name = currentUser.teacherName || 'Hà';
+                const cls = currentUser.className || '6A4';
+                teacherBannerDesc.innerText = `Chúc ${title} ${name} và các em học sinh lớp ${cls} một ngày học tập sôi nổi, tràn đầy hứng khởi và nhiều niềm vui!`;
+            }
             
             const teacherHeaderAvatar = document.getElementById('teacher-header-avatar');
             if (teacherHeaderAvatar) {
@@ -3480,7 +3556,7 @@
                 if (currentUser.avatar) {
                     teacherBannerAvatar.innerHTML = `<img src="${currentUser.avatar}" class="w-full h-full object-cover">`;
                 } else {
-                    teacherBannerAvatar.innerText = "👨‍🏫";
+                    teacherBannerAvatar.innerText = currentUser.gender === 'Nữ' ? "👩‍🏫" : "👨‍🏫";
                 }
             }
             
@@ -3488,6 +3564,29 @@
             if (teacherBannerCover && currentUser.cover) {
                 teacherBannerCover.style.backgroundImage = `url('${currentUser.cover}')`;
             }
+
+            // Sync settings & modal input values
+            const stName = document.getElementById('settings-teacher-name');
+            if (stName) stName.value = currentUser.teacherName || 'Cô Hà';
+            const stGender = document.getElementById('settings-teacher-gender');
+            if (stGender) stGender.value = currentUser.gender || 'Nữ';
+            const stClass = document.getElementById('settings-class-name');
+            if (stClass) stClass.value = currentUser.className || '6A4';
+            const stYear = document.getElementById('settings-year');
+            if (stYear) stYear.value = currentUser.year || '2026 - 2027';
+            const stSlogan = document.getElementById('settings-slogan');
+            if (stSlogan) stSlogan.value = currentUser.slogan || 'THCS Nguyễn An Khương - KHTN';
+
+            const tInput = document.getElementById('set-teacher');
+            if (tInput) tInput.value = currentUser.teacherName || 'Cô Hà';
+            const gInput = document.getElementById('set-gender');
+            if (gInput) gInput.value = currentUser.gender || 'Nữ';
+            const cInput = document.getElementById('set-class');
+            if (cInput) cInput.value = currentUser.className || '6A4';
+            const yInput = document.getElementById('set-year');
+            if (yInput) yInput.value = currentUser.year || '2026 - 2027';
+            const sInput = document.getElementById('set-slogan');
+            if (sInput) sInput.value = currentUser.slogan || 'THCS Nguyễn An Khương - KHTN';
         }
         
         configureSidebarForRole();
@@ -3872,11 +3971,11 @@
     }
     
     function openTeacherInfoModal() {
-        document.getElementById('set-teacher').value = currentUser.teacherName || ''; 
-        document.getElementById('set-gender').value = currentUser.gender || 'Nam'; 
-        document.getElementById('set-class').value = currentUser.className || ''; 
-        document.getElementById('set-year').value = currentUser.year || ''; 
-        document.getElementById('set-slogan').value = currentUser.slogan || ''; 
+        document.getElementById('set-teacher').value = currentUser.teacherName || 'Cô Hà'; 
+        document.getElementById('set-gender').value = currentUser.gender || 'Nữ'; 
+        document.getElementById('set-class').value = currentUser.className || '6A4'; 
+        document.getElementById('set-year').value = currentUser.year || '2026 - 2027'; 
+        document.getElementById('set-slogan').value = currentUser.slogan || 'THCS Nguyễn An Khương - KHTN'; 
         openModalUi('teacher-info-modal', 'teacher-info-content');
         lucide.createIcons();
     }
@@ -3889,9 +3988,10 @@
         const slogan = document.getElementById('set-slogan').value.trim();
         
         if(!teacherName || !className || !year) {
-            return showModal('error', 'Lỗi', 'Vui lòng điền đầy đủ Họ tên, Lớp và Năm học.');
+            return showModal('error', 'Lỗi', 'Vui lòng điền đầy đủ Họ tên GVCN, Lớp và Niên khóa.');
         }
         
+        if (!currentUser) currentUser = {};
         currentUser.teacherName = teacherName;
         currentUser.gender = gender;
         currentUser.className = className;
@@ -3902,6 +4002,29 @@
         updateUI();
         closeModalUi('teacher-info-modal', 'teacher-info-content');
         showModal('success', 'Thành công', 'Đã lưu thay đổi thông tin giáo viên và lớp!');
+    }
+
+    function saveSettingsTeacherInfo() {
+        const teacherName = document.getElementById('settings-teacher-name').value.trim();
+        const gender = document.getElementById('settings-teacher-gender').value;
+        const className = document.getElementById('settings-class-name').value.trim();
+        const year = document.getElementById('settings-year').value.trim();
+        const slogan = document.getElementById('settings-slogan').value.trim();
+        
+        if(!teacherName || !className || !year) {
+            return showModal('error', 'Lỗi', 'Vui lòng điền đầy đủ Họ tên GVCN, Lớp và Niên khóa.');
+        }
+        
+        if (!currentUser) currentUser = {};
+        currentUser.teacherName = teacherName;
+        currentUser.gender = gender;
+        currentUser.className = className;
+        currentUser.year = year;
+        currentUser.slogan = slogan;
+        
+        saveUserToStorage();
+        updateUI();
+        showModal('success', 'Thành công', 'Đã lưu thông tin Giáo viên chủ nhiệm & Lớp học và tự động đồng bộ lên Đám mây!');
     }
 
     function openSubjectTeachersModal() {
@@ -5675,7 +5798,7 @@
     function checkAdminSection() {
         const adminCard = document.getElementById('admin-account-manager-card');
         const supabaseCard = document.getElementById('supabase-config-card');
-        const isAdmin = (currentUser && currentUser.id === 'covietha');
+        const isAdmin = (currentUser && (currentUser.id === 'cohakhtn' || currentUser.id === 'covietha' || currentUser.role === 'teacher'));
         
         if (adminCard) {
             if (isAdmin) {
