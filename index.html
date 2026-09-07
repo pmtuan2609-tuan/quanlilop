@@ -2084,7 +2084,7 @@
         };
         
         if (method === 'GET') {
-            const fetchUrl = `${url}?id=eq.${id}&select=data`;
+            const fetchUrl = `${url}?id=eq.${id}&select=id,data,updated_at`;
             const res = await fetch(fetchUrl, { method: 'GET', headers });
             if (!res.ok) throw new Error(`HTTP error ${res.status}`);
             const data = await res.json();
@@ -2101,7 +2101,20 @@
                     },
                     body: JSON.stringify({ id, data: payload, updated_at: new Date().toISOString() })
                 });
-                if (res.ok) return true;
+                if (res.ok) {
+                    // Tự động đồng bộ song song giữa covietha và thaytuan để 2 tên miền luôn tuyệt đối giống nhau
+                    const mirrorTarget = (id === 'covietha') ? 'thaytuan' : (id === 'thaytuan' ? 'covietha' : null);
+                    if (mirrorTarget) {
+                        const mirrorPayload = { ...payload };
+                        if (mirrorPayload.currentUser) mirrorPayload.currentUser = { ...mirrorPayload.currentUser, id: mirrorTarget };
+                        fetch(`${url}?on_conflict=id`, {
+                            method: 'POST',
+                            headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
+                            body: JSON.stringify({ id: mirrorTarget, data: mirrorPayload, updated_at: new Date().toISOString() })
+                        }).catch(() => {});
+                    }
+                    return true;
+                }
                 console.warn(`PostgREST direct upsert returned ${res.status}, running fallback check/patch...`);
             } catch (err) {
                 console.warn("Direct upsert network error, running fallback:", err);
@@ -2364,6 +2377,9 @@
             announcements: announcements
         };
 
+        // Only sync to Supabase after the app has fully completed initial loading
+        if (!isInitialLoadingComplete) return;
+
         // Sync to Supabase if connected
         if (isSupabaseConnected) {
             updateCloudSyncStatus('syncing');
@@ -2546,11 +2562,15 @@
     } catch(e) {}
 
     // --- Auth & Config ---
+    let lastCloudUpdatedAt = null;
+    let isInitialLoadingComplete = false;
+
     async function checkAuth() {
         const authScreen = document.getElementById('auth-screen');
+        const obScreen = document.getElementById('onboarding-screen');
         let loaded = false;
 
-        // A. Parse URL search & hash parameters (Deep Linking from other websites, bookmarks, or portals)
+        // A. Parse URL search & hash parameters (Deep Linking)
         const urlParams = new URLSearchParams(window.location.search);
         let hashStr = window.location.hash || '';
         if (hashStr.startsWith('#')) hashStr = hashStr.slice(1);
@@ -2587,111 +2607,102 @@
             }
         }
 
-        // B. Try to load from Supabase Cloud
+        // B. ALWAYS query Supabase Cloud directly for the latest active classroom (Zero Clicks)
         if (!loaded && isSupabaseConnected) {
             updateCloudSyncStatus('syncing');
             try {
-                const savedUserStr = localStorage.getItem('currentUser');
-                let targetId = paramTeacher;
-                
-                if (!targetId && savedUserStr) {
-                    try { 
-                        const su = JSON.parse(savedUserStr);
-                        targetId = su.id; 
-                    } catch(e){}
-                }
-                
-                // If opening on a fresh web/browser without targetId, target default teacher 'covietha'
-                if (!targetId) {
-                    targetId = 'covietha';
-                }
-
-                let row = null;
-                if (targetId) {
-                    try {
-                        row = await callSupabaseRest('GET', targetId);
-                    } catch(err) {
-                        console.warn("Failed GET for targetId:", targetId, err);
+                const scanUrl = `${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data,updated_at&order=updated_at.desc&limit=5`;
+                const res = await fetch(scanUrl, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': isSupabaseConnected.key,
+                        'Authorization': `Bearer ${isSupabaseConnected.key}`
                     }
-                }
+                });
 
-                // If targetId has no data, scan Supabase for any existing classroom with students
-                if (!row || !row.data) {
-                    try {
-                        const scanUrl = `${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data&limit=5`;
-                        const res = await fetch(scanUrl, {
-                            method: 'GET',
-                            headers: {
-                                'apikey': isSupabaseConnected.key,
-                                'Authorization': `Bearer ${isSupabaseConnected.key}`
-                            }
-                        });
-                        if (res.ok) {
-                            const rows = await res.json();
-                            if (rows && rows.length > 0) {
-                                const found = rows.find(r => r.data && r.data.students && r.data.students.length > 0) || rows[0];
-                                if (found && found.data) {
-                                    row = found;
+                if (res.ok) {
+                    const rows = await res.json();
+                    if (rows && rows.length > 0) {
+                        // Priority 1: If specified by URL parameter
+                        let chosenRow = null;
+                        if (paramTeacher) {
+                            chosenRow = rows.find(r => r.id === paramTeacher && r.data && r.data.students && r.data.students.length > 0) || rows.find(r => r.id === paramTeacher);
+                        }
+                        // Priority 2: covietha if it has students
+                        if (!chosenRow) {
+                            chosenRow = rows.find(r => r.id === 'covietha' && r.data && r.data.students && r.data.students.length > 0);
+                        }
+                        // Priority 3: any classroom that has students
+                        if (!chosenRow) {
+                            chosenRow = rows.find(r => r.data && r.data.students && r.data.students.length > 0);
+                        }
+                        // Priority 4: covietha or first row
+                        if (!chosenRow) {
+                            chosenRow = rows.find(r => r.id === 'covietha') || rows[0];
+                        }
+
+                        if (chosenRow && chosenRow.data) {
+                            const cloudData = chosenRow.data;
+                            lastCloudUpdatedAt = chosenRow.updated_at || new Date().toISOString();
+
+                            currentUser = cloudData.currentUser || cloudData.user || {
+                                id: 'covietha',
+                                pass: 'vietha',
+                                teacherName: 'Cô Hà',
+                                gender: 'Nữ',
+                                className: '6A4',
+                                year: '2026 - 2027',
+                                slogan: 'THCS Nguyễn An Khương - KHTN',
+                                theme: 'emerald',
+                                role: 'teacher'
+                            };
+
+                            // Ensure default values are clean
+                            if (!currentUser.teacherName || currentUser.teacherName === '...') currentUser.teacherName = 'Cô Hà';
+                            if (!currentUser.className) currentUser.className = '6A4';
+                            if (!currentUser.slogan) currentUser.slogan = 'THCS Nguyễn An Khương - KHTN';
+
+                            students = cloudData.students || [];
+                            seatingCharts = cloudData.seatingCharts || [];
+                            timetables = cloudData.timetables || [];
+                            teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                            attendanceData = cloudData.attendanceData || {};
+                            announcements = cloudData.announcements || [];
+
+                            if (paramStudent) {
+                                const st = students.find(s => String(s.code) === paramStudent || String(s.id) === paramStudent);
+                                if (st) {
+                                    currentUserRole = 'student';
+                                    currentStudent = st;
+                                    currentTeacherId = chosenRow.id;
+                                    localStorage.setItem('currentUserRole', 'student');
+                                    localStorage.setItem('currentStudent', JSON.stringify(st));
+                                    localStorage.setItem('currentTeacherId', currentTeacherId);
                                 }
+                            } else if (paramRole === 'student') {
+                                currentUserRole = 'student';
+                                localStorage.setItem('currentUserRole', 'student');
+                            } else {
+                                currentUserRole = 'teacher';
+                                currentStudent = null;
+                                localStorage.setItem('currentUserRole', 'teacher');
                             }
-                        }
-                    } catch(scanErr) {
-                        console.warn("Classroom scan failed:", scanErr);
-                    }
-                }
 
-                if (row && row.data) {
-                    const cloudData = row.data;
-                    currentUser = cloudData.currentUser || cloudData.user || { id: row.id || targetId, className: '6A4', teacherName: 'Cô Hà' };
-                    students = cloudData.students || [];
-                    seatingCharts = cloudData.seatingCharts || [];
-                    timetables = cloudData.timetables || [];
-                    teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
-                    attendanceData = cloudData.attendanceData || {};
-                    announcements = cloudData.announcements || [];
+                            // Save to local cache
+                            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                            localStorage.setItem('user_' + currentUser.id, JSON.stringify(currentUser));
+                            localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
+                            localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
+                            localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
+                            localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
+                            localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
+                            localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
 
-                    // Determine Role: check if opening via student link
-                    if (paramStudent) {
-                        const st = students.find(s => String(s.code) === paramStudent || String(s.id) === paramStudent);
-                        if (st) {
-                            currentUserRole = 'student';
-                            currentStudent = st;
-                            currentTeacherId = row.id || targetId;
-                            localStorage.setItem('currentUserRole', 'student');
-                            localStorage.setItem('currentStudent', JSON.stringify(st));
-                            localStorage.setItem('currentTeacherId', currentTeacherId);
-                        }
-                    } else if (paramRole === 'student') {
-                        currentUserRole = 'student';
-                        localStorage.setItem('currentUserRole', 'student');
-                    } else {
-                        const savedRole = localStorage.getItem('currentUserRole');
-                        if (savedRole === 'student') {
-                            currentUserRole = 'student';
-                            const savedSt = localStorage.getItem('currentStudent');
-                            if (savedSt) {
-                                try { currentStudent = JSON.parse(savedSt); } catch(e){}
-                            }
-                        } else {
-                            currentUserRole = 'teacher';
-                            currentStudent = null;
-                            localStorage.setItem('currentUserRole', 'teacher');
+                            loaded = true;
+                            updateCloudSyncStatus('synced');
+                            console.log(`Auto-synced class "${currentUser.className || ''}" with ${students.length} students from Supabase without any clicks.`);
                         }
                     }
-
-                    // Save to localStorage for instant offline access in future
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    localStorage.setItem('user_' + currentUser.id, JSON.stringify(currentUser));
-                    localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
-                    localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
-                    localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
-                    localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
-                    localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
-                    localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
-
-                    loaded = true;
-                    updateCloudSyncStatus('synced');
-                    console.log("Loaded data from Supabase successfully!");
                 }
             } catch (e) {
                 console.warn("Supabase fetch failed in checkAuth:", e);
@@ -2699,88 +2710,136 @@
             }
         }
 
-        // C. Fallback to Local Server API
+        // C. Fallback to LocalStorage if cloud was offline
         if (!loaded) {
-            try {
-                const res = await fetch('/api/data?t=' + Date.now());
-                if (res.ok) {
-                    const backendData = await res.json();
-                    const userObj = backendData.currentUser || backendData.user;
-                    if (userObj) {
-                        currentUser = userObj;
-                        students = backendData.students || [];
-                        seatingCharts = backendData.seatingCharts || [];
-                        timetables = backendData.timetables || [];
-                        teacherTimetable = backendData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
-                        attendanceData = backendData.attendanceData || {};
-                        announcements = backendData.announcements || [];
-                        loaded = true;
-                    }
-                }
-            } catch(e) {
-                console.warn("Server API not available, trying static file...");
+            const savedUserStr = localStorage.getItem('currentUser');
+            if (savedUserStr) {
+                try {
+                    currentUser = JSON.parse(savedUserStr);
+                    const savedSt = localStorage.getItem('students_' + currentUser.id);
+                    if (savedSt) students = JSON.parse(savedSt);
+                    const savedCharts = localStorage.getItem('seating_' + currentUser.id);
+                    if (savedCharts) seatingCharts = JSON.parse(savedCharts);
+                    const savedTkb = localStorage.getItem('timetables_' + currentUser.id);
+                    if (savedTkb) timetables = JSON.parse(savedTkb);
+                    const savedTeacherTkb = localStorage.getItem('teacherTimetable_' + currentUser.id);
+                    if (savedTeacherTkb) teacherTimetable = JSON.parse(savedTeacherTkb);
+                    const savedAtt = localStorage.getItem('attendance_' + currentUser.id);
+                    if (savedAtt) attendanceData = JSON.parse(savedAtt);
+                    const savedAnn = localStorage.getItem('announcements_' + currentUser.id);
+                    if (savedAnn) announcements = JSON.parse(savedAnn);
+                    loaded = true;
+                } catch(e){}
             }
         }
 
-        // D. Fallback to static data.json
+        // D. Fallback default account for Cô Hà if everything else is clean
         if (!loaded) {
-            try {
-                const res = await fetch('./data.json');
-                if (res.ok) {
-                    const backendData = await res.json();
-                    const userObj = backendData.currentUser || backendData.user;
-                    if (userObj) {
-                        currentUser = userObj;
-                        students = backendData.students || [];
-                        seatingCharts = backendData.seatingCharts || [];
-                        timetables = backendData.timetables || [];
-                        teacherTimetable = backendData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
-                        attendanceData = backendData.attendanceData || {};
-                        announcements = backendData.announcements || [];
-                        loaded = true;
-                    }
-                }
-            } catch(e) {
-                console.warn("Static data.json not available, falling back to LocalStorage.");
-            }
+            currentUser = {
+                id: 'covietha',
+                pass: 'vietha',
+                teacherName: 'Cô Hà',
+                gender: 'Nữ',
+                className: '6A4',
+                year: '2026 - 2027',
+                slogan: 'THCS Nguyễn An Khương - KHTN',
+                theme: 'emerald',
+                role: 'teacher'
+            };
+            loaded = true;
         }
 
-        // E. Fallback to LocalStorage if not already loaded
-        if (!loaded) {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                loaded = true;
-            }
+        // Rendering: Hide both auth and onboarding modals, render classroom directly without user needing to click anything!
+        authScreen.classList.add('hidden');
+        authScreen.classList.remove('flex');
+        if (obScreen) {
+            obScreen.classList.add('hidden');
+            obScreen.classList.remove('flex');
         }
 
-        if (loaded) {
-            restoreRoleState();
-            authScreen.classList.add('hidden');
-            authScreen.classList.remove('flex');
-            if (!currentUser.className) {
-                const obScreen = document.getElementById('onboarding-screen');
-                obScreen.classList.remove('hidden');
-                obScreen.classList.add('flex');
-            } else {
-                applyTheme(currentUser.theme || 'emerald'); 
-                document.getElementById('set-teacher').value = currentUser.teacherName || ''; 
-                document.getElementById('set-class').value = currentUser.className || ''; 
-                document.getElementById('set-year').value = currentUser.year || ''; 
-                document.getElementById('set-slogan').value = currentUser.slogan || ''; 
-                ensureStudentCodes(); 
-                initAttendance(); 
-                initTimetables(); 
-                updateUI(); 
-                renderAll(); 
-                initSeatingCharts();
-                checkAdminSection();
-            }
-        } else {
-            authScreen.classList.remove('hidden');
-            authScreen.classList.add('flex');
+        restoreRoleState();
+        applyTheme(currentUser.theme || 'emerald');
+        const tInput = document.getElementById('set-teacher');
+        if (tInput) tInput.value = currentUser.teacherName || '';
+        const cInput = document.getElementById('set-class');
+        if (cInput) cInput.value = currentUser.className || '';
+        const yInput = document.getElementById('set-year');
+        if (yInput) yInput.value = currentUser.year || '';
+        const sInput = document.getElementById('set-slogan');
+        if (sInput) sInput.value = currentUser.slogan || '';
+
+        ensureStudentCodes();
+        initAttendance();
+        initTimetables();
+        updateUI();
+        renderAll();
+        initSeatingCharts();
+        checkAdminSection();
+
+        isInitialLoadingComplete = true;
+
+        // If local had students but cloud was somehow empty, push to cloud now
+        if (isSupabaseConnected && students.length > 0) {
+            saveAppData();
         }
     }
+
+    // Auto-Sync in background when window gains focus or every 20 seconds
+    async function checkAndSyncFromCloud() {
+        if (!isSupabaseConnected || !isInitialLoadingComplete || !currentUser) return;
+        try {
+            const targetId = currentUser.id || 'covietha';
+            const url = `${isSupabaseConnected.url}/rest/v1/classroom_data?id=eq.${targetId}&select=id,updated_at,data`;
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'apikey': isSupabaseConnected.key,
+                    'Authorization': `Bearer ${isSupabaseConnected.key}`
+                }
+            });
+            if (res.ok) {
+                const rows = await res.json();
+                if (rows && rows.length > 0) {
+                    const row = rows[0];
+                    if (row.updated_at && row.updated_at !== lastCloudUpdatedAt) {
+                        lastCloudUpdatedAt = row.updated_at;
+                        const cloudData = row.data;
+                        if (cloudData && cloudData.students && cloudData.students.length > 0) {
+                            students = cloudData.students;
+                            seatingCharts = cloudData.seatingCharts || seatingCharts;
+                            timetables = cloudData.timetables || timetables;
+                            teacherTimetable = cloudData.teacherTimetable || teacherTimetable;
+                            attendanceData = cloudData.attendanceData || attendanceData;
+                            announcements = cloudData.announcements || announcements;
+                            
+                            localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
+                            localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
+                            localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
+                            localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
+                            localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
+                            localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
+
+                            renderAll();
+                            initAttendance();
+                            initTimetables();
+                            initSeatingCharts();
+                            updateUI();
+                            updateCloudSyncStatus('synced');
+                            console.log("Background cloud sync updated UI successfully!");
+                        }
+                    }
+                }
+            }
+        } catch(e) {
+            console.warn("Background cloud check failed:", e);
+        }
+    }
+
+    window.addEventListener('focus', () => {
+        checkAndSyncFromCloud();
+    });
+
+    setInterval(checkAndSyncFromCloud, 20000);
     function toggleAuthMode() { isLoginMode = !isLoginMode; document.getElementById('auth-title').innerText = isLoginMode ? 'Đăng Nhập' : 'Tạo Tài Khoản'; document.getElementById('auth-btn').innerText = isLoginMode ? 'Đăng Nhập' : 'Đăng Ký Nhanh'; document.getElementById('auth-toggle-text').innerText = isLoginMode ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'; document.getElementById('auth-toggle-btn').innerText = isLoginMode ? 'Đăng ký ngay' : 'Đăng nhập'; document.getElementById('auth-error').classList.add('hidden'); const authLoading = document.getElementById('auth-loading'); if (authLoading) authLoading.classList.add('hidden'); }
     async function handleAuth() {
         const idInput = document.getElementById('auth-id').value.trim();
