@@ -992,6 +992,7 @@
                     <button onclick="document.getElementById('import-upload').click()" class="bg-emerald-600 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Nạp từ file (.json)</button>
                     <input type="file" id="import-upload" accept=".json" class="hidden" onchange="importData(event)">
                     <button onclick="resetAllPoints()" class="bg-rose-50 text-rose-600 border border-rose-200 px-3.5 py-2.5 rounded-xl font-bold hover:bg-rose-100 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset điểm</button>
+                    <button onclick="cleanAndResetAllClassData()" class="bg-rose-600 hover:bg-rose-700 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-xs" title="Làm sạch trắng dữ liệu học sinh, điểm danh, sơ đồ"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Làm sạch dữ liệu lớp</button>
                  </div>
               </div>
 
@@ -5568,6 +5569,28 @@
     function resetWheel() { hiddenWheelIds = []; renderStage(); }
 
     // --- Quản Lý Hệ Thống ---
+    function cleanAndResetAllClassData() {
+        showModal('confirm', 'Làm sạch toàn bộ dữ liệu', 'Bạn có chắc chắn muốn LÀM SẠCH toàn bộ danh sách học sinh, điểm danh, sơ đồ chỗ ngồi và thông báo để bắt đầu danh sách mới cho lớp 6A4 không?\n(Thông tin Cô Hà - Lớp 6A4 vẫn được giữ nguyên)', () => {
+            students = [];
+            attendanceData = {};
+            announcements = [];
+            seatingCharts = [];
+            currentChartId = null;
+            selectedSeatId = null;
+            timetables = [{ id: 'tkb_6a4', name: 'TKB Lớp 6A4', data: {} }];
+            teacherTimetable = { id: 'teacher_tkb', name: 'TKB Giáo viên - Cô Hà', data: {} };
+            
+            saveAppData();
+            updateUI();
+            renderAll();
+            initAttendance();
+            initTimetables();
+            initSeatingCharts();
+            
+            showModal('success', 'Đã làm sạch dữ liệu', 'Hệ thống đã được làm sạch hoàn toàn về trạng thái ban đầu của lớp 6A4 Cô Hà và đồng bộ lên Đám mây!');
+        });
+    }
+
     function resetAllPoints() { showModal('confirm', 'Reset Toàn Bộ Điểm', 'CẢNH BÁO: Đặt điểm của TOÀN BỘ học sinh về 0, đồng thời xóa sạch lịch sử đánh giá. Phù hợp khi bắt đầu Học Kỳ mới. Bạn chắc chắn chứ?', () => { students.forEach(s => { s.points = 0; s.history = []; }); saveAppData(); renderAll(); setTimeout(() => showModal('success', 'Hoàn tất', 'Tất cả điểm số và lịch sử đã được đặt về 0.'), 350); }); }
     function exportData() { const data = { user: currentUser, students: students, seatingCharts: seatingCharts, timetables: timetables, teacherTimetable: teacherTimetable, attendanceData: attendanceData, announcements: announcements }; const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", `Data_LopHoc_${currentUser.className}.json`); document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove(); showModal('success', 'Thành công', 'Đã lưu file dữ liệu (Backup) về máy!'); }
     function importData(event) { const file = event.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); const userObj = data.currentUser || data.user; if(userObj && data.students) { showModal('confirm', 'Khôi phục dữ liệu', 'Bạn có muốn GHI ĐÈ toàn bộ dữ liệu hiện tại bằng dữ liệu từ file Backup không?', () => { currentUser = userObj; students = data.students || []; seatingCharts = data.seatingCharts || []; timetables = data.timetables || []; teacherTimetable = data.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} }; attendanceData = data.attendanceData || {}; announcements = data.announcements || []; saveAppData(); initTimetables(); initSeatingCharts(); initAttendance(); renderAll(); updateUI(); setTimeout(()=>showModal('success', 'Thành công', 'Đã khôi phục dữ liệu thành công!'), 400); }); } else throw new Error("Invalid"); } catch(error) { showModal('error', 'Lỗi', 'File dữ liệu không hợp lệ.'); } }; reader.readAsText(file); event.target.value = ''; }
