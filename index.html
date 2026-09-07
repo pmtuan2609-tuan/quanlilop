@@ -171,8 +171,12 @@
         <p class="text-sm text-slate-500 mt-1">Hệ thống quản lý lớp học</p>
       </div>
       <div class="space-y-4">
-        <div><label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Tài khoản (ID)</label><input type="text" id="auth-id" class="w-full mt-1.5 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none"></div>
-        <div><label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Mật khẩu</label><input type="password" id="auth-pass" class="w-full mt-1.5 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none"></div>
+        <div><label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Tài khoản (ID)</label><input type="text" id="auth-id" placeholder="admin" value="admin" class="w-full mt-1.5 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none"></div>
+        <div><label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Mật khẩu</label><input type="password" id="auth-pass" placeholder="admin" value="admin" class="w-full mt-1.5 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none"></div>
+        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-2.5 rounded-xl text-xs flex items-center gap-2 font-medium">
+          <i data-lucide="info" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+          <span>Tài khoản mới: <strong class="font-bold text-emerald-700">admin</strong> / Mật khẩu: <strong class="font-bold text-emerald-700">admin</strong></span>
+        </div>
         <p id="auth-error" class="text-xs text-rose-500 font-bold hidden bg-rose-50 p-2 rounded-lg text-center">Sai tài khoản hoặc mật khẩu!</p>
         <div id="auth-loading" class="hidden w-full flex flex-col items-center gap-2.5 my-3 bg-slate-50 border border-slate-100 p-3 rounded-2xl shadow-sm">
             <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden relative">
@@ -194,28 +198,38 @@
   <!-- ONBOARDING -->
   <div id="onboarding-screen" class="fixed inset-0 bg-slate-900/90 z-[550] hidden items-center justify-center backdrop-blur-md p-4 transition-opacity duration-300">
     <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md">
-      <h2 class="text-2xl font-black text-theme mb-2">Thông tin lớp học</h2>
-      <p class="text-sm text-slate-500 mb-6">Cập nhật thông tin cơ bản để hệ thống tạo Mã ID cho học sinh.</p>
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200 shadow-sm"><i data-lucide="sparkles" class="w-5 h-5 text-emerald-600"></i></div>
+        <div>
+          <h2 class="text-xl font-black text-slate-800">Khởi tạo Lớp học Mới</h2>
+          <p class="text-xs text-slate-400 font-bold">Bắt đầu thiết lập từ đầu</p>
+        </div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded-2xl text-xs mb-5 leading-relaxed font-medium">
+        🔔 <strong>Thông báo:</strong> Dữ liệu đã được làm sạch hoàn toàn. Thầy/Cô vui lòng điền thông tin lớp học dưới đây để bắt đầu tạo lại từ đầu.
+      </div>
       <div class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-xs font-bold text-slate-600">Họ tên GVCN</label>
-            <input type="text" id="ob-teacher" class="w-full mt-1 px-4 py-3 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: Phạm Minh Tuấn">
+            <input type="text" id="ob-teacher" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: Thầy Tuấn / Cô Hà">
           </div>
           <div>
             <label class="text-xs font-bold text-slate-600">Giới tính GVCN</label>
-            <select id="ob-gender" class="w-full mt-1 px-4 py-3 border border-slate-200 rounded-xl ring-theme outline-none bg-white cursor-pointer font-bold text-slate-700 text-sm">
-              <option value="Nam">Nam (Thầy)</option>
+            <select id="ob-gender" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none bg-white cursor-pointer font-bold text-slate-700 text-sm">
               <option value="Nữ">Nữ (Cô)</option>
+              <option value="Nam">Nam (Thầy)</option>
             </select>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div><label class="text-xs font-bold text-slate-600">Lớp</label><input type="text" id="ob-class" class="w-full mt-1 px-4 py-3 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: 12A17"></div>
-          <div><label class="text-xs font-bold text-slate-600">Năm học</label><input type="text" id="ob-year" class="w-full mt-1 px-4 py-3 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: 2026 - 2027"></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-xs font-bold text-slate-600">Lớp</label><input type="text" id="ob-class" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: 6A4"></div>
+          <div><label class="text-xs font-bold text-slate-600">Năm học</label><input type="text" id="ob-year" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" value="2026 - 2027"></div>
         </div>
-        <div><label class="text-xs font-bold text-slate-600">Khẩu hiệu</label><input type="text" id="ob-slogan" class="w-full mt-1 px-4 py-3 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: Chuyến Tàu Tuổi Trẻ"></div>
-        <button onclick="saveOnboarding()" class="w-full bg-theme-grad text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] transition mt-4">Lưu & Bắt đầu</button>
+        <div><label class="text-xs font-bold text-slate-600">Khẩu hiệu / Trường</label><input type="text" id="ob-slogan" class="w-full mt-1 px-3.5 py-2.5 border border-slate-200 rounded-xl ring-theme outline-none text-sm" placeholder="VD: THCS Nguyễn An Khương"></div>
+        <button onclick="saveOnboarding()" class="w-full bg-theme-grad text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] transition mt-3 flex items-center justify-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Lưu & Bắt đầu tạo lớp
+        </button>
       </div>
     </div>
   </div>
@@ -265,7 +279,7 @@
         <button onclick="logout()" class="text-white/50 hover:text-white bg-white/5 hover:bg-white/20 p-2.5 rounded-xl transition shrink-0" title="Đăng xuất"><i data-lucide="log-out" class="w-4 h-4"></i></button>
       </div>
       <div class="mt-2 text-[9px] text-white/35 font-normal italic leading-relaxed text-center border-t border-white/5 pt-1.5">
-         Copyright © bản quyền thuộc Cô Hà - GV KHTN THCS Nguyễn An Khương
+         Copyright © Hệ thống Quản lý Lớp học THCS
       </div>
     </div>
   </aside>
@@ -438,9 +452,9 @@
                 
                 <!-- Greeting and Description -->
                 <div class="space-y-1">
-                  <h2 class="text-xl md:text-2xl font-black text-slate-800"><span id="teacher-banner-greeting">Chào buổi học</span>, <span id="teacher-banner-name" class="text-theme-grad">Cô Hà</span>! 👋</h2>
-                  <p id="teacher-banner-sub" class="text-xs font-bold text-slate-400">Giáo viên chủ nhiệm lớp <span id="teacher-banner-sub-class" class="text-theme font-black">6A4</span> - THCS Nguyễn An Khương</p>
-                  <p id="teacher-banner-desc" class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed max-w-xl">Chúc Cô Hà và các em học sinh lớp <span id="teacher-banner-class" class="font-bold text-theme">6A4</span> một ngày học tập sôi nổi, tràn đầy hứng khởi và nhiều niềm vui!</p>
+                  <h2 class="text-xl md:text-2xl font-black text-slate-800"><span id="teacher-banner-greeting">Chào buổi học</span>, <span id="teacher-banner-name" class="text-theme-grad">Thầy/Cô</span>! 👋</h2>
+                  <p id="teacher-banner-sub" class="text-xs font-bold text-slate-400">Giáo viên chủ nhiệm lớp <span id="teacher-banner-sub-class" class="text-theme font-black">...</span></p>
+                  <p id="teacher-banner-desc" class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed max-w-xl">Chúc <span id="teacher-banner-sub-teacher">Thầy/Cô</span> và các em học sinh lớp <span id="teacher-banner-class" class="font-bold text-theme">...</span> một ngày học tập sôi nổi, tràn đầy hứng khởi và nhiều niềm vui!</p>
                 </div>
               </div>
               
@@ -911,7 +925,7 @@
                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                        <div>
                          <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5 text-indigo-500"></i> Họ tên GVCN</label>
-                         <input type="text" id="settings-teacher-name" placeholder="VD: Cô Hà" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                         <input type="text" id="settings-teacher-name" placeholder="VD: Thầy Tuấn / Cô Hà" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
                        </div>
                        <div>
                          <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5 text-indigo-500"></i> Giới tính</label>
@@ -1990,7 +2004,7 @@
         key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF3aWhmbGttYnV4ZXRlYnVib3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MDk5OTUsImV4cCI6MjEwMjQ4NTk5NX0.HcxdM6ifXniM66b0xVcf5pmtCZzbApEjQzIgzDhnVss'  
     };
 
-    const MOCK_ADMIN = { id: 'cohakhtn', pass: 'coha' };
+    const MOCK_ADMIN = { id: 'admin', pass: 'admin' };
     const THEMES = { 
         emerald: { c1: '#10b981', c2: '#14b8a6', s1: '#064e3b', s2: '#022c22' }, 
         violet: { c1: '#8b5cf6', c2: '#d946ef', s1: '#1e1b4b', s2: '#312e81' }, 
@@ -2157,17 +2171,6 @@
                     body: JSON.stringify({ id, data: payload, updated_at: new Date().toISOString() })
                 });
                 if (res.ok) {
-                    // Tự động đồng bộ song song giữa cohakhtn và thaytuan để 2 tên miền luôn tuyệt đối giống nhau
-                    const mirrorTarget = (id === 'cohakhtn') ? 'thaytuan' : (id === 'thaytuan' ? 'cohakhtn' : null);
-                    if (mirrorTarget) {
-                        const mirrorPayload = { ...payload };
-                        if (mirrorPayload.currentUser) mirrorPayload.currentUser = { ...mirrorPayload.currentUser, id: mirrorTarget };
-                        fetch(`${url}?on_conflict=id`, {
-                            method: 'POST',
-                            headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
-                            body: JSON.stringify({ id: mirrorTarget, data: mirrorPayload, updated_at: new Date().toISOString() })
-                        }).catch(() => {});
-                    }
                     return true;
                 }
                 console.warn(`PostgREST direct upsert returned ${res.status}, running fallback check/patch...`);
@@ -2308,7 +2311,7 @@
             return showModal('warning', 'Chưa kết nối', 'Vui lòng kết nối với Supabase trước khi lấy dữ liệu.');
         }
         
-        const targetId = (currentUser && currentUser.id) || 'cohakhtn';
+        const targetId = (currentUser && currentUser.id) || 'admin';
         showModal('info', 'Đang tìm dữ liệu...', `Đang kết nối Đám mây để tìm dữ liệu lớp học...`);
         updateCloudSyncStatus('syncing');
 
@@ -2345,7 +2348,7 @@
             }
 
             const cloudData = row.data;
-            const cloudUser = cloudData.currentUser || cloudData.user || { id: targetId, className: '6A4', teacherName: 'Cô Hà' };
+            const cloudUser = cloudData.currentUser || cloudData.user || { id: targetId, className: '', teacherName: '' };
             const cloudStudents = cloudData.students || [];
 
             closeModalUi('custom-modal', 'custom-modal-content');
@@ -2533,7 +2536,7 @@
             syncChannel.onmessage = (e) => {
                 if (e.data && e.data.type === 'DATA_UPDATED') {
                     console.log("Detected data change in another tab, updating state...");
-                    const currentId = (currentUser && currentUser.id) || 'cohakhtn';
+                    const currentId = (currentUser && currentUser.id) || 'admin';
                     const savedStudents = localStorage.getItem('students_' + currentId);
                     if (savedStudents) {
                         try {
@@ -2625,6 +2628,30 @@
         const obScreen = document.getElementById('onboarding-screen');
         let loaded = false;
 
+        // 1. Wipe out any legacy Cô Hà or Thầy Tuấn keys from LocalStorage
+        const legacyKeys = [
+            'user_covietha', 'user_cohakhtn', 'user_thaytuan',
+            'students_covietha', 'students_cohakhtn', 'students_thaytuan',
+            'seating_covietha', 'seating_cohakhtn', 'seating_thaytuan',
+            'timetables_covietha', 'timetables_cohakhtn', 'timetables_thaytuan',
+            'teacherTimetable_covietha', 'teacherTimetable_cohakhtn', 'teacherTimetable_thaytuan',
+            'attendance_covietha', 'attendance_cohakhtn', 'attendance_thaytuan',
+            'announcements_covietha', 'announcements_cohakhtn', 'announcements_thaytuan'
+        ];
+        legacyKeys.forEach(k => localStorage.removeItem(k));
+
+        let savedUserStr = localStorage.getItem('currentUser');
+        if (savedUserStr) {
+            try {
+                const u = JSON.parse(savedUserStr);
+                if (u && (u.id === 'cohakhtn' || u.id === 'covietha' || u.id === 'thaytuan')) {
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem('currentUserRole');
+                    savedUserStr = null;
+                }
+            } catch(e) {}
+        }
+
         // A. Parse URL search & hash parameters (Deep Linking)
         const urlParams = new URLSearchParams(window.location.search);
         let hashStr = window.location.hash || '';
@@ -2662,102 +2689,54 @@
             }
         }
 
-        // B. ALWAYS query Supabase Cloud directly for the latest active classroom (Zero Clicks)
-        if (!loaded && isSupabaseConnected) {
+        // B. Query Supabase Cloud if user session exists or target specified in URL
+        const targetUserId = paramTeacher || (savedUserStr ? JSON.parse(savedUserStr).id : null);
+        if (!loaded && isSupabaseConnected && targetUserId) {
             updateCloudSyncStatus('syncing');
             try {
-                const scanUrl = `${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data,updated_at&order=updated_at.desc&limit=5`;
-                const res = await fetch(scanUrl, {
-                    method: 'GET',
-                    headers: {
-                        'apikey': isSupabaseConnected.key,
-                        'Authorization': `Bearer ${isSupabaseConnected.key}`
+                const row = await callSupabaseRest('GET', targetUserId);
+                if (row && row.data) {
+                    const cloudData = row.data;
+                    lastCloudUpdatedAt = row.updated_at || new Date().toISOString();
+                    currentUser = cloudData.currentUser || cloudData.user || { id: targetUserId, role: 'teacher' };
+                    students = cloudData.students || [];
+                    seatingCharts = cloudData.seatingCharts || [];
+                    timetables = cloudData.timetables || [];
+                    teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                    attendanceData = cloudData.attendanceData || {};
+                    announcements = cloudData.announcements || [];
+
+                    if (paramStudent) {
+                        const st = students.find(s => String(s.code) === paramStudent || String(s.id) === paramStudent);
+                        if (st) {
+                            currentUserRole = 'student';
+                            currentStudent = st;
+                            currentTeacherId = row.id;
+                            localStorage.setItem('currentUserRole', 'student');
+                            localStorage.setItem('currentStudent', JSON.stringify(st));
+                            localStorage.setItem('currentTeacherId', currentTeacherId);
+                        }
+                    } else if (paramRole === 'student') {
+                        currentUserRole = 'student';
+                        localStorage.setItem('currentUserRole', 'student');
+                    } else {
+                        currentUserRole = 'teacher';
+                        currentStudent = null;
+                        localStorage.setItem('currentUserRole', 'teacher');
                     }
-                });
 
-                if (res.ok) {
-                    const rows = await res.json();
-                    if (rows && rows.length > 0) {
-                        // Priority 1: If specified by URL parameter
-                        let chosenRow = null;
-                        if (paramTeacher) {
-                            chosenRow = rows.find(r => r.id === paramTeacher && r.data && r.data.students && r.data.students.length > 0) || rows.find(r => r.id === paramTeacher);
-                        }
-                        // Priority 2: cohakhtn (target account)
-                        if (!chosenRow) {
-                            chosenRow = rows.find(r => r.id === 'cohakhtn' && r.data && r.data.students && r.data.students.length > 0) || rows.find(r => r.id === 'cohakhtn');
-                        }
-                        // Priority 3: any classroom that has students
-                        if (!chosenRow) {
-                            chosenRow = rows.find(r => r.data && r.data.students && r.data.students.length > 0);
-                        }
-                        // Priority 4: cohakhtn or first row
-                        if (!chosenRow) {
-                            chosenRow = rows.find(r => r.id === 'cohakhtn') || rows[0];
-                        }
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('user_' + currentUser.id, JSON.stringify(currentUser));
+                    localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
+                    localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
+                    localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
+                    localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
+                    localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
+                    localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
 
-                        if (chosenRow && chosenRow.data) {
-                            const cloudData = chosenRow.data;
-                            lastCloudUpdatedAt = chosenRow.updated_at || new Date().toISOString();
-
-                            currentUser = cloudData.currentUser || cloudData.user || {
-                                id: 'cohakhtn',
-                                pass: 'coha',
-                                teacherName: 'Cô Hà',
-                                gender: 'Nữ',
-                                className: '6A4',
-                                year: '2026 - 2027',
-                                slogan: 'THCS Nguyễn An Khương - KHTN',
-                                theme: 'emerald',
-                                role: 'teacher'
-                            };
-
-                            // Ensure default values are clean
-                            if (!currentUser.teacherName || currentUser.teacherName === '...') currentUser.teacherName = 'Cô Hà';
-                            if (!currentUser.className) currentUser.className = '6A4';
-                            if (!currentUser.slogan) currentUser.slogan = 'THCS Nguyễn An Khương - KHTN';
-
-                            students = cloudData.students || [];
-                            seatingCharts = cloudData.seatingCharts || [];
-                            timetables = cloudData.timetables || [];
-                            teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
-                            attendanceData = cloudData.attendanceData || {};
-                            announcements = cloudData.announcements || [];
-
-                            if (paramStudent) {
-                                const st = students.find(s => String(s.code) === paramStudent || String(s.id) === paramStudent);
-                                if (st) {
-                                    currentUserRole = 'student';
-                                    currentStudent = st;
-                                    currentTeacherId = chosenRow.id;
-                                    localStorage.setItem('currentUserRole', 'student');
-                                    localStorage.setItem('currentStudent', JSON.stringify(st));
-                                    localStorage.setItem('currentTeacherId', currentTeacherId);
-                                }
-                            } else if (paramRole === 'student') {
-                                currentUserRole = 'student';
-                                localStorage.setItem('currentUserRole', 'student');
-                            } else {
-                                currentUserRole = 'teacher';
-                                currentStudent = null;
-                                localStorage.setItem('currentUserRole', 'teacher');
-                            }
-
-                            // Save to local cache
-                            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                            localStorage.setItem('user_' + currentUser.id, JSON.stringify(currentUser));
-                            localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
-                            localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
-                            localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
-                            localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
-                            localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
-                            localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
-
-                            loaded = true;
-                            updateCloudSyncStatus('synced');
-                            console.log(`Auto-synced class "${currentUser.className || ''}" with ${students.length} students from Supabase without any clicks.`);
-                        }
-                    }
+                    loaded = true;
+                    updateCloudSyncStatus('synced');
+                    console.log(`Loaded class data for user "${targetUserId}" from Supabase.`);
                 }
             } catch (e) {
                 console.warn("Supabase fetch failed in checkAuth:", e);
@@ -2766,50 +2745,58 @@
         }
 
         // C. Fallback to LocalStorage if cloud was offline
-        if (!loaded) {
-            const savedUserStr = localStorage.getItem('currentUser');
-            if (savedUserStr) {
-                try {
-                    currentUser = JSON.parse(savedUserStr);
-                    const savedSt = localStorage.getItem('students_' + currentUser.id);
-                    if (savedSt) students = JSON.parse(savedSt);
-                    const savedCharts = localStorage.getItem('seating_' + currentUser.id);
-                    if (savedCharts) seatingCharts = JSON.parse(savedCharts);
-                    const savedTkb = localStorage.getItem('timetables_' + currentUser.id);
-                    if (savedTkb) timetables = JSON.parse(savedTkb);
-                    const savedTeacherTkb = localStorage.getItem('teacherTimetable_' + currentUser.id);
-                    if (savedTeacherTkb) teacherTimetable = JSON.parse(savedTeacherTkb);
-                    const savedAtt = localStorage.getItem('attendance_' + currentUser.id);
-                    if (savedAtt) attendanceData = JSON.parse(savedAtt);
-                    const savedAnn = localStorage.getItem('announcements_' + currentUser.id);
-                    if (savedAnn) announcements = JSON.parse(savedAnn);
-                    loaded = true;
-                } catch(e){}
+        if (!loaded && savedUserStr) {
+            try {
+                currentUser = JSON.parse(savedUserStr);
+                const savedSt = localStorage.getItem('students_' + currentUser.id);
+                if (savedSt) students = JSON.parse(savedSt);
+                const savedCharts = localStorage.getItem('seating_' + currentUser.id);
+                if (savedCharts) seatingCharts = JSON.parse(savedCharts);
+                const savedTkb = localStorage.getItem('timetables_' + currentUser.id);
+                if (savedTkb) timetables = JSON.parse(savedTkb);
+                const savedTeacherTkb = localStorage.getItem('teacherTimetable_' + currentUser.id);
+                if (savedTeacherTkb) teacherTimetable = JSON.parse(savedTeacherTkb);
+                const savedAtt = localStorage.getItem('attendance_' + currentUser.id);
+                if (savedAtt) attendanceData = JSON.parse(savedAtt);
+                const savedAnn = localStorage.getItem('announcements_' + currentUser.id);
+                if (savedAnn) announcements = JSON.parse(savedAnn);
+                loaded = true;
+            } catch(e){}
+        }
+
+        // D. If not logged in: display login auth screen
+        if (!loaded || !currentUser) {
+            authScreen.classList.remove('hidden');
+            authScreen.classList.add('flex');
+            if (obScreen) {
+                obScreen.classList.add('hidden');
+                obScreen.classList.remove('flex');
             }
+            const authIdInput = document.getElementById('auth-id');
+            const authPassInput = document.getElementById('auth-pass');
+            if (authIdInput) authIdInput.value = 'admin';
+            if (authPassInput) authPassInput.value = 'admin';
+            isInitialLoadingComplete = true;
+            return;
         }
 
-        // D. Fallback default account for Cô Hà if everything else is clean
-        if (!loaded) {
-            currentUser = {
-                id: 'cohakhtn',
-                pass: 'coha',
-                teacherName: 'Cô Hà',
-                gender: 'Nữ',
-                className: '6A4',
-                year: '2026 - 2027',
-                slogan: 'THCS Nguyễn An Khương - KHTN',
-                theme: 'emerald',
-                role: 'teacher'
-            };
-            loaded = true;
-        }
-
-        // Rendering: Hide both auth and onboarding modals, render classroom directly without user needing to click anything!
+        // E. Authenticated user: Hide auth modal
         authScreen.classList.add('hidden');
         authScreen.classList.remove('flex');
-        if (obScreen) {
-            obScreen.classList.add('hidden');
-            obScreen.classList.remove('flex');
+
+        // If the user's class has not been configured yet, show the Onboarding screen
+        if (!currentUser.className) {
+            if (obScreen) {
+                obScreen.classList.remove('hidden');
+                obScreen.classList.add('flex');
+            }
+            isInitialLoadingComplete = true;
+            return;
+        } else {
+            if (obScreen) {
+                obScreen.classList.add('hidden');
+                obScreen.classList.remove('flex');
+            }
         }
 
         restoreRoleState();
@@ -2843,7 +2830,7 @@
     async function checkAndSyncFromCloud() {
         if (!isSupabaseConnected || !isInitialLoadingComplete || !currentUser) return;
         try {
-            const targetId = currentUser.id || 'cohakhtn';
+            const targetId = currentUser.id || 'admin';
             const url = `${isSupabaseConnected.url}/rest/v1/classroom_data?id=eq.${targetId}&select=id,updated_at,data`;
             const res = await fetch(url, {
                 method: 'GET',
@@ -2914,10 +2901,10 @@
                     const row = await callSupabaseRest('GET', id);
                     if (row && row.data && row.data.currentUser) {
                         const cloudUser = row.data.currentUser;
-                        const cloudPass = cloudUser.pass || 'vietha';
+                        const cloudPass = cloudUser.pass || 'admin';
                         if (cloudPass === pass) {
                             if (!cloudUser.pass) {
-                                cloudUser.pass = 'vietha';
+                                cloudUser.pass = 'admin';
                             }
                             currentUser = cloudUser;
                             students = row.data.students || [];
@@ -3030,93 +3017,40 @@
             }
 
             // 3. Local Fallback Auth for Teacher
-            if (id === 'cohakhtn' || id === 'covietha') {
-                let fetchedUser = null;
-                let fetchedData = null;
-                
-                try {
-                    const res = await fetch('/api/data?t=' + Date.now());
-                    if (res.ok) {
-                        const backendData = await res.json();
-                        const userObj = backendData.currentUser || backendData.user;
-                        if (userObj && (userObj.id === 'cohakhtn' || userObj.id === 'covietha')) {
-                            fetchedUser = userObj;
-                            fetchedData = backendData;
-                        }
-                    }
-                } catch(e) {
-                    console.log("Failed to fetch from server on login:", e);
-                }
-                
-                if (!fetchedUser) {
+            // 3. Fallback Auth for Admin / Teacher
+            if (id === 'admin') {
+                let expectedPass = 'admin';
+                const localSavedStr = localStorage.getItem('user_admin');
+                if (localSavedStr) {
                     try {
-                        const res = await fetch('./data.json');
-                        if (res.ok) {
-                            const backendData = await res.json();
-                            const userObj = backendData.currentUser || backendData.user;
-                            if (userObj && (userObj.id === 'cohakhtn' || userObj.id === 'covietha')) {
-                                fetchedUser = userObj;
-                                fetchedData = backendData;
-                            }
-                        }
-                    } catch(e) {
-                        console.log("Failed to fetch from static data.json on login:", e);
-                    }
-                }
-                
-                let expectedPass = 'coha';
-                if (fetchedUser && fetchedUser.pass) {
-                    expectedPass = fetchedUser.pass;
-                } else {
-                    const localSavedStr = localStorage.getItem('user_cohakhtn') || localStorage.getItem('user_covietha');
-                    if (localSavedStr) {
                         const localUser = JSON.parse(localSavedStr);
                         if (localUser.pass) expectedPass = localUser.pass;
-                    }
+                    } catch(e){}
                 }
                 
-                if (pass === expectedPass || (id === 'cohakhtn' && pass === 'coha') || (id === 'covietha' && pass === 'vietha')) {
-                    if (fetchedUser) {
-                        currentUser = fetchedUser;
-                        currentUser.id = 'cohakhtn';
-                        currentUser.pass = 'coha';
-                        students = fetchedData.students || [];
-                        seatingCharts = fetchedData.seatingCharts || [];
-                        timetables = fetchedData.timetables || [];
-                        teacherTimetable = fetchedData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên - Cô Hà', data: {} };
-                        attendanceData = fetchedData.attendanceData || {};
-                        announcements = fetchedData.announcements || [];
-                        
-                        localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
-                        localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
-                        localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
-                        localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
-                        localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
-                        localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
-                    } else {
-                        let adminData = localStorage.getItem('user_cohakhtn');
-                        if(!adminData) {
-                            adminData = {
-                                id: 'cohakhtn',
-                                pass: 'coha',
-                                teacherName: 'Cô Hà',
-                                gender: 'Nữ',
-                                className: '6A4',
-                                year: '2026 - 2027',
-                                slogan: 'THCS Nguyễn An Khương - KHTN',
-                                theme: 'emerald',
-                                role: 'teacher'
-                            };
-                            localStorage.setItem('user_cohakhtn', JSON.stringify(adminData));
-                        } else adminData = JSON.parse(adminData);
-                        currentUser = adminData;
+                if (pass === expectedPass) {
+                    let adminData = localStorage.getItem('user_admin');
+                    if (adminData) {
+                        try { adminData = JSON.parse(adminData); } catch(e) { adminData = null; }
                     }
-                    
+                    if (!adminData) {
+                        adminData = {
+                            id: 'admin',
+                            pass: 'admin',
+                            teacherName: '',
+                            gender: 'Nữ',
+                            className: '',
+                            year: '2026 - 2027',
+                            slogan: '',
+                            theme: 'emerald',
+                            role: 'teacher'
+                        };
+                    }
+                    currentUser = adminData;
                     currentUserRole = 'teacher';
                     currentStudent = null;
                     localStorage.setItem('currentUserRole', 'teacher');
-                    localStorage.setItem('user_cohakhtn', JSON.stringify(currentUser));
-                    localStorage.removeItem('user_covietha');
+                    localStorage.setItem('user_admin', JSON.stringify(currentUser));
                     loginSuccess(currentUser);
                     return;
                 } else {
@@ -3226,7 +3160,26 @@
             loginSuccess(newUser);
         }
     }
-    function loginSuccess(user) { currentUser = user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); const authScreen = document.getElementById('auth-screen'); authScreen.classList.add('hidden'); authScreen.classList.remove('flex'); if (!currentUser.className) { const obScreen = document.getElementById('onboarding-screen'); obScreen.classList.remove('hidden'); obScreen.classList.add('flex'); } else loadUserData(); }
+    function loginSuccess(user) { 
+        currentUser = user; 
+        localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+        const authScreen = document.getElementById('auth-screen'); 
+        authScreen.classList.add('hidden'); 
+        authScreen.classList.remove('flex'); 
+        if (!currentUser.className) { 
+            const obScreen = document.getElementById('onboarding-screen'); 
+            obScreen.classList.remove('hidden'); 
+            obScreen.classList.add('flex'); 
+            const obTeacher = document.getElementById('ob-teacher');
+            const obClass = document.getElementById('ob-class');
+            const obSlogan = document.getElementById('ob-slogan');
+            if (obTeacher) obTeacher.value = currentUser.teacherName || '';
+            if (obClass) obClass.value = currentUser.className || '';
+            if (obSlogan) obSlogan.value = currentUser.slogan || '';
+        } else {
+            loadUserData(); 
+        }
+    }
     function logout() { 
         // 1. Create a full-screen overlay for the fade-out/dimming transition
         const overlay = document.createElement('div');
@@ -3271,16 +3224,30 @@
         }, 900);
     }
     function saveOnboarding() { 
-        currentUser.teacherName = document.getElementById('ob-teacher').value || 'Thầy/Cô'; 
-        currentUser.gender = document.getElementById('ob-gender').value || 'Nam'; 
-        currentUser.className = document.getElementById('ob-class').value || '12A1'; 
-        currentUser.year = document.getElementById('ob-year').value || '2026'; 
-        currentUser.slogan = document.getElementById('ob-slogan').value || 'Lớp học yêu thương'; 
+        currentUser.teacherName = document.getElementById('ob-teacher').value.trim() || 'Giáo viên'; 
+        currentUser.gender = document.getElementById('ob-gender').value || 'Nữ'; 
+        currentUser.className = document.getElementById('ob-class').value.trim() || 'Lớp Mới'; 
+        currentUser.year = document.getElementById('ob-year').value.trim() || '2026 - 2027'; 
+        currentUser.slogan = document.getElementById('ob-slogan').value.trim() || ''; 
         currentUser.theme = 'emerald'; 
         currentUser.cover = DEFAULT_COVERS[Math.floor(Math.random() * DEFAULT_COVERS.length)]; 
+
+        // Reset all data structures cleanly for the new class
+        students = [];
+        seatingCharts = [{ id: 'chart_default', name: 'Sơ đồ lớp ' + currentUser.className, layout: {} }];
+        timetables = [{ id: 'tkb_' + currentUser.className.toLowerCase().replace(/\s+/g, '_'), name: 'TKB ' + currentUser.className, data: {} }];
+        teacherTimetable = { id: 'teacher_tkb', name: 'TKB Giáo viên - ' + currentUser.teacherName, data: {} };
+        attendanceData = {};
+        announcements = [];
+
         if(saveUserToStorage()) { 
-            document.getElementById('onboarding-screen').classList.replace('flex', 'hidden'); 
+            const obScreen = document.getElementById('onboarding-screen');
+            if (obScreen) {
+                obScreen.classList.remove('flex');
+                obScreen.classList.add('hidden');
+            }
             loadUserData(); 
+            showModal('success', 'Khởi tạo thành công!', `Chào mừng ${currentUser.gender === 'Nam' ? 'Thầy' : 'Cô'} ${currentUser.teacherName}! Lớp học ${currentUser.className} đã được khởi tạo thành công.\n\nBây giờ Thầy/Cô hãy vào mục "Danh sách học sinh" để tải file mẫu hoặc tải lên file Excel danh sách học sinh của lớp.`);
         } 
     }
     function saveUserToStorage() { try { saveAppData(); return true; } catch (e) { showModal('error', 'Lỗi bộ nhớ', 'Bộ nhớ đầy! Vui lòng tải ảnh nhẹ hơn.'); return false; } }
@@ -3568,26 +3535,26 @@
 
             // Sync settings & modal input values
             const stName = document.getElementById('settings-teacher-name');
-            if (stName) stName.value = currentUser.teacherName || 'Cô Hà';
+            if (stName) stName.value = currentUser.teacherName || '';
             const stGender = document.getElementById('settings-teacher-gender');
             if (stGender) stGender.value = currentUser.gender || 'Nữ';
             const stClass = document.getElementById('settings-class-name');
-            if (stClass) stClass.value = currentUser.className || '6A4';
+            if (stClass) stClass.value = currentUser.className || '';
             const stYear = document.getElementById('settings-year');
             if (stYear) stYear.value = currentUser.year || '2026 - 2027';
             const stSlogan = document.getElementById('settings-slogan');
-            if (stSlogan) stSlogan.value = currentUser.slogan || 'THCS Nguyễn An Khương - KHTN';
+            if (stSlogan) stSlogan.value = currentUser.slogan || '';
 
             const tInput = document.getElementById('set-teacher');
-            if (tInput) tInput.value = currentUser.teacherName || 'Cô Hà';
+            if (tInput) tInput.value = currentUser.teacherName || '';
             const gInput = document.getElementById('set-gender');
             if (gInput) gInput.value = currentUser.gender || 'Nữ';
             const cInput = document.getElementById('set-class');
-            if (cInput) cInput.value = currentUser.className || '6A4';
+            if (cInput) cInput.value = currentUser.className || '';
             const yInput = document.getElementById('set-year');
             if (yInput) yInput.value = currentUser.year || '2026 - 2027';
             const sInput = document.getElementById('set-slogan');
-            if (sInput) sInput.value = currentUser.slogan || 'THCS Nguyễn An Khương - KHTN';
+            if (sInput) sInput.value = currentUser.slogan || '';
         }
         
         configureSidebarForRole();
@@ -3972,11 +3939,11 @@
     }
     
     function openTeacherInfoModal() {
-        document.getElementById('set-teacher').value = currentUser.teacherName || 'Cô Hà'; 
+        document.getElementById('set-teacher').value = currentUser.teacherName || ''; 
         document.getElementById('set-gender').value = currentUser.gender || 'Nữ'; 
-        document.getElementById('set-class').value = currentUser.className || '6A4'; 
+        document.getElementById('set-class').value = currentUser.className || ''; 
         document.getElementById('set-year').value = currentUser.year || '2026 - 2027'; 
-        document.getElementById('set-slogan').value = currentUser.slogan || 'THCS Nguyễn An Khương - KHTN'; 
+        document.getElementById('set-slogan').value = currentUser.slogan || ''; 
         openModalUi('teacher-info-modal', 'teacher-info-content');
         lucide.createIcons();
     }
@@ -5568,17 +5535,18 @@
     }
     function resetWheel() { hiddenWheelIds = []; renderStage(); }
 
-    // --- Quản Lý Hệ Thống ---
     function cleanAndResetAllClassData() {
-        showModal('confirm', 'Làm sạch toàn bộ dữ liệu', 'Bạn có chắc chắn muốn LÀM SẠCH toàn bộ danh sách học sinh, điểm danh, sơ đồ chỗ ngồi và thông báo để bắt đầu danh sách mới cho lớp 6A4 không?\n(Thông tin Cô Hà - Lớp 6A4 vẫn được giữ nguyên)', () => {
+        const cName = (currentUser && currentUser.className) || 'lớp học';
+        const tName = (currentUser && currentUser.teacherName) || 'Giáo viên';
+        showModal('confirm', 'Làm sạch toàn bộ dữ liệu', `Bạn có chắc chắn muốn LÀM SẠCH toàn bộ danh sách học sinh, điểm danh, sơ đồ chỗ ngồi và thông báo để bắt đầu danh sách mới cho lớp ${cName} không?\n(Thông tin ${tName} - ${cName} vẫn được giữ nguyên)`, () => {
             students = [];
             attendanceData = {};
             announcements = [];
             seatingCharts = [];
             currentChartId = null;
             selectedSeatId = null;
-            timetables = [{ id: 'tkb_6a4', name: 'TKB Lớp 6A4', data: {} }];
-            teacherTimetable = { id: 'teacher_tkb', name: 'TKB Giáo viên - Cô Hà', data: {} };
+            timetables = [{ id: 'tkb_' + (currentUser.className || 'lop').toLowerCase().replace(/\s+/g, '_'), name: 'TKB ' + (currentUser.className || 'Lớp'), data: {} }];
+            teacherTimetable = { id: 'teacher_tkb', name: 'TKB Giáo viên - ' + (currentUser.teacherName || 'GV'), data: {} };
             
             saveAppData();
             updateUI();
@@ -5587,7 +5555,7 @@
             initTimetables();
             initSeatingCharts();
             
-            showModal('success', 'Đã làm sạch dữ liệu', 'Hệ thống đã được làm sạch hoàn toàn về trạng thái ban đầu của lớp 6A4 Cô Hà và đồng bộ lên Đám mây!');
+            showModal('success', 'Đã làm sạch dữ liệu', `Hệ thống đã được làm sạch hoàn toàn về trạng thái ban đầu của lớp ${cName} và đồng bộ lên Đám mây! Thầy/Cô có thể tải lên danh sách học sinh mới ngay bây giờ.`);
         });
     }
 
@@ -5821,7 +5789,7 @@
     function checkAdminSection() {
         const adminCard = document.getElementById('admin-account-manager-card');
         const supabaseCard = document.getElementById('supabase-config-card');
-        const isAdmin = (currentUser && (currentUser.id === 'cohakhtn' || currentUser.id === 'covietha' || currentUser.role === 'teacher'));
+        const isAdmin = (currentUser && (currentUser.id === 'admin' || currentUser.role === 'teacher'));
         
         if (adminCard) {
             if (isAdmin) {
