@@ -305,6 +305,11 @@
           <div class="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-slate-200 group-hover:bg-slate-50"><i data-lucide="camera" class="w-3 h-3 text-slate-500"></i></div>
           <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
         </div>
+        <!-- Quick Logout Button on Header -->
+        <button onclick="logout()" class="flex items-center gap-1.5 text-xs bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-3 py-2 rounded-full font-bold transition shadow-sm border border-slate-200 shrink-0" title="Đăng xuất khỏi hệ thống">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Đăng xuất</span>
+        </button>
       </div>
     </header>
 
@@ -2689,15 +2694,13 @@
             }
         }
 
-        // B. Query Supabase Cloud: Auto-sync on startup across any device / browser / incognito
-        if (!loaded && isSupabaseConnected) {
+        // B. Query Supabase Cloud if user session exists or target specified in URL
+        const targetUserId = paramTeacher || (savedUserStr ? JSON.parse(savedUserStr).id : null);
+        if (!loaded && isSupabaseConnected && targetUserId) {
             updateCloudSyncStatus('syncing');
             try {
-                let targetUserId = paramTeacher || (savedUserStr ? JSON.parse(savedUserStr).id : 'admin');
                 let row = await callSupabaseRest('GET', targetUserId);
-                
-                // If not found with targetUserId, query latest active class from cloud
-                if (!row) {
+                if (!row && targetUserId === 'admin') {
                     const latestRes = await fetch(`${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data,updated_at&order=updated_at.desc&limit=1`, {
                         method: 'GET',
                         headers: {
@@ -3232,47 +3235,73 @@
         }
     }
     function logout() { 
-        // 1. Create a full-screen overlay for the fade-out/dimming transition
+        try {
+            // 1. Clear session credentials from storage
+            localStorage.removeItem('currentUser'); 
+            localStorage.removeItem('currentUserRole'); 
+            localStorage.removeItem('currentStudent'); 
+            localStorage.removeItem('currentTeacherId'); 
+            sessionStorage.clear();
+        } catch(e) {
+            console.warn("Storage clear error on logout:", e);
+        }
+
+        // 2. Clear state in-memory
+        currentUser = null;
+        currentUserRole = 'guest';
+        currentStudent = null;
+        currentTeacherId = null;
+        students = [];
+        seatingCharts = [];
+        timetables = [];
+        attendanceData = {};
+        announcements = [];
+        isInitialLoadingComplete = false;
+
+        // 3. Clear URL parameters if any (deep links like ?teacher=... or ?student=...)
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // 4. Create full-screen overlay for smooth logout transition
         const overlay = document.createElement('div');
+        overlay.id = 'logout-screen-overlay';
         overlay.style.position = 'fixed';
         overlay.style.inset = '0';
         overlay.style.backgroundColor = 'rgba(15, 23, 42, 0)';
         overlay.style.backdropFilter = 'blur(0px)';
-        overlay.style.transition = 'all 0.8s ease-in-out';
-        overlay.style.zIndex = '9999';
+        overlay.style.transition = 'all 0.4s ease-in-out';
+        overlay.style.zIndex = '99999';
         overlay.style.display = 'flex';
         overlay.style.alignItems = 'center';
         overlay.style.justifyContent = 'center';
         
         overlay.innerHTML = `
-            <div style="transform: scale(0.8); opacity: 0; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);" id="logout-transition-content" class="flex flex-col items-center gap-4 text-white">
+            <div style="transform: scale(0.85); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);" id="logout-transition-content" class="flex flex-col items-center gap-4 text-white">
                 <div class="w-16 h-16 bg-white/10 rounded-2xl border border-white/20 flex items-center justify-center shadow-lg"><i data-lucide="log-out" class="w-8 h-8 text-white"></i></div>
-                <span class="text-[10px] font-black uppercase tracking-widest text-white/50">Đang đăng xuất...</span>
+                <span class="text-xs font-black uppercase tracking-widest text-white/70">Đang đăng xuất...</span>
             </div>
         `;
         
         document.body.appendChild(overlay);
-        lucide.createIcons();
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+            lucide.createIcons();
+        }
         
-        // 2. Trigger the animations after layout render
         setTimeout(() => {
-            overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
-            overlay.style.backdropFilter = 'blur(10px)';
+            overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+            overlay.style.backdropFilter = 'blur(8px)';
             const content = document.getElementById('logout-transition-content');
             if (content) {
                 content.style.transform = 'scale(1)';
                 content.style.opacity = '1';
             }
-        }, 50);
+        }, 30);
         
-        // 3. Clear credentials and reload page after the animation finishes
+        // 5. Navigate cleanly to root path without query parameters or hash after transition
         setTimeout(() => {
-            localStorage.removeItem('currentUser'); 
-            localStorage.removeItem('currentUserRole'); 
-            localStorage.removeItem('currentStudent'); 
-            localStorage.removeItem('currentTeacherId'); 
-            location.reload(); 
-        }, 900);
+            window.location.href = window.location.pathname;
+        }, 500);
     }
     function saveOnboarding() { 
         currentUser.teacherName = document.getElementById('ob-teacher').value.trim() || 'Giáo viên'; 
