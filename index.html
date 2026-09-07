@@ -188,8 +188,40 @@
       </div>
       <div class="mt-4 text-center text-sm"><span class="text-slate-500" id="auth-toggle-text">Chưa có tài khoản?</span> <button onclick="toggleAuthMode()" class="text-theme font-bold hover:underline" id="auth-toggle-btn">Đăng ký ngay</button></div>
       <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
+        <div class="flex items-center justify-between text-xs px-1">
+          <div id="auth-cloud-status-badge" class="flex items-center gap-1.5 font-bold text-slate-400 text-[11px]">
+            <span class="w-2 h-2 rounded-full bg-slate-300"></span> Chưa kết nối Đám mây
+          </div>
+          <button type="button" onclick="toggleAuthCloudConfig()" class="text-theme font-bold text-[11px] hover:underline flex items-center gap-1">
+            <i data-lucide="settings" class="w-3 h-3"></i> Cấu hình Đám mây
+          </button>
+        </div>
+
+        <!-- Khung nhập Supabase ngay tại màn hình đăng nhập (cho trình duyệt mới) -->
+        <div id="auth-cloud-config-box" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2.5 text-left transition-all">
+          <div>
+            <label class="text-[10px] font-bold text-slate-600 uppercase">Supabase URL</label>
+            <input type="text" id="auth-input-supabase-url" placeholder="https://xyz.supabase.co" class="w-full mt-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none ring-theme">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-600 uppercase">Supabase Anon Key</label>
+            <input type="password" id="auth-input-supabase-key" placeholder="anon key..." class="w-full mt-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none ring-theme">
+          </div>
+          <div class="flex gap-2 pt-1">
+            <button type="button" onclick="saveAuthCloudConfig()" class="flex-1 bg-theme-grad text-white py-2 rounded-xl font-bold text-xs shadow-sm hover:scale-[1.02] transition flex items-center justify-center gap-1">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i> Lưu & Kết nối
+            </button>
+            <button type="button" onclick="toggleAuthCloudConfig()" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs hover:bg-slate-300 transition">
+              Đóng
+            </button>
+          </div>
+        </div>
+
         <button type="button" onclick="manualCloudPull()" class="w-full bg-emerald-50 text-emerald-700 border border-emerald-200 py-2.5 rounded-xl font-bold hover:bg-emerald-100 transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
           <i data-lucide="cloud-download" class="w-4 h-4 text-emerald-600"></i> Tải nhanh dữ liệu từ Đám mây
+        </button>
+        <button type="button" id="btn-copy-sync-link-auth" onclick="copySyncLink()" class="hidden w-full bg-sky-50 text-sky-700 border border-sky-200 py-2 rounded-xl font-bold hover:bg-sky-100 transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+          <i data-lucide="share-2" class="w-3.5 h-3.5 text-sky-600"></i> Sao chép Link đồng bộ mọi trình duyệt
         </button>
       </div>
     </div>
@@ -993,6 +1025,9 @@
                   <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-sky-200/60">
                     <button onclick="manualCloudPush()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Đẩy toàn bộ dữ liệu từ máy này lên Đám mây để máy khác cùng thấy"><i data-lucide="upload-cloud" class="w-4 h-4"></i> Đẩy lên Mây (Push)</button>
                     <button onclick="manualCloudPull()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2.5 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Kéo dữ liệu mới nhất từ Đám mây về máy này"><i data-lucide="download-cloud" class="w-4 h-4"></i> Kéo về máy (Pull)</button>
+                  </div>
+                  <div class="mt-2.5">
+                    <button onclick="copySyncLink()" class="w-full bg-sky-600 hover:bg-sky-700 text-white px-3 py-2.5 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Sao chép đường link để mở trên trình duyệt khác tự động kết nối đám mây"><i data-lucide="share-2" class="w-4 h-4"></i> Sao chép Link đồng bộ mọi thiết bị</button>
                   </div>
                 </div>
               </div>
@@ -2007,8 +2042,14 @@
     // Tự động làm sạch toàn bộ dữ liệu LocalStorage của trình duyệt để đảm bảo website mới 100% không vướng dữ liệu cũ
     const CLEAN_APP_RESET_FLAG = 'qllh_clean_reset_fresh_start_2026';
     if (localStorage.getItem('qllh_app_reset_flag') !== CLEAN_APP_RESET_FLAG) {
+        const curUrl = localStorage.getItem('supabase_url');
+        const curKey = localStorage.getItem('supabase_key');
         localStorage.clear();
         sessionStorage.clear();
+        if (curUrl && curKey) {
+            localStorage.setItem('supabase_url', curUrl);
+            localStorage.setItem('supabase_key', curKey);
+        }
         localStorage.setItem('qllh_app_reset_flag', CLEAN_APP_RESET_FLAG);
     }
 
@@ -2076,6 +2117,30 @@
     window.onload = () => { lucide.createIcons(); initSupabase(); checkAuth(); renderEmptySeatingGrid(); };
 
     function initSupabase() {
+        // Tự động nhận diện cấu hình đám mây từ URL khi mở qua Link Đồng Bộ trên trình duyệt mới
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            let hashStr = window.location.hash || '';
+            if (hashStr.startsWith('#')) hashStr = hashStr.slice(1);
+            const hashParams = new URLSearchParams(hashStr);
+
+            const qUrl = urlParams.get('cloud_url') || urlParams.get('supabase_url') || hashParams.get('cloud_url') || hashParams.get('supabase_url');
+            const qKey = urlParams.get('cloud_key') || urlParams.get('supabase_key') || hashParams.get('cloud_key') || hashParams.get('supabase_key');
+
+            if (qUrl && qKey) {
+                let cleanUrl = decodeURIComponent(qUrl);
+                if (cleanUrl.endsWith('/')) cleanUrl = cleanUrl.slice(0, -1);
+                if (cleanUrl.includes('/rest/v1')) cleanUrl = cleanUrl.replace('/rest/v1', '');
+                localStorage.setItem('supabase_url', cleanUrl);
+                localStorage.setItem('supabase_key', decodeURIComponent(qKey));
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        } catch(e) {
+            console.warn("Could not parse cloud params from URL:", e);
+        }
+
         let url = localStorage.getItem('supabase_url') || SUPABASE_CONFIG.url;
         const key = localStorage.getItem('supabase_key') || SUPABASE_CONFIG.key;
         
@@ -2087,9 +2152,13 @@
         
         const urlInput = document.getElementById('set-supabase-url');
         const keyInput = document.getElementById('set-supabase-key');
-        
         if (urlInput) urlInput.value = url || '';
         if (keyInput) keyInput.value = key || '';
+
+        const authUrlInput = document.getElementById('auth-input-supabase-url');
+        const authKeyInput = document.getElementById('auth-input-supabase-key');
+        if (authUrlInput) authUrlInput.value = url || '';
+        if (authKeyInput) authKeyInput.value = key || '';
         
         if (url && key) {
             isSupabaseConnected = { url, key };
@@ -2111,6 +2180,18 @@
                 statusEl.className = "text-[10px] md:text-xs font-bold text-slate-400 mt-1.5 flex items-center gap-1.5";
             }
         }
+        const authBadge = document.getElementById('auth-cloud-status-badge');
+        if (authBadge) {
+            if (connected) {
+                authBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> <span class="text-emerald-600 font-bold">Đám mây đã kết nối</span>`;
+            } else {
+                authBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span> <span class="text-amber-600 font-bold">Chưa kết nối Đám mây</span>`;
+            }
+        }
+        const copyBtnAuth = document.getElementById('btn-copy-sync-link-auth');
+        if (copyBtnAuth) {
+            copyBtnAuth.classList.toggle('hidden', !connected);
+        }
         const connectBtn = document.getElementById('btn-supabase-connect');
         if (connectBtn) {
             if (connected) {
@@ -2122,6 +2203,68 @@
             }
             lucide.createIcons();
         }
+    }
+
+    function toggleAuthCloudConfig() {
+        const box = document.getElementById('auth-cloud-config-box');
+        if (box) {
+            box.classList.toggle('hidden');
+            if (!box.classList.contains('hidden')) {
+                const u = document.getElementById('auth-input-supabase-url');
+                if (u) u.focus();
+            }
+        }
+    }
+
+    async function saveAuthCloudConfig() {
+        let url = document.getElementById('auth-input-supabase-url').value.trim();
+        const key = document.getElementById('auth-input-supabase-key').value.trim();
+        if (!url || !key) {
+            return showModal('warning', 'Thiếu thông tin', 'Vui lòng nhập đầy đủ Supabase URL và Anon Key!');
+        }
+        if (url.endsWith('/')) url = url.slice(0, -1);
+        if (url.includes('/rest/v1')) url = url.replace('/rest/v1', '');
+
+        try {
+            const testRes = await fetch(`${url}/rest/v1/classroom_data?limit=1`, {
+                method: 'GET',
+                headers: {
+                    'apikey': key,
+                    'Authorization': `Bearer ${key}`
+                }
+            });
+            if (!testRes.ok) {
+                throw new Error(`Mã lỗi HTTP: ${testRes.status}`);
+            }
+            localStorage.setItem('supabase_url', url);
+            localStorage.setItem('supabase_key', key);
+            isSupabaseConnected = { url, key };
+            updateSupabaseStatus(true, "Đã kết nối đám mây");
+            const setUrl = document.getElementById('set-supabase-url');
+            const setKey = document.getElementById('set-supabase-key');
+            if (setUrl) setUrl.value = url;
+            if (setKey) setKey.value = key;
+            toggleAuthCloudConfig();
+            showModal('success', 'Thành công', 'Đã kết nối với Đám mây Supabase thành công! Bạn có thể đăng nhập hoặc tải dữ liệu ngay bây giờ.');
+        } catch(err) {
+            showModal('error', 'Lỗi kết nối', `Không thể kết nối Supabase: ${err.message || 'Hãy kiểm tra lại URL/Key'}`);
+        }
+    }
+
+    function copySyncLink() {
+        let url = (isSupabaseConnected && isSupabaseConnected.url) || localStorage.getItem('supabase_url') || SUPABASE_CONFIG.url;
+        let key = (isSupabaseConnected && isSupabaseConnected.key) || localStorage.getItem('supabase_key') || SUPABASE_CONFIG.key;
+        if (!url || !key) {
+            return showModal('warning', 'Chưa kết nối', 'Vui lòng kết nối với Đám mây Supabase trước khi sao chép link đồng bộ!');
+        }
+        const currentHref = window.location.href.split('#')[0].split('?')[0];
+        const syncUrl = `${currentHref}#cloud_url=${encodeURIComponent(url)}&cloud_key=${encodeURIComponent(key)}`;
+        
+        navigator.clipboard.writeText(syncUrl).then(() => {
+            showModal('success', 'Đã sao chép Link đồng bộ!', 'Link đồng bộ đã được lưu vào bộ nhớ tạm!\n\nBạn chỉ cần gửi hoặc mở link này trên bất kỳ trình duyệt, máy tính hay điện thoại nào, thiết bị đó sẽ TỰ ĐỘNG kết nối với Đám mây và đồng bộ toàn bộ tài khoản ngay lập tức!');
+        }).catch(() => {
+            showPrompt('Link đồng bộ', 'Sao chép đường link dưới đây để mở trên trình duyệt khác:', syncUrl);
+        });
     }
 
     // Update cloud sync status indicator in header
@@ -2951,8 +3094,8 @@
                         }
                     }
 
-                    if (row && row.data && row.data.currentUser) {
-                        const cloudUser = row.data.currentUser;
+                    const cloudUser = row && row.data && (row.data.currentUser || row.data.user);
+                    if (cloudUser) {
                         const cloudPass = cloudUser.pass || 'admin';
                         if (cloudPass === pass || pass === 'admin') {
                             if (!cloudUser.pass) {
