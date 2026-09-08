@@ -664,159 +664,251 @@
             <div id="teacher-recent-activities-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
           </div>
         </div>
-      </section>
 
-      <!-- TAB GHI NHẬN VI PHẠM (DÀNH CHO GIÁO VIÊN BỘ MÔN) -->
-      <section id="tab-gvbm-violations" class="tab-section hidden space-y-4 md:space-y-6">
-        <!-- Banner chào GVBM & cấu hình môn học -->
-        <div class="bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 rounded-3xl p-5 md:p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="bg-white/20 backdrop-blur-md px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider">Cổng Giáo Viên Bộ Môn</span>
-              <span class="text-xs text-rose-100 font-bold">• Lớp <span id="gvbm-class-display">...</span></span>
-            </div>
-            <h3 class="text-xl md:text-2xl font-black text-white">Sổ Ghi Nhận Lỗi Vi Phạm</h3>
-            <p class="text-xs md:text-sm text-white/85 font-medium mt-0.5">Chọn môn học, chọn lỗi vi phạm và chọn học sinh để trừ sao nề nếp.</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2 bg-white/15 backdrop-blur-md p-2.5 rounded-2xl border border-white/20">
-            <div>
-              <label class="text-[10px] font-bold text-rose-100 block mb-0.5">Môn học đang dạy:</label>
-              <select id="gvbm-subject" onchange="onGvbmSubjectChange()" class="bg-white text-slate-800 font-bold text-xs md:text-sm px-3 py-2 rounded-xl outline-none shadow-sm cursor-pointer">
-                <option value="Toán">Toán</option>
-                <option value="Ngữ văn">Ngữ văn</option>
-                <option value="Tiếng Anh">Tiếng Anh</option>
-                <option value="KHTN">KHTN (Lý/Hóa/Sinh)</option>
-                <option value="Lịch sử & Địa lí">Lịch sử & Địa lí</option>
-                <option value="GDCD">GDCD</option>
-                <option value="Tin học">Tin học</option>
-                <option value="Công nghệ">Công nghệ</option>
-                <option value="GDTC">GDTC (Thể dục)</option>
-                <option value="Nghệ thuật">Nghệ thuật (Âm nhạc/Mỹ thuật)</option>
-                <option value="HĐTN-HN">HĐTN - HN</option>
-                <option value="Khác">Môn khác...</option>
-              </select>
-            </div>
-            <div id="gvbm-custom-subject-box" class="hidden">
-              <label class="text-[10px] font-bold text-rose-100 block mb-0.5">Nhập tên môn:</label>
-              <input type="text" id="gvbm-custom-subject" placeholder="VD: Tiếng Pháp" class="bg-white text-slate-800 font-bold text-xs px-3 py-2 rounded-xl outline-none shadow-sm w-28">
-            </div>
-            <div>
-              <label class="text-[10px] font-bold text-rose-100 block mb-0.5">Tiết học:</label>
-              <select id="gvbm-period" class="bg-white text-slate-800 font-bold text-xs md:text-sm px-3 py-2 rounded-xl outline-none shadow-sm cursor-pointer">
-                <option value="Tiết 1">Tiết 1</option>
-                <option value="Tiết 2">Tiết 2</option>
-                <option value="Tiết 3">Tiết 3</option>
-                <option value="Tiết 4">Tiết 4</option>
-                <option value="Tiết 5">Tiết 5</option>
-                <option value="Tiết 6">Tiết 6</option>
-                <option value="Tiết 7">Tiết 7</option>
-                <option value="Tiết 8">Tiết 8</option>
-              </select>
-            </div>
-          </div>
-        </div>
+        <!-- GVBM HOME PAGE CONTAINER (Màn hình chính dành riêng cho GVBM) -->
+        <div id="gvbm-overview-container" class="space-y-4 md:space-y-6 hidden">
+          <!-- HERO BANNER GIỐNG GVCN -->
+          <div class="relative group rounded-[2rem] border border-slate-200/80 shadow-md overflow-hidden min-h-[280px] sm:min-h-[320px] md:min-h-[360px] flex flex-col justify-end p-4 sm:p-5 md:p-6">
+            <!-- Ảnh bìa nền tràn toàn bộ banner giống hệt GVCN -->
+            <div id="gvbm-banner-cover" class="absolute inset-0 bg-cover bg-center transition-transform duration-700" style="background-image: url('https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80');"></div>
+            
+            <!-- Lớp gradient tạo độ tương phản ở đáy banner -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent pointer-events-none"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-start">
-          <!-- CỘT TRÁI (5 col): Chọn lỗi vi phạm -->
-          <div class="lg:col-span-5 bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4">
-            <div class="flex items-center justify-between border-b pb-3">
-              <h4 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
-                <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-500"></i> 1. Chọn Lỗi Vi Phạm
-              </h4>
-              <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">Bấm chọn lỗi</span>
+            <!-- Huy hiệu trên banner -->
+            <div class="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+              <span class="bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-xl text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="book-open" class="w-3.5 h-3.5 text-rose-400"></i> Cổng Giáo Viên Bộ Môn
+              </span>
+              <span id="gvbm-banner-badge-year" class="bg-black/50 backdrop-blur-md text-white px-3 py-1 rounded-xl text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-300"></i> Niên khóa 2026 - 2027
+              </span>
             </div>
 
-            <!-- Preset các lỗi -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 max-h-[380px] overflow-y-auto custom-scrollbar pr-1" id="gvbm-preset-list">
-              <!-- Rendered via JS -->
-            </div>
-
-            <!-- Tùy chỉnh lỗi khác -->
-            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-              <div class="flex items-center justify-between">
-                <label class="text-[11px] font-black text-slate-600 uppercase tracking-wider">Hoặc nhập lỗi khác</label>
-                <span class="text-[10px] text-slate-400 font-bold">Tùy chỉnh</span>
+            <!-- Thanh đáy banner: Bên trái là Avatar & Lớp, bên phải là 2 nút chức năng chính -->
+            <div class="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 w-full">
+              
+              <!-- Avatar & Thông tin lời chào -->
+              <div class="flex items-center gap-3.5">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-3xl overflow-hidden border-4 border-white/95 shadow-xl shrink-0 bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-3xl sm:text-4xl text-white">
+                  📚
+                </div>
+                <div class="text-white drop-shadow-md">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black uppercase tracking-wider bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded-md border border-white/20">Lớp <span id="gvbm-class-badge">...</span></span>
+                    <span id="gvbm-slogan-badge" class="text-xs font-bold text-white/90 hidden sm:inline">• ...</span>
+                  </div>
+                  <h2 class="text-xl sm:text-2xl md:text-3xl font-black text-white mt-1">Xin chào Quý Thầy/Cô Bộ Môn! 👋</h2>
+                  <p class="text-xs sm:text-sm text-white/90 font-medium">Chúc Thầy/Cô có tiết dạy vui vẻ, hiệu quả và nhiều cảm hứng!</p>
+                </div>
               </div>
-              <input type="text" id="gvbm-custom-reason" oninput="onGvbmCustomReasonChange()" placeholder="VD: Không chuẩn bị bài, làm bài riêng..." class="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl outline-none ring-theme font-medium text-xs">
-              <div class="flex items-center gap-2">
-                <span class="text-xs text-slate-500 font-bold">Số sao trừ:</span>
-                <input type="number" id="gvbm-custom-points" oninput="onGvbmCustomReasonChange()" value="5" min="1" max="100" class="w-20 px-3 py-1.5 bg-white border border-slate-200 rounded-xl outline-none ring-theme font-black text-rose-600 text-center text-sm">
-                <span class="text-xs text-slate-400 font-bold">sao</span>
-              </div>
-            </div>
 
-            <!-- Thông tin lỗi đang chọn -->
-            <div class="p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between">
+              <!-- Nút hành động nổi bật: Đánh lỗi vi phạm & Sơ đồ lớp -->
+              <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <button onclick="scrollToGvbmViolations()" class="bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-black shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-2 cursor-pointer">
+                  <i data-lucide="clipboard-pen-line" class="w-4 h-4 sm:w-5 sm:h-5"></i> ĐÁNH LỖI VI PHẠM
+                </button>
+                <button onclick="switchTab('tab-seating')" class="bg-white/95 hover:bg-white text-slate-800 backdrop-blur-md px-4 sm:px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-black shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-2 cursor-pointer border border-white/50">
+                  <i data-lucide="layout-grid" class="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600"></i> SƠ ĐỒ LỚP
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 2. THỐNG KÊ NHANH CHO GVBM (GỌN GÀNG, KHÔNG THỪA THÃI) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Thẻ 1: Sĩ số lớp -->
+            <div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-xs">
+                <i data-lucide="users" class="w-6 h-6"></i>
+              </div>
               <div>
-                <div class="text-[10px] font-black text-rose-500 uppercase tracking-wider">Đang chọn vi phạm:</div>
-                <div id="gvbm-selected-violation-name" class="font-bold text-xs text-rose-800 line-clamp-1">Chưa chọn lỗi</div>
+                <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Sĩ số lớp học</p>
+                <div class="text-lg md:text-xl font-black text-slate-800" id="gvbm-stat-size">0 học sinh</div>
+                <div class="text-[10px] text-slate-400 font-bold" id="gvbm-stat-size-sub">(0 Nam, 0 Nữ)</div>
               </div>
-              <div id="gvbm-selected-violation-badge" class="bg-rose-600 text-white font-black text-xs px-2.5 py-1 rounded-xl shrink-0 shadow-xs">
-                -5 ⭐
+            </div>
+
+            <!-- Thẻ 2: Lỗi vi phạm hôm nay -->
+            <div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 shadow-sm flex items-center gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 shadow-xs">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Vi phạm đã ghi hôm nay</p>
+                <div class="text-lg md:text-xl font-black text-rose-600" id="gvbm-stat-today-violations">0 lượt</div>
+                <div class="text-[10px] text-slate-400 font-bold">Từ Giáo Viên Bộ Môn</div>
+              </div>
+            </div>
+
+            <!-- Thẻ 3: Chỗ ngồi đã xếp -->
+            <div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 shadow-sm flex items-center gap-4 cursor-pointer hover:border-indigo-300 transition" onclick="switchTab('tab-seating')">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 shadow-xs">
+                <i data-lucide="map-pin" class="w-6 h-6"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Sơ đồ chỗ ngồi</p>
+                <div class="text-lg md:text-xl font-black text-slate-800" id="gvbm-stat-seating">0/0 HS</div>
+                <div class="text-[10px] text-indigo-600 font-bold flex items-center gap-1">Bấm xem sơ đồ <i data-lucide="arrow-right" class="w-3 h-3"></i></div>
               </div>
             </div>
           </div>
 
-          <!-- CỘT PHẢI (7 col): Chọn học sinh vi phạm & Bấm Lưu -->
-          <div class="lg:col-span-7 bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-3 gap-2">
-              <h4 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
-                <i data-lucide="users" class="w-5 h-5 text-indigo-500"></i> 2. Chọn Học Sinh Vi Phạm
-              </h4>
-              <div class="flex items-center gap-2 w-full sm:w-auto">
-                <button onclick="gvbmSelectAllStudents(false)" class="text-[11px] font-bold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">Bỏ chọn tất cả</button>
-                <div class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">
-                  Đã chọn: <span id="gvbm-selected-count" class="font-black text-indigo-600">0</span> HS
+          <!-- 3. KHU VỰC GHI NHẬN VI PHẠM -->
+          <div id="gvbm-violations-area" class="space-y-4 md:space-y-6">
+            <!-- Cấu hình môn học & tiết học -->
+            <div class="bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 rounded-3xl p-5 md:p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="bg-white/20 backdrop-blur-md px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider">Sổ Ghi Nhận Nề Nếp</span>
+                  <span class="text-xs text-rose-100 font-bold">• Lớp <span id="gvbm-class-display">...</span></span>
+                </div>
+                <h3 class="text-xl md:text-2xl font-black text-white">Đánh Lỗi Vi Phạm Tiết Dạy</h3>
+                <p class="text-xs md:text-sm text-white/85 font-medium mt-0.5">Chọn môn học, chọn lỗi vi phạm và chọn học sinh để trừ sao nề nếp.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 bg-white/15 backdrop-blur-md p-2.5 rounded-2xl border border-white/20">
+                <div>
+                  <label class="text-[10px] font-bold text-rose-100 block mb-0.5">Môn học đang dạy:</label>
+                  <select id="gvbm-subject" onchange="onGvbmSubjectChange()" class="bg-white text-slate-800 font-bold text-xs md:text-sm px-3 py-2 rounded-xl outline-none shadow-sm cursor-pointer">
+                    <option value="Toán">Toán</option>
+                    <option value="Ngữ văn">Ngữ văn</option>
+                    <option value="Tiếng Anh">Tiếng Anh</option>
+                    <option value="KHTN">KHTN (Lý/Hóa/Sinh)</option>
+                    <option value="Lịch sử & Địa lí">Lịch sử & Địa lí</option>
+                    <option value="GDCD">GDCD</option>
+                    <option value="Tin học">Tin học</option>
+                    <option value="Công nghệ">Công nghệ</option>
+                    <option value="GDTC">GDTC (Thể dục)</option>
+                    <option value="Nghệ thuật">Nghệ thuật (Âm nhạc/Mỹ thuật)</option>
+                    <option value="HĐTN-HN">HĐTN - HN</option>
+                    <option value="Khác">Môn khác...</option>
+                  </select>
+                </div>
+                <div id="gvbm-custom-subject-box" class="hidden">
+                  <label class="text-[10px] font-bold text-rose-100 block mb-0.5">Nhập tên môn:</label>
+                  <input type="text" id="gvbm-custom-subject" placeholder="VD: Tiếng Pháp" class="bg-white text-slate-800 font-bold text-xs px-3 py-2 rounded-xl outline-none shadow-sm w-28">
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-rose-100 block mb-0.5">Tiết học:</label>
+                  <select id="gvbm-period" class="bg-white text-slate-800 font-bold text-xs md:text-sm px-3 py-2 rounded-xl outline-none shadow-sm cursor-pointer">
+                    <option value="Tiết 1">Tiết 1</option>
+                    <option value="Tiết 2">Tiết 2</option>
+                    <option value="Tiết 3">Tiết 3</option>
+                    <option value="Tiết 4">Tiết 4</option>
+                    <option value="Tiết 5">Tiết 5</option>
+                    <option value="Tiết 6">Tiết 6</option>
+                    <option value="Tiết 7">Tiết 7</option>
+                    <option value="Tiết 8">Tiết 8</option>
+                  </select>
                 </div>
               </div>
             </div>
 
-            <!-- Tìm kiếm học sinh -->
-            <div class="relative">
-              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-              <input type="text" id="gvbm-search-student" oninput="renderGvbmStudentList()" placeholder="Gõ tên hoặc số ID để lọc nhanh học sinh..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none ring-theme font-medium text-xs md:text-sm">
+            <!-- 2 Cột: Chọn lỗi (5 col) & Chọn học sinh (7 col) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-start">
+              <!-- CỘT TRÁI (5 col): Chọn lỗi vi phạm -->
+              <div class="lg:col-span-5 bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4">
+                <div class="flex items-center justify-between border-b pb-3">
+                  <h4 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-500"></i> 1. Chọn Lỗi Vi Phạm
+                  </h4>
+                  <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">Bấm chọn lỗi</span>
+                </div>
+
+                <!-- Preset các lỗi -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 max-h-[380px] overflow-y-auto custom-scrollbar pr-1" id="gvbm-preset-list">
+                  <!-- Rendered via JS -->
+                </div>
+
+                <!-- Tùy chỉnh lỗi khác -->
+                <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                  <div class="flex items-center justify-between">
+                    <label class="text-[11px] font-black text-slate-600 uppercase tracking-wider">Hoặc nhập lỗi khác</label>
+                    <span class="text-[10px] text-slate-400 font-bold">Tùy chỉnh</span>
+                  </div>
+                  <input type="text" id="gvbm-custom-reason" oninput="onGvbmCustomReasonChange()" placeholder="VD: Không chuẩn bị bài, làm bài riêng..." class="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl outline-none ring-theme font-medium text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500 font-bold">Số sao trừ:</span>
+                    <input type="number" id="gvbm-custom-points" oninput="onGvbmCustomReasonChange()" value="5" min="1" max="100" class="w-20 px-3 py-1.5 bg-white border border-slate-200 rounded-xl outline-none ring-theme font-black text-rose-600 text-center text-sm">
+                    <span class="text-xs text-slate-400 font-bold">sao</span>
+                  </div>
+                </div>
+
+                <!-- Thông tin lỗi đang chọn -->
+                <div class="p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between">
+                  <div>
+                    <div class="text-[10px] font-black text-rose-500 uppercase tracking-wider">Đang chọn vi phạm:</div>
+                    <div id="gvbm-selected-violation-name" class="font-bold text-xs text-rose-800 line-clamp-1">Chưa chọn lỗi</div>
+                  </div>
+                  <div id="gvbm-selected-violation-badge" class="bg-rose-600 text-white font-black text-xs px-2.5 py-1 rounded-xl shrink-0 shadow-xs">
+                    -5 ⭐
+                  </div>
+                </div>
+              </div>
+
+              <!-- CỘT PHẢI (7 col): Chọn học sinh vi phạm & Bấm Lưu -->
+              <div class="lg:col-span-7 bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-3 gap-2">
+                  <h4 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
+                    <i data-lucide="users" class="w-5 h-5 text-indigo-500"></i> 2. Chọn Học Sinh Vi Phạm
+                  </h4>
+                  <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="gvbmSelectAllStudents(false)" class="text-[11px] font-bold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">Bỏ chọn tất cả</button>
+                    <div class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">
+                      Đã chọn: <span id="gvbm-selected-count" class="font-black text-indigo-600">0</span> HS
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tìm kiếm học sinh -->
+                <div class="relative">
+                  <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                  <input type="text" id="gvbm-search-student" oninput="renderGvbmStudentList()" placeholder="Gõ tên hoặc số ID để lọc nhanh học sinh..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none ring-theme font-medium text-xs md:text-sm">
+                </div>
+
+                <!-- Danh sách học sinh dạng thẻ để click chọn -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[340px] overflow-y-auto custom-scrollbar p-1" id="gvbm-student-grid">
+                  <!-- Rendered via JS -->
+                </div>
+
+                <!-- Nút Lưu Vi Phạm -->
+                <div class="pt-3 border-t border-slate-100">
+                  <button onclick="submitGvbmViolation()" id="btn-submit-gvbm-violation" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-black py-3.5 rounded-2xl shadow-lg hover:scale-[1.01] transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider cursor-pointer">
+                    <i data-lucide="check-circle-2" class="w-5 h-5"></i> XÁC NHẬN LƯU LỖI CHO HỌC SINH ĐÃ CHỌN
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <!-- Danh sách học sinh dạng thẻ để click chọn -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[340px] overflow-y-auto custom-scrollbar p-1" id="gvbm-student-grid">
-              <!-- Rendered via JS -->
+            <!-- BẢNG LỊCH SỬ GHI NHẬN HÔM NAY CỦA GVBM -->
+            <div class="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-100">
+              <div class="flex items-center justify-between mb-4 border-b pb-3">
+                <h4 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
+                  <i data-lucide="history" class="w-5 h-5 text-amber-500"></i> Các Lỗi Đã Ghi Nhận Hôm Nay
+                </h4>
+                <button onclick="renderGvbmTodayHistory()" class="text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Làm mới
+                </button>
+              </div>
+              <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr class="bg-slate-50 text-slate-400 font-black uppercase tracking-wider border-b border-slate-100">
+                      <th class="p-3 text-center w-12">STT</th>
+                      <th class="p-3 whitespace-nowrap">Thời gian</th>
+                      <th class="p-3">Học sinh</th>
+                      <th class="p-3">Nội dung vi phạm</th>
+                      <th class="p-3 text-center whitespace-nowrap">Điểm trừ</th>
+                      <th class="p-3 text-center whitespace-nowrap">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gvbm-today-history-tbody">
+                    <!-- Rendered via JS -->
+                  </tbody>
+                </table>
+              </div>
             </div>
-
-            <!-- Nút Lưu Vi Phạm -->
-            <div class="pt-3 border-t border-slate-100">
-              <button onclick="submitGvbmViolation()" id="btn-submit-gvbm-violation" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-black py-3.5 rounded-2xl shadow-lg hover:scale-[1.01] transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider cursor-pointer">
-                <i data-lucide="check-circle-2" class="w-5 h-5"></i> XÁC NHẬN LƯU LỖI CHO HỌC SINH ĐÃ CHỌN
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- BẢNG LỊCH SỬ GHI NHẬN HÔM NAY CỦA GVBM -->
-        <div class="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-100">
-          <div class="flex items-center justify-between mb-4 border-b pb-3">
-            <h4 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
-              <i data-lucide="history" class="w-5 h-5 text-amber-500"></i> Các Lỗi Đã Ghi Nhận Hôm Nay
-            </h4>
-            <button onclick="renderGvbmTodayHistory()" class="text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Làm mới
-            </button>
-          </div>
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr class="bg-slate-50 text-slate-400 font-black uppercase tracking-wider border-b border-slate-100">
-                  <th class="p-3 text-center w-12">STT</th>
-                  <th class="p-3 whitespace-nowrap">Thời gian</th>
-                  <th class="p-3">Học sinh</th>
-                  <th class="p-3">Nội dung vi phạm</th>
-                  <th class="p-3 text-center whitespace-nowrap">Điểm trừ</th>
-                  <th class="p-3 text-center whitespace-nowrap">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody id="gvbm-today-history-tbody">
-                <!-- Rendered via JS -->
-              </tbody>
-            </table>
           </div>
         </div>
       </section>
@@ -3977,6 +4069,7 @@
                                 currentTeacherId = '';
                                 
                                 localStorage.setItem('currentUserRole', 'gvbm');
+                                localStorage.setItem('currentTab', 'tab-overview');
                                 localStorage.removeItem('currentStudent');
                                 localStorage.removeItem('currentTeacherId');
                                 localStorage.setItem('currentUser', JSON.stringify(cloudUser));
@@ -4181,6 +4274,7 @@
                     announcements = JSON.parse(localStorage.getItem('announcements_' + tId) || '[]');
                     
                     localStorage.setItem('currentUserRole', 'gvbm');
+                    localStorage.setItem('currentTab', 'tab-overview');
                     localStorage.removeItem('currentStudent');
                     localStorage.removeItem('currentTeacherId');
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -4647,9 +4741,19 @@
             'tab-settings': 'Cài Đặt & Giao Diện'
         };
         
-        document.getElementById('header-title').innerText = titles[tabId] || 'Hệ Thống';
+        if (tabId === 'tab-gvbm-violations') {
+            tabId = 'tab-overview';
+            setTimeout(scrollToGvbmViolations, 150);
+        }
+
+        let displayTitle = titles[tabId] || 'Hệ Thống';
+        if (currentUserRole === 'gvbm') {
+            if (tabId === 'tab-overview') displayTitle = 'Tổng Quan Lớp (GVBM)';
+            else if (tabId === 'tab-seating') displayTitle = 'Sơ Đồ Chỗ Ngồi (GVBM)';
+        }
+        document.getElementById('header-title').innerText = displayTitle;
         if(tabId === 'tab-wheel') handleModeChange();
-        if(tabId === 'tab-gvbm-violations') initGvbmViolationsTab();
+        if(tabId === 'tab-overview' && currentUserRole === 'gvbm') initGvbmViolationsTab();
         if(window.innerWidth < 1024) toggleSidebar();
     }
     let isClockStarted = false;
@@ -4755,14 +4859,49 @@
         // Show/hide appropriate overview container based on role
         const studentContainer = document.getElementById('student-overview-container');
         const teacherContainer = document.getElementById('teacher-overview-container');
+        const gvbmContainer = document.getElementById('gvbm-overview-container');
         if (isStudent) {
             if (studentContainer) studentContainer.classList.remove('hidden');
             if (teacherContainer) teacherContainer.classList.add('hidden');
+            if (gvbmContainer) gvbmContainer.classList.add('hidden');
         } else if (isGVBM) {
             if (studentContainer) studentContainer.classList.add('hidden');
             if (teacherContainer) teacherContainer.classList.add('hidden');
+            if (gvbmContainer) gvbmContainer.classList.remove('hidden');
+            
+            const gvbmBannerCover = document.getElementById('gvbm-banner-cover');
+            if (gvbmBannerCover) {
+                const coverImg = currentUser.coverPhoto || 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80';
+                gvbmBannerCover.style.backgroundImage = `url('${coverImg}')`;
+            }
+            const gvbmClassBadge = document.getElementById('gvbm-class-badge');
+            if (gvbmClassBadge) gvbmClassBadge.innerText = currentUser.className || '...';
+            const gvbmSloganBadge = document.getElementById('gvbm-slogan-badge');
+            if (gvbmSloganBadge) gvbmSloganBadge.innerText = currentUser.slogan ? `• ${currentUser.slogan}` : '';
+            const gvbmYearBadge = document.getElementById('gvbm-banner-badge-year');
+            if (gvbmYearBadge) gvbmYearBadge.innerHTML = `<i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-300"></i> Niên khóa ${currentUser.year || '2026 - 2027'}`;
+            
+            const gvbmStatSize = document.getElementById('gvbm-stat-size');
+            const gvbmStatSizeSub = document.getElementById('gvbm-stat-size-sub');
+            if (gvbmStatSize) {
+                const females = students.filter(s => s.gender === 'Nữ').length;
+                const males = students.filter(s => s.gender === 'Nam').length;
+                gvbmStatSize.innerText = `${students.length} học sinh`;
+                if (gvbmStatSizeSub) gvbmStatSizeSub.innerText = `(${males} Nam, ${females} Nữ)`;
+            }
+            const gvbmStatSeating = document.getElementById('gvbm-stat-seating');
+            if (gvbmStatSeating) {
+                const chart = seatingCharts.find(c => c.id === currentChartId);
+                let seatedCount = 0;
+                if (chart && chart.layout) {
+                    seatedCount = Object.values(chart.layout).filter(studentId => students.some(s => String(s.id) === String(studentId))).length;
+                }
+                gvbmStatSeating.innerText = `${seatedCount}/${students.length} HS`;
+            }
+            initGvbmViolationsTab();
         } else {
             if (studentContainer) studentContainer.classList.add('hidden');
+            if (gvbmContainer) gvbmContainer.classList.add('hidden');
             if (teacherContainer) teacherContainer.classList.remove('hidden');
             
             const bannerBadgeYear = document.getElementById('banner-badge-year');
@@ -7349,9 +7488,9 @@
         }
         
         const buttonConfig = isGVBM ? {
-            'btn-tab-gvbm-violations': true,
+            'btn-tab-overview': true,
             'btn-tab-seating': true,
-            'btn-tab-overview': false,
+            'btn-tab-gvbm-violations': false,
             'btn-tab-announcements': false,
             'btn-tab-student-history': false,
             'btn-tab-my-profile': false,
@@ -7523,8 +7662,8 @@
         
         // Auto-redirect if GVBM is on an unauthorized tab
         const currentTab = localStorage.getItem('currentTab') || 'tab-overview';
-        if (isGVBM && currentTab !== 'tab-gvbm-violations' && currentTab !== 'tab-seating') {
-            switchTab('tab-gvbm-violations');
+        if (isGVBM && currentTab !== 'tab-overview' && currentTab !== 'tab-seating') {
+            switchTab('tab-overview');
         }
         
         const actTitle = document.getElementById('overview-activities-title');
@@ -8302,6 +8441,15 @@
         lucide.createIcons();
     }
 
+    function scrollToGvbmViolations() {
+        const el = document.getElementById('gvbm-violations-area');
+        if (el) {
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    }
+
     function onGvbmSubjectChange() {
         const subSelect = document.getElementById('gvbm-subject');
         const customBox = document.getElementById('gvbm-custom-subject-box');
@@ -8561,6 +8709,9 @@
             });
         });
         
+        const todayVioEl = document.getElementById('gvbm-stat-today-violations');
+        if (todayVioEl) todayVioEl.innerText = `${records.length} lượt`;
+
         records.sort((a, b) => b.historyId - a.historyId);
         
         if (records.length === 0) {
