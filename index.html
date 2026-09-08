@@ -217,11 +217,15 @@
           </div>
         </div>
 
+        <button type="button" onclick="openInputSyncCodeModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-2.5 rounded-xl font-bold transition text-xs flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01]">
+          <i data-lucide="download-cloud" class="w-4 h-4"></i>
+          <span>📥 Nhận dữ liệu từ Chrome sang Safari</span>
+        </button>
         <button type="button" onclick="manualCloudPull()" class="w-full bg-emerald-50 text-emerald-700 border border-emerald-200 py-2.5 rounded-xl font-bold hover:bg-emerald-100 transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
           <i data-lucide="cloud-download" class="w-4 h-4 text-emerald-600"></i> Tải nhanh dữ liệu từ Đám mây
         </button>
-        <button type="button" id="btn-copy-sync-link-auth" onclick="copySyncLink()" class="hidden w-full bg-sky-50 text-sky-700 border border-sky-200 py-2 rounded-xl font-bold hover:bg-sky-100 transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
-          <i data-lucide="share-2" class="w-3.5 h-3.5 text-sky-600"></i> Sao chép Link đồng bộ mọi trình duyệt
+        <button type="button" id="btn-copy-sync-link-auth" onclick="openSyncModal()" class="w-full bg-sky-50 text-sky-700 border border-sky-200 py-2 rounded-xl font-bold hover:bg-sky-100 transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
+          <i data-lucide="share-2" class="w-3.5 h-3.5 text-sky-600"></i> Trung tâm Đồng bộ & Chia sẻ
         </button>
       </div>
     </div>
@@ -325,7 +329,12 @@
         <h2 id="header-title" class="text-lg md:text-xl font-black text-theme-grad uppercase tracking-tight line-clamp-1">Tổng Quan Lớp</h2>
       </div>
       <div class="flex items-center gap-2 md:gap-3 shrink-0">
-        <button id="header-search-btn" onclick="openGlobalSearch()" class="hidden md:flex items-center gap-1.5 text-xs bg-white px-3 py-2 rounded-full font-bold shadow-sm border border-slate-200 text-slate-500 hover:text-theme transition"><i data-lucide="search" class="w-3.5 h-3.5"></i> Tra cứu</button>
+        <!-- Nút Đồng bộ Chrome ⇄ Safari & Thiết bị -->
+        <button onclick="openSyncModal()" class="flex items-center gap-1.5 text-xs bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3 py-1.5 rounded-full font-bold shadow-sm transition hover:scale-105" title="Đồng bộ dữ liệu giữa Google Chrome, Safari và các thiết bị">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Đồng bộ Chrome ⇄ Safari</span>
+          <span class="sm:hidden">Đồng bộ</span>
+        </button>
         <!-- Cloud Sync Status Indicator & Pull Action -->
         <div id="header-cloud-sync-status" onclick="manualCloudPull()" class="cursor-pointer flex items-center gap-1.5 text-xs px-2.5 sm:px-3 py-1.5 rounded-full font-bold border transition shadow-sm bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" title="Trạng thái đám mây. Bấm để kéo/đồng bộ dữ liệu từ Đám mây về máy này">
           <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0" id="header-cloud-dot"></span>
@@ -1026,8 +1035,9 @@
                     <button onclick="manualCloudPush()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Đẩy toàn bộ dữ liệu từ máy này lên Đám mây để máy khác cùng thấy"><i data-lucide="upload-cloud" class="w-4 h-4"></i> Đẩy lên Mây (Push)</button>
                     <button onclick="manualCloudPull()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2.5 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Kéo dữ liệu mới nhất từ Đám mây về máy này"><i data-lucide="download-cloud" class="w-4 h-4"></i> Kéo về máy (Pull)</button>
                   </div>
-                  <div class="mt-2.5">
-                    <button onclick="copySyncLink()" class="w-full bg-sky-600 hover:bg-sky-700 text-white px-3 py-2.5 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Sao chép đường link để mở trên trình duyệt khác tự động kết nối đám mây"><i data-lucide="share-2" class="w-4 h-4"></i> Sao chép Link đồng bộ mọi thiết bị</button>
+                  <div class="mt-2.5 space-y-2">
+                    <button onclick="openSyncModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-3 py-2.5 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Mở trung tâm quản lý đồng bộ giữa Chrome và Safari"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Mở Trung Tâm Đồng Bộ Chrome ⇄ Safari</button>
+                    <button onclick="downloadDataJson()" class="w-full bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-xl font-bold shadow-sm transition text-xs flex items-center justify-center gap-1.5" title="Tải file data.json để lưu vào thư mục chứa web"><i data-lucide="download" class="w-4 h-4"></i> Tải file data.json dự phòng</button>
                   </div>
                 </div>
               </div>
@@ -1348,6 +1358,106 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL TRUNG TÂM ĐỒNG BỘ CHROME ⇄ SAFARI & CLOUD -->
+  <div id="sync-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[700] p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-xl shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col border border-white/20 max-h-[90vh] overflow-y-auto custom-scrollbar" id="sync-modal-content">
+      <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200 shadow-sm"><i data-lucide="refresh-cw" class="w-5 h-5"></i></div>
+          <div>
+            <h3 class="text-lg md:text-xl font-black text-slate-800 tracking-tight">Đồng Bộ Chrome ⇄ Safari</h3>
+            <p class="text-xs text-slate-400 font-bold">Chuyển dữ liệu lớp học giữa các trình duyệt & thiết bị</p>
+          </div>
+        </div>
+        <button onclick="closeModalUi('sync-modal', 'sync-modal-content')" class="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <!-- Thống kê lớp hiện tại -->
+      <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 rounded-2xl p-4 mb-4 flex items-center justify-between">
+        <div>
+          <span id="sync-modal-class-name" class="font-black text-sm text-slate-800 block">Lớp học</span>
+          <span id="sync-modal-cloud-status" class="text-xs font-bold text-slate-500 mt-0.5">Kiểm tra trạng thái...</span>
+        </div>
+        <div class="bg-white/90 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-black text-emerald-700 shadow-sm" id="sync-modal-student-count">0 học sinh</div>
+      </div>
+
+      <div class="space-y-4 text-left">
+        <!-- CÁCH 1: LINK ĐỒNG BỘ 1 CHẠM -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-black text-slate-700 uppercase flex items-center gap-1.5"><i data-lucide="link" class="w-4 h-4 text-emerald-600"></i> Cách 1: Mở Link Trực Tiếp trên Safari (Khuyên dùng)</span>
+            <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">Nhanh nhất</span>
+          </div>
+          <p class="text-xs text-slate-500 mb-3">Sao chép đường link này và dán mở trên Safari. Safari sẽ <b>tự động nạp toàn bộ học sinh, điểm số, điểm danh</b> ngay lập tức.</p>
+          <div class="space-y-2">
+            <input type="text" id="sync-modal-url" readonly class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-600 outline-none select-all" onclick="this.select()">
+            <button onclick="copySyncLink()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition flex items-center justify-center gap-2">
+              <i data-lucide="copy" class="w-4 h-4"></i> Sao chép Link đồng bộ
+            </button>
+          </div>
+        </div>
+
+        <!-- CÁCH 2: MÃ ĐỒNG BỘ (COPY / PASTE) -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-black text-slate-700 uppercase flex items-center gap-1.5"><i data-lucide="code" class="w-4 h-4 text-blue-600"></i> Cách 2: Dùng Mã Đồng Bộ (Copy & Paste)</span>
+          </div>
+          <p class="text-xs text-slate-500 mb-3">Nếu không mở được link dài, hãy sao chép đoạn mã dưới đây rồi sang Safari bấm <i>"Nhận dữ liệu từ Chrome"</i> để dán vào.</p>
+          <div class="space-y-2">
+            <textarea id="sync-modal-code" readonly rows="2" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-mono text-slate-600 outline-none select-all resize-none" onclick="this.select()"></textarea>
+            <div class="flex gap-2">
+              <button onclick="copySyncCode()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition flex items-center justify-center gap-2">
+                <i data-lucide="copy" class="w-4 h-4"></i> Sao chép Mã Đồng Bộ
+              </button>
+              <button onclick="closeModalUi('sync-modal', 'sync-modal-content'); openInputSyncCodeModal();" class="flex-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+                <i data-lucide="upload" class="w-4 h-4"></i> Nhập mã từ máy khác
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CÁCH 3: TẢI FILE DATA.JSON -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-black text-slate-700 uppercase flex items-center gap-1.5"><i data-lucide="file-json" class="w-4 h-4 text-amber-600"></i> Cách 3: Tải file data.json</span>
+            <p class="text-xs text-slate-500 mt-0.5">Lưu file vào thư mục máy tính để làm dữ liệu chuẩn offline.</p>
+          </div>
+          <button onclick="downloadDataJson()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-2 rounded-xl text-xs transition shrink-0 flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="download" class="w-4 h-4"></i> Tải data.json
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NHẬP MÃ ĐỒNG BỘ (NHẬN TỪ CHROME SANG SAFARI) -->
+  <div id="input-sync-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[750] p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col border border-white/20" id="input-sync-modal-content">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200 shadow-sm shrink-0"><i data-lucide="download-cloud" class="w-5 h-5"></i></div>
+        <div>
+          <h3 class="text-lg font-black text-slate-800 tracking-tight">Nhận Dữ Liệu Lớp Học</h3>
+          <p class="text-xs text-slate-400 font-bold">Dán link hoặc mã đồng bộ từ Chrome</p>
+        </div>
+      </div>
+      
+      <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+        Dán <b>đường link đồng bộ</b> hoặc <b>mã đồng bộ</b> bạn vừa sao chép từ Google Chrome vào ô bên dưới:
+      </p>
+
+      <textarea id="input-sync-text" rows="4" class="w-full p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xs font-mono outline-none ring-theme focus:bg-white transition mb-2" placeholder="Dán link (http...#sync_data=...) hoặc mã JSON vào đây..."></textarea>
+      <p id="input-sync-error" class="text-xs text-rose-500 font-bold mb-3 hidden bg-rose-50 p-2 rounded-xl text-center"></p>
+
+      <div class="flex gap-2">
+        <button onclick="closeModalUi('input-sync-modal', 'input-sync-modal-content')" class="flex-[0.4] bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl text-xs transition">Hủy</button>
+        <button onclick="processSyncInput()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Xác nhận & Nạp dữ liệu
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Modal Phân công Giáo viên Bộ môn -->
   <div id="subject-teachers-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[700] p-4 opacity-0 transition-opacity duration-300">
@@ -2039,19 +2149,8 @@
         return false;
     };
 
-    // Tự động làm sạch toàn bộ dữ liệu LocalStorage của trình duyệt để đảm bảo website mới 100% không vướng dữ liệu cũ
-    const CLEAN_APP_RESET_FLAG = 'qllh_clean_reset_fresh_start_2026';
-    if (localStorage.getItem('qllh_app_reset_flag') !== CLEAN_APP_RESET_FLAG) {
-        const curUrl = localStorage.getItem('supabase_url');
-        const curKey = localStorage.getItem('supabase_key');
-        localStorage.clear();
-        sessionStorage.clear();
-        if (curUrl && curKey) {
-            localStorage.setItem('supabase_url', curUrl);
-            localStorage.setItem('supabase_key', curKey);
-        }
-        localStorage.setItem('qllh_app_reset_flag', CLEAN_APP_RESET_FLAG);
-    }
+    // Đảm bảo bảo toàn 100% dữ liệu LocalStorage và thông tin kết nối Đám mây
+    const APP_VERSION = 'qllh_v2.5_multi_browser_sync';
 
     // Cấu hình Supabase (để trống - Thầy/Cô có thể tự kết nối với Supabase mới trong mục Cài đặt):
     const SUPABASE_CONFIG = {
@@ -2133,9 +2232,6 @@
                 if (cleanUrl.includes('/rest/v1')) cleanUrl = cleanUrl.replace('/rest/v1', '');
                 localStorage.setItem('supabase_url', cleanUrl);
                 localStorage.setItem('supabase_key', decodeURIComponent(qKey));
-                if (window.history && window.history.replaceState) {
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
             }
         } catch(e) {
             console.warn("Could not parse cloud params from URL:", e);
@@ -2251,20 +2347,262 @@
         }
     }
 
-    function copySyncLink() {
-        let url = (isSupabaseConnected && isSupabaseConnected.url) || localStorage.getItem('supabase_url') || SUPABASE_CONFIG.url;
-        let key = (isSupabaseConnected && isSupabaseConnected.key) || localStorage.getItem('supabase_key') || SUPABASE_CONFIG.key;
-        if (!url || !key) {
-            return showModal('warning', 'Chưa kết nối', 'Vui lòng kết nối với Đám mây Supabase trước khi sao chép link đồng bộ!');
-        }
+    // --- BỘ CÔNG CỤ ĐỒNG BỘ ĐA TRÌNH DUYỆT (CHROME ⇄ SAFARI & CLOUD) ---
+    function buildSyncPayload() {
+        const curUrl = (isSupabaseConnected && isSupabaseConnected.url) || localStorage.getItem('supabase_url') || SUPABASE_CONFIG.url || '';
+        const curKey = (isSupabaseConnected && isSupabaseConnected.key) || localStorage.getItem('supabase_key') || SUPABASE_CONFIG.key || '';
+        return {
+            type: 'QLLH_FULL_SYNC',
+            version: APP_VERSION,
+            exportedAt: new Date().toISOString(),
+            currentUser: currentUser || { id: 'admin', className: 'Lớp học' },
+            students: students || [],
+            seatingCharts: seatingCharts || [],
+            timetables: timetables || [],
+            teacherTimetable: teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} },
+            attendanceData: attendanceData || {},
+            announcements: announcements || [],
+            cloudConfig: (curUrl && curKey) ? { url: curUrl, key: curKey } : null
+        };
+    }
+
+    function generateSyncUrl(payload) {
         const currentHref = window.location.href.split('#')[0].split('?')[0];
-        const syncUrl = `${currentHref}#cloud_url=${encodeURIComponent(url)}&cloud_key=${encodeURIComponent(key)}`;
+        if (payload.cloudConfig && payload.cloudConfig.url && payload.cloudConfig.key) {
+            const tId = (payload.currentUser && payload.currentUser.id) || 'admin';
+            return `${currentHref}#cloud_url=${encodeURIComponent(payload.cloudConfig.url)}&cloud_key=${encodeURIComponent(payload.cloudConfig.key)}&teacher=${encodeURIComponent(tId)}`;
+        }
         
-        navigator.clipboard.writeText(syncUrl).then(() => {
-            showModal('success', 'Đã sao chép Link đồng bộ!', 'Link đồng bộ đã được lưu vào bộ nhớ tạm!\n\nBạn chỉ cần gửi hoặc mở link này trên bất kỳ trình duyệt, máy tính hay điện thoại nào, thiết bị đó sẽ TỰ ĐỘNG kết nối với Đám mây và đồng bộ toàn bộ tài khoản ngay lập tức!');
+        // Link trực tiếp chứa toàn bộ dữ liệu
+        try {
+            const rawJson = JSON.stringify(payload);
+            const encoded = encodeURIComponent(rawJson);
+            if (encoded.length < 32000) {
+                return `${currentHref}#sync_data=${encoded}`;
+            }
+        } catch(e) {}
+        return null;
+    }
+
+    function openSyncModal() {
+        const payload = buildSyncPayload();
+        const syncUrl = generateSyncUrl(payload);
+        const codeInput = document.getElementById('sync-modal-code');
+        const urlInput = document.getElementById('sync-modal-url');
+        const countEl = document.getElementById('sync-modal-student-count');
+        const classEl = document.getElementById('sync-modal-class-name');
+        
+        if (countEl) countEl.innerText = `${students.length} học sinh`;
+        if (classEl) classEl.innerText = (currentUser && currentUser.className) ? `Lớp ${currentUser.className}` : 'Chưa có lớp';
+        
+        if (urlInput) {
+            if (syncUrl) {
+                urlInput.value = syncUrl;
+                urlInput.parentElement.classList.remove('hidden');
+            } else {
+                urlInput.parentElement.classList.add('hidden');
+            }
+        }
+        
+        if (codeInput) {
+            try {
+                codeInput.value = JSON.stringify(payload);
+            } catch(e) {
+                codeInput.value = '';
+            }
+        }
+        
+        const cloudStatusTxt = document.getElementById('sync-modal-cloud-status');
+        if (cloudStatusTxt) {
+            if (isSupabaseConnected) {
+                cloudStatusTxt.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Đã kết nối Đám mây Supabase (Tự động đồng bộ liên tục)`;
+                cloudStatusTxt.className = "text-xs font-bold text-emerald-600 flex items-center gap-1.5";
+            } else {
+                cloudStatusTxt.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> Chưa kết nối Đám mây (Đang dùng chế độ Đồng bộ Trực tiếp)`;
+                cloudStatusTxt.className = "text-xs font-bold text-amber-600 flex items-center gap-1.5";
+            }
+        }
+        
+        openModalUi('sync-modal', 'sync-modal-content');
+    }
+
+    function copySyncLink() {
+        const payload = buildSyncPayload();
+        const syncUrl = generateSyncUrl(payload);
+        
+        if (syncUrl) {
+            navigator.clipboard.writeText(syncUrl).then(() => {
+                showModal('success', 'Đã sao chép Link đồng bộ!', 'Đường link đồng bộ đã được lưu vào bộ nhớ tạm!\n\n👉 BƯỚC TIẾP THEO:\nBạn chỉ cần mở trình duyệt SAFARI (hoặc điện thoại, máy tính khác) và DÁN link này vào thanh địa chỉ rồi nhấn Enter.\n\nSafari sẽ TỰ ĐỘNG nhận diện và nạp 100% dữ liệu lớp học ngay lập tức!');
+            }).catch(() => {
+                showPrompt('Link đồng bộ', 'Sao chép đường link dưới đây để mở trên Safari:', syncUrl);
+            });
+        } else {
+            // Trường hợp dữ liệu lớn vượt giới hạn URL hash, dùng Mã đồng bộ
+            copySyncCode();
+        }
+    }
+
+    function copySyncCode() {
+        const payload = buildSyncPayload();
+        const jsonStr = JSON.stringify(payload);
+        navigator.clipboard.writeText(jsonStr).then(() => {
+            showModal('success', 'Đã sao chép Mã Đồng Bộ!', 'Mã dữ liệu đã được sao chép vào bộ nhớ tạm!\n\n👉 BƯỚC TIẾP THEO:\n1. Mở Safari (hoặc trang web trên thiết bị khác).\n2. Bấm nút "Đồng bộ từ Chrome sang Safari" (ở màn hình đăng nhập hoặc trên thanh tiêu đề).\n3. Dán mã này vào rồi bấm "Xác nhận đồng bộ". Toàn bộ dữ liệu sẽ xuất hiện ngay lập tức!');
         }).catch(() => {
-            showPrompt('Link đồng bộ', 'Sao chép đường link dưới đây để mở trên trình duyệt khác:', syncUrl);
+            showPrompt('Mã đồng bộ', 'Sao chép toàn bộ đoạn mã bên dưới để dán sang Safari:', jsonStr);
         });
+    }
+
+    function openInputSyncCodeModal() {
+        const inputEl = document.getElementById('input-sync-text');
+        if (inputEl) inputEl.value = '';
+        const errEl = document.getElementById('input-sync-error');
+        if (errEl) errEl.classList.add('hidden');
+        openModalUi('input-sync-modal', 'input-sync-modal-content');
+        setTimeout(() => {
+            if (inputEl) inputEl.focus();
+        }, 200);
+    }
+
+    function processSyncInput() {
+        const inputEl = document.getElementById('input-sync-text');
+        const errEl = document.getElementById('input-sync-error');
+        if (!inputEl) return;
+        const text = inputEl.value.trim();
+        if (!text) {
+            if (errEl) {
+                errEl.innerText = "Vui lòng dán link hoặc mã đồng bộ vào ô bên dưới!";
+                errEl.classList.remove('hidden');
+            }
+            return;
+        }
+
+        try {
+            let dataObj = null;
+            
+            // 1. Kiểm tra nếu là đường link có chứa #sync_data= hoặc ?data=
+            if (text.includes('sync_data=') || text.includes('data=')) {
+                let paramPart = text;
+                if (paramPart.includes('#')) paramPart = paramPart.split('#')[1];
+                if (paramPart.includes('?')) paramPart = paramPart.split('?')[1];
+                const p = new URLSearchParams(paramPart);
+                const rawData = p.get('sync_data') || p.get('data');
+                if (rawData) {
+                    let decoded = decodeURIComponent(rawData);
+                    dataObj = JSON.parse(decoded);
+                }
+            } else if (text.includes('cloud_url=') || text.includes('supabase_url=')) {
+                // Link chứa cấu hình Supabase
+                let paramPart = text;
+                if (paramPart.includes('#')) paramPart = paramPart.split('#')[1];
+                if (paramPart.includes('?')) paramPart = paramPart.split('?')[1];
+                const p = new URLSearchParams(paramPart);
+                const qUrl = p.get('cloud_url') || p.get('supabase_url');
+                const qKey = p.get('cloud_key') || p.get('supabase_key');
+                const qTeacher = p.get('teacher') || p.get('id') || 'admin';
+                if (qUrl && qKey) {
+                    localStorage.setItem('supabase_url', decodeURIComponent(qUrl));
+                    localStorage.setItem('supabase_key', decodeURIComponent(qKey));
+                    isSupabaseConnected = { url: decodeURIComponent(qUrl), key: decodeURIComponent(qKey) };
+                    closeModalUi('input-sync-modal', 'input-sync-modal-content');
+                    showModal('info', 'Đang kết nối Đám mây...', 'Đã nhận cấu hình Đám mây! Đang tải dữ liệu từ Đám mây...');
+                    manualCloudPull();
+                    return;
+                }
+            } else if (text.startsWith('{') && text.endsWith('}')) {
+                // Mã JSON trực tiếp
+                dataObj = JSON.parse(text);
+            } else {
+                // Thử decode base64
+                try {
+                    const decoded = decodeURIComponent(escape(atob(text)));
+                    dataObj = JSON.parse(decoded);
+                } catch(b64Err) {
+                    throw new Error("Định dạng dữ liệu không đúng. Hãy sao chép lại từ Chrome.");
+                }
+            }
+
+            if (!dataObj || (!dataObj.currentUser && !dataObj.user && !dataObj.students)) {
+                throw new Error("Dữ liệu đồng bộ không chứa thông tin lớp học hợp lệ.");
+            }
+
+            closeModalUi('input-sync-modal', 'input-sync-modal-content');
+            applySyncData(dataObj, 'Đã đồng bộ thành công dữ liệu từ Chrome sang!');
+        } catch (err) {
+            if (errEl) {
+                errEl.innerText = "Lỗi xử lý: " + (err.message || 'Dữ liệu không hợp lệ!');
+                errEl.classList.remove('hidden');
+            }
+        }
+    }
+
+    function applySyncData(payload, successMsg = 'Đã đồng bộ thành công dữ liệu lớp học!') {
+        if (!payload) return;
+        currentUser = payload.currentUser || payload.user || { id: 'admin', className: 'Lớp học' };
+        students = payload.students || [];
+        seatingCharts = payload.seatingCharts || [];
+        timetables = payload.timetables || [];
+        teacherTimetable = payload.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+        attendanceData = payload.attendanceData || {};
+        announcements = payload.announcements || [];
+        currentUserRole = 'teacher';
+        currentStudent = null;
+
+        // Lưu bền vững vào LocalStorage của trình duyệt hiện tại (Safari/Chrome/...)
+        localStorage.setItem('currentUserRole', 'teacher');
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('user_' + currentUser.id, JSON.stringify(currentUser));
+        localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
+        localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
+        localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
+        localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
+        localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
+        localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
+
+        // Nhận cấu hình đám mây nếu có
+        if (payload.cloudConfig && payload.cloudConfig.url && payload.cloudConfig.key) {
+            localStorage.setItem('supabase_url', payload.cloudConfig.url);
+            localStorage.setItem('supabase_key', payload.cloudConfig.key);
+            isSupabaseConnected = { url: payload.cloudConfig.url, key: payload.cloudConfig.key };
+            updateSupabaseStatus(true, "Đã kết nối đám mây");
+            updateCloudSyncStatus('synced');
+        }
+
+        // Đóng các màn hình đăng nhập và khởi tạo
+        const authScreen = document.getElementById('auth-screen');
+        if (authScreen) {
+            authScreen.classList.add('hidden');
+            authScreen.classList.remove('flex');
+        }
+        const obScreen = document.getElementById('onboarding-screen');
+        if (obScreen) {
+            obScreen.classList.add('hidden');
+            obScreen.classList.remove('flex');
+        }
+
+        isInitialLoadingComplete = true;
+        restoreRoleState();
+        applyTheme(currentUser.theme || 'emerald');
+        ensureStudentCodes();
+        initAttendance();
+        initTimetables();
+        updateUI();
+        renderAll();
+        initSeatingCharts();
+        checkAdminSection();
+
+        showModal('success', 'Đồng bộ Hoàn tất!', `${successMsg}\n\n• Lớp: ${currentUser.className || 'Chưa đặt tên'}\n• Giáo viên: ${currentUser.teacherName || 'Chưa cập nhật'}\n• Số học sinh: ${students.length}\n\nDữ liệu đã được lưu an toàn vào trình duyệt này.`);
+    }
+
+    function downloadDataJson() {
+        const payload = buildSyncPayload();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "data.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        showModal('success', 'Đã tải data.json', 'File data.json đã được lưu vào thư mục Downloads của bạn.\nBạn có thể copy file này vào cùng thư mục với index.html để làm nguồn dữ liệu mặc định.');
     }
 
     // Update cloud sync status indicator in header
@@ -2785,31 +3123,7 @@
         const obScreen = document.getElementById('onboarding-screen');
         let loaded = false;
 
-        // 1. Wipe out any legacy Cô Hà or Thầy Tuấn keys from LocalStorage
-        const legacyKeys = [
-            'user_covietha', 'user_cohakhtn', 'user_thaytuan',
-            'students_covietha', 'students_cohakhtn', 'students_thaytuan',
-            'seating_covietha', 'seating_cohakhtn', 'seating_thaytuan',
-            'timetables_covietha', 'timetables_cohakhtn', 'timetables_thaytuan',
-            'teacherTimetable_covietha', 'teacherTimetable_cohakhtn', 'teacherTimetable_thaytuan',
-            'attendance_covietha', 'attendance_cohakhtn', 'attendance_thaytuan',
-            'announcements_covietha', 'announcements_cohakhtn', 'announcements_thaytuan'
-        ];
-        legacyKeys.forEach(k => localStorage.removeItem(k));
-
-        let savedUserStr = localStorage.getItem('currentUser');
-        if (savedUserStr) {
-            try {
-                const u = JSON.parse(savedUserStr);
-                if (u && (u.id === 'cohakhtn' || u.id === 'covietha' || u.id === 'thaytuan')) {
-                    localStorage.removeItem('currentUser');
-                    localStorage.removeItem('currentUserRole');
-                    savedUserStr = null;
-                }
-            } catch(e) {}
-        }
-
-        // A. Parse URL search & hash parameters (Deep Linking)
+        // A. Parse URL search & hash parameters (Deep Linking & Sync Data)
         const urlParams = new URLSearchParams(window.location.search);
         let hashStr = window.location.hash || '';
         if (hashStr.startsWith('#')) hashStr = hashStr.slice(1);
@@ -2818,9 +3132,9 @@
         const paramTeacher = urlParams.get('teacher') || urlParams.get('user') || urlParams.get('id') || hashParams.get('teacher') || hashParams.get('user') || hashParams.get('id');
         const paramRole = urlParams.get('role') || hashParams.get('role');
         const paramStudent = urlParams.get('student') || urlParams.get('code') || hashParams.get('student') || hashParams.get('code');
-        const paramData = urlParams.get('data') || hashParams.get('data');
+        const paramData = urlParams.get('sync_data') || urlParams.get('data') || hashParams.get('sync_data') || hashParams.get('data');
 
-        // Check if direct data payload is embedded in URL (e.g. ?data=...)
+        // 1. Kiểm tra nếu có dữ liệu đồng bộ trực tiếp nhúng trong URL (#sync_data=...)
         if (paramData && !loaded) {
             try {
                 let decoded = decodeURIComponent(paramData);
@@ -2831,28 +3145,28 @@
                     parsed = JSON.parse(decodeURIComponent(escape(atob(decoded))));
                 }
                 if (parsed) {
-                    currentUser = parsed.currentUser || parsed.user;
-                    students = parsed.students || [];
-                    seatingCharts = parsed.seatingCharts || [];
-                    timetables = parsed.timetables || [];
-                    teacherTimetable = parsed.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
-                    attendanceData = parsed.attendanceData || {};
-                    announcements = parsed.announcements || [];
+                    applySyncData(parsed, 'Đã tự động nhận diện và nạp dữ liệu đồng bộ từ đường link!');
                     loaded = true;
-                    saveAppData();
                 }
             } catch (err) {
                 console.warn("Could not parse data from URL query:", err);
             }
         }
 
-        // B. Query Supabase Cloud if user session exists or target specified in URL
+        let savedUserStr = localStorage.getItem('currentUser');
+
+        // 2. Kiểm tra Đám mây Supabase nếu đã kết nối
         const targetUserId = paramTeacher || (savedUserStr ? JSON.parse(savedUserStr).id : null);
-        if (!loaded && isSupabaseConnected && targetUserId) {
+        if (!loaded && isSupabaseConnected) {
             updateCloudSyncStatus('syncing');
             try {
-                let row = await callSupabaseRest('GET', targetUserId);
-                if (!row && targetUserId === 'admin') {
+                let row = null;
+                if (targetUserId) {
+                    row = await callSupabaseRest('GET', targetUserId);
+                }
+                
+                // Nếu chưa có targetUserId hoặc không tìm thấy, lấy lớp mới nhất trên Supabase
+                if (!row) {
                     const latestRes = await fetch(`${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data,updated_at&order=updated_at.desc&limit=1`, {
                         method: 'GET',
                         headers: {
@@ -2915,7 +3229,7 @@
             }
         }
 
-        // C. Fallback to LocalStorage if cloud was offline
+        // 3. Nạp từ LocalStorage của trình duyệt này
         if (!loaded && savedUserStr) {
             try {
                 currentUser = JSON.parse(savedUserStr);
@@ -2935,7 +3249,31 @@
             } catch(e){}
         }
 
-        // D. If not logged in: display login auth screen
+        // 4. Thử nạp từ file data.json nếu mở qua web server và chưa có dữ liệu local
+        if (!loaded && !savedUserStr) {
+            try {
+                const res = await fetch('./data.json');
+                if (res.ok) {
+                    const fData = await res.json();
+                    if (fData && (fData.currentUser || (fData.students && fData.students.length > 0))) {
+                        applySyncData(fData, 'Đã tự động nhận dữ liệu từ file data.json!');
+                        loaded = true;
+                        return;
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // Dọn sạch URL hash/query sau khi đã đọc xong
+        if (paramData || (hashStr && (hashStr.includes('sync_data') || hashStr.includes('cloud_url')))) {
+            try {
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            } catch(e) {}
+        }
+
+        // 5. Nếu chưa có dữ liệu hoặc chưa đăng nhập: Hiển thị màn hình đăng nhập
         if (!loaded || !currentUser) {
             authScreen.classList.remove('hidden');
             authScreen.classList.add('flex');
@@ -3329,8 +3667,9 @@
                 }
             }
 
-            errorMsg.innerText = 'Tài khoản không tồn tại trên hệ thống!';
+            errorMsg.innerHTML = 'Tài khoản không tồn tại trên trình duyệt này!<br><button type="button" onclick="openInputSyncCodeModal()" class="mt-2 inline-flex items-center gap-1.5 text-xs text-theme font-bold underline hover:text-emerald-700 cursor-pointer"><i data-lucide="download-cloud" class="w-3.5 h-3.5"></i> Bấm vào đây để Nhận dữ liệu từ Chrome</button>';
             errorMsg.classList.remove('hidden');
+            lucide.createIcons();
         } else {
             if(id === MOCK_ADMIN.id || localStorage.getItem('user_' + id)) {
                 errorMsg.innerText = 'Tài khoản này đã tồn tại!';
@@ -3377,6 +3716,13 @@
                 if (obSlogan) obSlogan.value = currentUser.slogan || '';
             }
             isInitialLoadingComplete = true;
+            
+            // Gợi ý đồng bộ nếu người dùng đang ở trình duyệt mới
+            setTimeout(() => {
+                showModal('confirm', 'Chưa có dữ liệu trên trình duyệt này', 'Trình duyệt này chưa có dữ liệu lớp học.\n\nNếu bạn đã tạo lớp trên Google Chrome, bấm "Đồng ý" để Dán Link hoặc Mã đồng bộ từ Chrome sang ngay bây giờ.\n\nNếu bạn muốn tạo lớp mới từ đầu, bấm "Hủy".', () => {
+                    openInputSyncCodeModal();
+                });
+            }, 300);
         } else {
             const obScreen = document.getElementById('onboarding-screen'); 
             if (obScreen) {
