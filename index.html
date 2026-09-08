@@ -561,40 +561,90 @@
             </div>
           </div>
 
-          <!-- 4. BOTTOM GRID: TIMETABLE & LEADERBOARD -->
+          <!-- 4. BOTTOM GRID: TIMETABLE, BIRTHDAYS & LEADERBOARD -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Today's Timetable (Left column span 2) -->
-            <div class="lg:col-span-2 bg-white p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-              <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2"><i data-lucide="calendar" class="w-5 h-5 text-blue-500"></i> Thời Khóa Biểu Hôm Nay</h3>
-                <button onclick="switchTab('tab-timetable')" class="text-xs font-bold text-theme bg-theme-light border border-theme/10 hover:bg-theme-light/80 px-3 py-1.5 rounded-lg transition flex items-center gap-1">Xem cả tuần <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
+            <!-- 1. Today's Timetable (Col 1) -->
+            <div class="bg-white p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
+                  <h3 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-5 h-5 text-blue-500"></i> Thời Khóa Biểu
+                  </h3>
+                  <button onclick="switchTab('tab-timetable')" class="text-xs font-bold text-theme bg-theme-light border border-theme/10 hover:bg-theme-light/80 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+                    Cả tuần <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                  </button>
+                </div>
+
+                <!-- Session Switcher Tabs (Sáng / Chiều) -->
+                <div class="bg-slate-100/80 p-1 rounded-xl flex gap-1 mb-3">
+                  <button id="btn-today-tkb-morning" onclick="switchTodayTkbSession('morning')" class="flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-amber-600 shadow-xs">
+                    <i data-lucide="sun" class="w-3.5 h-3.5"></i> Sáng (4 tiết)
+                  </button>
+                  <button id="btn-today-tkb-afternoon" onclick="switchTodayTkbSession('afternoon')" class="flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800">
+                    <i data-lucide="sunset" class="w-3.5 h-3.5"></i> Chiều (4 tiết)
+                  </button>
+                </div>
+
+                <!-- Periods List -->
+                <div id="teacher-today-timetable-list-morning" class="space-y-2">
+                  <!-- Morning slots -->
+                </div>
+                <div id="teacher-today-timetable-list-afternoon" class="space-y-2 hidden">
+                  <!-- Afternoon slots -->
+                </div>
               </div>
-              <!-- Horizontally scrollable list of today's periods -->
-              <div class="space-y-4">
-                <div>
-                  <div class="text-[10px] md:text-xs font-black text-slate-400 mb-2 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500"></i> Buổi Sáng</div>
-                  <div id="teacher-today-timetable-list-morning" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <!-- Morning slots -->
-                  </div>
-                </div>
-                <div>
-                  <div class="text-[10px] md:text-xs font-black text-slate-400 mb-2 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="sunset" class="w-3.5 h-3.5 text-indigo-500"></i> Buổi Chiều</div>
-                  <div id="teacher-today-timetable-list-afternoon" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <!-- Afternoon slots -->
-                  </div>
-                </div>
+
+              <!-- Timetable Footer Status -->
+              <div class="pt-2 border-t border-slate-100 text-[11px] font-bold text-slate-400 flex items-center justify-between">
+                <span class="flex items-center gap-1"><i data-lucide="clock-4" class="w-3.5 h-3.5 text-slate-400"></i> Hôm nay</span>
+                <span class="text-theme font-semibold" id="teacher-today-tkb-weekday">Thứ Hai</span>
               </div>
             </div>
-            
-            <!-- Top Leaderboard list (Right column) -->
-            <div class="bg-white p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-              <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2"><i data-lucide="crown" class="w-5 h-5 text-amber-500"></i> Top Thi Đua Nhận Sao</h3>
-                <button onclick="switchTab('tab-points')" class="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1">Xem tất cả <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
+
+            <!-- 2. Student Birthdays (Col 2) -->
+            <div class="bg-white p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
+                  <h3 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
+                    <i data-lucide="cake" class="w-5 h-5 text-rose-500"></i> Sinh Nhật HS
+                  </h3>
+                  <span id="teacher-birthday-month-badge" class="text-xs font-black text-rose-600 bg-rose-50 border border-rose-100 px-2.5 py-1 rounded-lg">
+                    Tháng --
+                  </span>
+                </div>
+
+                <!-- Birthday Container -->
+                <div id="teacher-birthday-container" class="space-y-2">
+                  <!-- Dynamically filled -->
+                </div>
               </div>
-              <!-- Vertical list of top students -->
-              <div id="teacher-top-students-list" class="space-y-2.5">
-                <!-- Dynamically filled rows -->
+
+              <!-- Birthday Footer / Counter -->
+              <div id="teacher-birthday-footer" class="pt-2 border-t border-slate-100 text-[11px] font-bold text-slate-400 flex items-center justify-between">
+                <span class="flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i> Trong tháng</span>
+                <span id="teacher-birthday-count-text" class="text-rose-500 font-bold">0 em</span>
+              </div>
+            </div>
+
+            <!-- 3. Top Leaderboard list (Col 3) -->
+            <div class="bg-white p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-3">
+                  <h3 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
+                    <i data-lucide="crown" class="w-5 h-5 text-amber-500"></i> Top Thi Đua
+                  </h3>
+                  <button onclick="switchTab('tab-points')" class="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 hover:bg-amber-100 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+                    Tất cả <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                  </button>
+                </div>
+                <!-- Vertical list of top students -->
+                <div id="teacher-top-students-list" class="space-y-2">
+                  <!-- Dynamically filled rows -->
+                </div>
+              </div>
+              <div class="pt-2 border-t border-slate-100 text-[11px] font-bold text-slate-400 flex items-center justify-between">
+                <span class="flex items-center gap-1"><i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i> Tích cực nhất</span>
+                <span class="text-amber-600 font-bold">Top 4</span>
               </div>
             </div>
           </div>
@@ -5998,11 +6048,20 @@
       const afternoonList = document.getElementById('teacher-today-timetable-list-afternoon');
       if (morningList && afternoonList) {
           const activeTkb = timetables.find(x => x.id === currentTimetableId) || timetables[0];
-          let dayNum = new Date().getDay() + 1; // 1 = Sunday, 2 = Monday, ...
+          const now = new Date();
+          let dayNum = now.getDay() + 1; // 1 = Sunday, 2 = Monday, ...
           let isWeekend = false;
           if (dayNum === 1 || dayNum === 7) {
               isWeekend = true;
               dayNum = 2; // Default to Monday
+          }
+          
+          const weekdayNames = {
+            1: "Chủ Nhật", 2: "Thứ Hai", 3: "Thứ Ba", 4: "Thứ Tư", 5: "Thứ Năm", 6: "Thứ Sáu", 7: "Thứ Bảy"
+          };
+          const weekdayEl = document.getElementById('teacher-today-tkb-weekday');
+          if (weekdayEl) {
+            weekdayEl.innerText = isWeekend ? `${weekdayNames[dayNum]} (Tuần mới)` : weekdayNames[now.getDay() + 1] || 'Hôm nay';
           }
           
           const periods = [
@@ -6024,7 +6083,9 @@
               
               let subject = 'Trống';
               let teacher = '';
+              let hasSubject = false;
               if (val) {
+                  hasSubject = true;
                   if (val.includes('|')) {
                       const parts = val.split('|');
                       subject = parts[0] || 'Trống';
@@ -6037,17 +6098,24 @@
                   }
               }
               
-              const periodLabel = p.num <= 4 ? `Tiết ${p.num}` : `Tiết ${p.num - 4} (Chiều)`;
+              const periodLabel = p.num <= 4 ? `T${p.num}` : `T${p.num - 4}`;
+              const badgeClass = hasSubject 
+                  ? (p.num <= 4 ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200')
+                  : 'bg-slate-100 text-slate-400 border-slate-200';
               
               const cardHtml = `
-              <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex flex-col justify-between hover:bg-slate-100/50 transition shadow-sm">
-                <div>
-                  <div class="text-[9px] uppercase font-bold tracking-wider text-slate-400 mb-0.5">${periodLabel}</div>
-                  <div class="text-[10px] font-bold text-slate-500 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${p.time}</div>
+              <div class="flex items-center justify-between p-2.5 ${hasSubject ? 'bg-slate-50/80 hover:bg-slate-100/80 border-slate-100' : 'bg-slate-50/40 border-slate-100/60'} border rounded-2xl transition shadow-2xs">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="w-7 h-7 rounded-xl font-black text-xs flex items-center justify-center shrink-0 border ${badgeClass}">
+                    ${periodLabel}
+                  </span>
+                  <div class="min-w-0">
+                    <div class="font-bold text-slate-800 text-xs truncate" title="${subject}">${subject}</div>
+                    <div class="text-[10px] ${hasSubject ? 'text-theme font-semibold' : 'text-slate-400'} truncate" title="${teacher}">${teacher || 'Tiết trống'}</div>
+                  </div>
                 </div>
-                <div class="mt-3">
-                  <div class="font-black text-slate-800 text-sm truncate" title="${subject}">${subject}</div>
-                  <div class="text-[10px] font-bold text-theme mt-0.5 truncate" title="${teacher}">${teacher}</div>
+                <div class="text-[10px] font-bold text-slate-400 shrink-0 bg-white px-2 py-1 rounded-lg border border-slate-100">
+                  ${p.time.split(' - ')[0]}
                 </div>
               </div>`;
               
@@ -6059,7 +6127,10 @@
           });
           morningList.innerHTML = morningHtml;
           afternoonList.innerHTML = afternoonHtml;
-          lucide.createIcons();
+
+          if (typeof currentTodayTkbSession !== 'undefined') {
+            switchTodayTkbSession(currentTodayTkbSession);
+          }
       }
 
       // Render Today's Top Students for Teacher
@@ -6074,21 +6145,230 @@
                   const reason = s.history && s.history.length > 0 ? s.history[0].reason : 'Học sinh tích cực';
                   
                   return `
-                  <div onclick="openProfileModal(${s.id})" class="flex items-center justify-between gap-3 p-3 bg-slate-50 hover:bg-slate-100/70 border border-slate-100 rounded-2xl cursor-pointer transition shadow-sm">
-                    <div class="flex items-center gap-3 min-w-0">
+                  <div onclick="openProfileModal(${s.id})" class="flex items-center justify-between gap-3 p-2.5 bg-slate-50 hover:bg-slate-100/70 border border-slate-100 rounded-2xl cursor-pointer transition shadow-2xs">
+                    <div class="flex items-center gap-2.5 min-w-0">
                       <div class="w-6 h-6 rounded-full border flex items-center justify-center font-black text-xs shrink-0 ${medalColors[index] || medalColors[3]}">${medalText}</div>
-                      <div class="w-9 h-9 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-100">${getAvatarHtml(s.avatar)}</div>
+                      <div class="w-8 h-8 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-100">${getAvatarHtml(s.avatar)}</div>
                       <div class="min-w-0 leading-tight">
                         <div class="text-xs font-black text-slate-800 truncate" title="${s.name}">${s.name}</div>
                         <div class="text-[9px] font-bold text-slate-400 truncate mt-0.5" title="${reason}">${reason}</div>
                       </div>
                     </div>
-                    <div class="shrink-0 bg-amber-50 border border-amber-100 text-amber-700 font-black text-[10px] px-2.5 py-1.5 rounded-xl whitespace-nowrap shadow-sm">${s.points} ⭐</div>
+                    <div class="shrink-0 bg-amber-50 border border-amber-100 text-amber-700 font-black text-[10px] px-2.5 py-1 rounded-xl whitespace-nowrap shadow-2xs">${s.points} ⭐</div>
                   </div>`;
               }).join('');
           }
       }
+
+      // Render Student Birthdays for Teacher
+      renderTeacherBirthdays();
+
       lucide.createIcons();
+    }
+
+    let currentTodayTkbSession = (new Date().getHours() >= 12 && new Date().getHours() < 18) ? 'afternoon' : 'morning';
+
+    function switchTodayTkbSession(session) {
+      currentTodayTkbSession = session;
+      const morningList = document.getElementById('teacher-today-timetable-list-morning');
+      const afternoonList = document.getElementById('teacher-today-timetable-list-afternoon');
+      const btnMorning = document.getElementById('btn-today-tkb-morning');
+      const btnAfternoon = document.getElementById('btn-today-tkb-afternoon');
+      if (!morningList || !afternoonList || !btnMorning || !btnAfternoon) return;
+
+      if (session === 'morning') {
+        morningList.classList.remove('hidden');
+        afternoonList.classList.add('hidden');
+        btnMorning.className = 'flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-amber-600 shadow-xs';
+        btnAfternoon.className = 'flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800';
+      } else {
+        morningList.classList.add('hidden');
+        afternoonList.classList.remove('hidden');
+        btnAfternoon.className = 'flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-indigo-600 shadow-xs';
+        btnMorning.className = 'flex-1 py-1.5 px-2.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800';
+      }
+      lucide.createIcons();
+    }
+
+    function parseStudentBirthday(dobStr) {
+      if (!dobStr) return null;
+      const str = String(dobStr).trim();
+      let d, m, y;
+      if (str.includes('/') || str.includes('-') || str.includes('.')) {
+        const parts = str.split(/[-/.]/).map(x => parseInt(x, 10));
+        if (parts.length >= 2) {
+          if (parts[0] > 1900) {
+            y = parts[0];
+            m = parts[1];
+            d = parts[2];
+          } else {
+            d = parts[0];
+            m = parts[1];
+            y = parts[2] || null;
+          }
+        }
+      }
+      if (d && m && !isNaN(d) && !isNaN(m) && d >= 1 && d <= 31 && m >= 1 && m <= 12) {
+        return { day: d, month: m, year: y };
+      }
+      return null;
+    }
+
+    function renderTeacherBirthdays() {
+      const container = document.getElementById('teacher-birthday-container');
+      const monthBadge = document.getElementById('teacher-birthday-month-badge');
+      const countEl = document.getElementById('teacher-birthday-count-text');
+      if (!container) return;
+
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentDay = now.getDate();
+
+      if (monthBadge) monthBadge.innerText = `Tháng ${currentMonth}`;
+
+      // Filter students with birthday in current month
+      const monthBirthdays = [];
+      (students || []).forEach(s => {
+        const parsed = parseStudentBirthday(s.dob);
+        if (parsed && parsed.month === currentMonth) {
+          const isToday = parsed.day === currentDay;
+          const isUpcoming = parsed.day > currentDay;
+          monthBirthdays.push({
+            student: s,
+            day: parsed.day,
+            month: parsed.month,
+            year: parsed.year,
+            isToday,
+            isUpcoming,
+            diffDays: parsed.day - currentDay
+          });
+        }
+      });
+
+      // Sort: Today first, then upcoming by day, then past
+      monthBirthdays.sort((a, b) => {
+        if (a.isToday && !b.isToday) return -1;
+        if (!a.isToday && b.isToday) return 1;
+        if (a.isUpcoming && !b.isUpcoming) return -1;
+        if (!a.isUpcoming && b.isUpcoming) return 1;
+        return a.day - b.day;
+      });
+
+      if (countEl) countEl.innerText = `${monthBirthdays.length} em`;
+
+      if (monthBirthdays.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 px-4 bg-slate-50/60 rounded-2xl border border-dashed border-slate-200">
+            <div class="w-10 h-10 mx-auto rounded-full bg-rose-50 text-rose-400 flex items-center justify-center mb-2 shadow-2xs">
+              <i data-lucide="cake" class="w-5 h-5"></i>
+            </div>
+            <p class="text-xs font-bold text-slate-600">Tháng ${currentMonth} không có sinh nhật</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Không có học sinh nào sinh nhật trong tháng này.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const todayBirthdays = monthBirthdays.filter(x => x.isToday);
+      const otherBirthdays = monthBirthdays.filter(x => !x.isToday);
+
+      let html = '';
+
+      // Render today's birthdays with celebratory styling
+      todayBirthdays.forEach(item => {
+        const s = item.student;
+        const safeName = (s.name || '').replace(/'/g, "\\'");
+        html += `
+          <div class="p-3 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 text-white rounded-2xl shadow-sm relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 opacity-20 text-white pointer-events-none">
+              <i data-lucide="cake" class="w-16 h-16"></i>
+            </div>
+            <div class="relative z-10 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-full overflow-hidden bg-white/20 border-2 border-white/60 shrink-0 shadow-xs">
+                  ${getAvatarHtml(s.avatar)}
+                </div>
+                <div class="min-w-0">
+                  <div class="text-[9px] font-black uppercase tracking-wider text-rose-100 flex items-center gap-1">
+                    <i data-lucide="sparkles" class="w-3 h-3 text-amber-300"></i> Sinh nhật hôm nay!
+                  </div>
+                  <div class="font-black text-white text-xs truncate">${s.name}</div>
+                  <div class="text-[10px] text-rose-100 font-semibold">${item.day}/${item.month}${item.year ? '/' + item.year : ''}</div>
+                </div>
+              </div>
+              <button onclick="celebrateBirthday('${safeName}')" class="shrink-0 bg-white hover:bg-rose-50 text-rose-600 font-black text-xs px-2.5 py-1.5 rounded-xl shadow transition active:scale-95 flex items-center gap-1">
+                🎂 Chúc mừng
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      // Render upcoming & other birthdays in current month (up to 4 items)
+      const maxOthers = todayBirthdays.length > 0 ? 2 : 4;
+      const listToShow = otherBirthdays.slice(0, maxOthers);
+      listToShow.forEach(item => {
+        const s = item.student;
+        const dayStr = String(item.day).padStart(2, '0');
+        const monthStr = String(item.month).padStart(2, '0');
+        let statusBadge = '';
+        if (item.diffDays > 0) {
+          statusBadge = `<span class="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-md whitespace-nowrap">Còn ${item.diffDays} ngày</span>`;
+        } else {
+          statusBadge = `<span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md whitespace-nowrap">Đã qua</span>`;
+        }
+
+        html += `
+          <div onclick="openProfileModal(${s.id})" class="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/70 border border-slate-100 rounded-2xl cursor-pointer transition shadow-2xs">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-full overflow-hidden bg-white border border-slate-200 shrink-0">
+                ${getAvatarHtml(s.avatar)}
+              </div>
+              <div class="min-w-0 leading-tight">
+                <div class="font-bold text-slate-800 text-xs truncate" title="${s.name}">${s.name}</div>
+                <div class="text-[10px] text-slate-400 font-medium mt-0.5">${dayStr}/${monthStr}${item.year ? '/' + item.year : ''}</div>
+              </div>
+            </div>
+            ${statusBadge}
+          </div>
+        `;
+      });
+
+      if (otherBirthdays.length > listToShow.length) {
+        const remaining = otherBirthdays.length - listToShow.length;
+        html += `
+          <div class="text-center text-[10px] font-bold text-slate-400 pt-1">
+            +${remaining} học sinh khác trong tháng
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function celebrateBirthday(name) {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+        setTimeout(() => {
+          confetti({
+            particleCount: 70,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0.1, y: 0.7 }
+          });
+          confetti({
+            particleCount: 70,
+            angle: 120,
+            spread: 55,
+            origin: { x: 0.9, y: 0.7 }
+          });
+        }, 200);
+      }
+      showModal('info', '🎂 Chúc Mừng Sinh Nhật!', `Chúc mừng sinh nhật em ${name}! Chúc em tuổi mới luôn mạnh khỏe, vui vẻ và chăm ngoan học giỏi! ✨🎉`);
     }
     
     function renderStage() {
