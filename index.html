@@ -331,31 +331,41 @@
   <!-- MAIN CONTENT AREA -->
   <main class="flex-1 flex flex-col h-full relative w-full overflow-hidden" id="main-content">
     
-    <header class="bg-white/90 backdrop-blur-md px-4 md:px-8 py-3 md:py-4 shadow-sm flex items-center justify-between shrink-0 sticky top-0 z-40 border-b border-slate-100">
-      <div class="flex items-center gap-3">
-        <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition"><i data-lucide="menu" class="w-6 h-6"></i></button>
+    <header class="bg-white/90 backdrop-blur-md px-4 md:px-8 py-2.5 md:py-3 shadow-sm flex items-center justify-between shrink-0 sticky top-0 z-40 border-b border-slate-100">
+      <div class="flex items-center gap-3 md:gap-4">
+        <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition"><i data-lucide="menu" class="w-5 h-5"></i></button>
         <h2 id="header-title" class="text-lg md:text-xl font-black text-theme-grad uppercase tracking-tight line-clamp-1">Tổng Quan Lớp</h2>
+        <div class="hidden sm:flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-xs">
+          <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-500"></i>
+          <span>Lớp <span id="teacher-class-name">...</span></span>
+        </div>
+        <span id="header-year" class="hidden lg:inline-flex text-xs bg-theme-light px-3 py-1 rounded-full font-bold shadow-xs items-center gap-1.5 border border-slate-100 whitespace-nowrap"><i data-lucide="calendar" class="w-3 h-3"></i> Năm học ...</span>
       </div>
-      <div class="flex items-center gap-2 md:gap-3 shrink-0">
-        <!-- Nút Đồng bộ Chrome ⇄ Safari & Thiết bị -->
-        <button onclick="openSyncModal()" class="flex items-center gap-1.5 text-xs bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3 py-1.5 rounded-full font-bold shadow-sm transition hover:scale-105" title="Đồng bộ dữ liệu giữa Google Chrome, Safari và các thiết bị">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">Đồng bộ Chrome ⇄ Safari</span>
-          <span class="sm:hidden">Đồng bộ</span>
-        </button>
+      <div class="flex items-center gap-2.5 md:gap-3.5 shrink-0">
+        <!-- Đồng hồ thời gian thực -->
+        <div class="hidden xl:flex bg-[#1e1b4b] text-white px-3.5 py-1.5 rounded-full text-xs font-bold items-center gap-2 shadow-xs border border-indigo-950">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-300"></i>
+          <span id="teacher-current-time" class="font-mono text-[11px]">--:--:-- | --, --/--/----</span>
+        </div>
         <!-- Cloud Sync Status Indicator & Pull Action -->
-        <div id="header-cloud-sync-status" onclick="manualCloudPull()" class="cursor-pointer flex items-center gap-1.5 text-xs px-2.5 sm:px-3 py-1.5 rounded-full font-bold border transition shadow-sm bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" title="Trạng thái đám mây. Bấm để kéo/đồng bộ dữ liệu từ Đám mây về máy này">
+        <div id="header-cloud-sync-status" onclick="manualCloudPull()" class="cursor-pointer flex items-center gap-1.5 text-xs px-2.5 sm:px-3 py-1.5 rounded-full font-bold border transition shadow-xs bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" title="Trạng thái đám mây Supabase. Bấm để đồng bộ dữ liệu">
           <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0" id="header-cloud-dot"></span>
           <span id="header-cloud-text" class="whitespace-nowrap flex items-center gap-1"><i data-lucide="cloud" class="w-3.5 h-3.5 inline text-slate-400"></i> Đám mây</span>
         </div>
-        <span id="header-year" class="hidden md:inline-flex text-xs bg-theme-light px-3 py-1.5 rounded-full font-bold shadow-sm items-center gap-1.5 border border-slate-100 whitespace-nowrap"><i data-lucide="calendar" class="w-3 h-3"></i> Năm học ...</span>
-        <div class="relative group cursor-pointer shrink-0" onclick="document.getElementById('avatar-upload').click()" title="Đổi ảnh đại diện GV">
-          <div id="header-avatar" class="w-10 h-10 rounded-full bg-theme-grad text-white flex items-center justify-center font-bold text-sm shadow-md border-2 border-white overflow-hidden transition transform group-hover:scale-105">GV</div>
-          <div class="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm border border-slate-200 group-hover:bg-slate-50"><i data-lucide="camera" class="w-3 h-3 text-slate-500"></i></div>
-          <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+        <!-- Teacher Profile & Avatar Widget -->
+        <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+          <div class="relative group cursor-pointer shrink-0" onclick="document.getElementById('avatar-upload').click()" title="Đổi ảnh đại diện">
+            <div id="header-avatar" class="w-9 h-9 rounded-full bg-theme-grad text-white flex items-center justify-center font-bold text-xs shadow-md border-2 border-white overflow-hidden transition transform group-hover:scale-105">GV</div>
+            <div class="absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5 shadow-xs border border-slate-200 group-hover:bg-slate-50"><i data-lucide="camera" class="w-2.5 h-2.5 text-slate-500"></i></div>
+            <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+          </div>
+          <div class="hidden md:block text-left leading-tight">
+            <div id="teacher-header-name" class="text-xs font-black text-slate-800 line-clamp-1">GV. ...</div>
+            <div id="teacher-header-role" class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">GVCN</div>
+          </div>
         </div>
         <!-- Quick Logout Button on Header -->
-        <button onclick="logout()" class="flex items-center gap-1.5 text-xs bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-3 py-2 rounded-full font-bold transition shadow-sm border border-slate-200 shrink-0" title="Đăng xuất khỏi hệ thống">
+        <button onclick="logout()" class="flex items-center gap-1.5 text-xs bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-3 py-1.5 rounded-full font-bold transition shadow-xs border border-slate-200 shrink-0" title="Đăng xuất khỏi hệ thống">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Đăng xuất</span>
         </button>
@@ -442,39 +452,7 @@
 
         <!-- TEACHER HOME PAGE CONTAINER -->
         <div id="teacher-overview-container" class="space-y-4 md:space-y-6 hidden">
-          <!-- 1. HEADER ROW -->
-          <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-slate-100 pb-4">
-            <div>
-              <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Trang chủ</h1>
-            </div>
-            
-            <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-              <!-- Clock widget -->
-              <div class="bg-[#1e1b4b] text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-sm border border-indigo-950">
-                <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-300"></i>
-                <span id="teacher-current-time" class="font-mono">--:--:-- | --, --/--/----</span>
-              </div>
-              
-              <!-- Class Select indicator -->
-              <div class="bg-indigo-50 border border-indigo-100 text-indigo-700 px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 whitespace-nowrap">
-                <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-500"></i>
-                <span>Lớp <span id="teacher-class-name">...</span></span>
-              </div>
-              
-              <!-- Teacher User Widget -->
-              <div class="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-                <div id="teacher-header-avatar" class="w-9 h-9 rounded-full bg-theme-grad text-white flex items-center justify-center font-bold text-sm shadow-md border-2 border-white overflow-hidden shrink-0">
-                  GV
-                </div>
-                <div class="text-left leading-none">
-                  <div id="teacher-header-name" class="text-xs font-black text-slate-800">GV. ...</div>
-                  <div id="teacher-header-role" class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-wider">GVCN</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. HERO BANNER (RE-DESIGNED TO MATCH THE SCREENSHOT EXACTLY) -->
+          <!-- HERO BANNER -->
           <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col relative">
             <!-- Top Half: Cover Photo (High opacity, clear, 100% width) -->
             <div class="relative w-full h-48 md:h-64 bg-slate-200 overflow-hidden">
@@ -4326,6 +4304,24 @@
         }
         if(currentUser.cover) document.getElementById('cover-photo').style.backgroundImage = `url('${currentUser.cover}')`; 
         
+        // Start real-time clock on header
+        startClockOnce();
+
+        const teacherClassNameEl = document.getElementById('teacher-class-name');
+        if (teacherClassNameEl) teacherClassNameEl.innerText = currentUser.className || '';
+        const teacherHeaderNameEl = document.getElementById('teacher-header-name');
+        const teacherHeaderRoleEl = document.getElementById('teacher-header-role');
+        if (teacherHeaderNameEl) {
+            if (isStudent && currentStudent) {
+                teacherHeaderNameEl.innerText = currentStudent.name || 'Học sinh';
+                if (teacherHeaderRoleEl) teacherHeaderRoleEl.innerText = 'Học sinh';
+            } else {
+                const title = currentUser.gender === 'Nữ' ? 'Cô' : 'Thầy';
+                teacherHeaderNameEl.innerText = `${title}. ${currentUser.teacherName || 'Thầy/Cô'}`;
+                if (teacherHeaderRoleEl) teacherHeaderRoleEl.innerText = 'GVCN';
+            }
+        }
+
         // Show/hide appropriate overview container based on role
         const studentContainer = document.getElementById('student-overview-container');
         const teacherContainer = document.getElementById('teacher-overview-container');
@@ -4335,18 +4331,6 @@
         } else {
             if (studentContainer) studentContainer.classList.add('hidden');
             if (teacherContainer) teacherContainer.classList.remove('hidden');
-            
-            // Start clock for teacher dashboard
-            startClockOnce();
-            
-            // Bind teacher home page header/banner elements
-            const teacherClassNameEl = document.getElementById('teacher-class-name');
-            if (teacherClassNameEl) teacherClassNameEl.innerText = currentUser.className || '';
-            const teacherHeaderNameEl = document.getElementById('teacher-header-name');
-            if (teacherHeaderNameEl) {
-                const title = currentUser.gender === 'Nữ' ? 'Cô' : 'Thầy';
-                teacherHeaderNameEl.innerText = `${title}. ${currentUser.teacherName || 'Thầy/Cô'}`;
-            }
             
             const bannerBadgeYear = document.getElementById('banner-badge-year');
             if (bannerBadgeYear) bannerBadgeYear.innerHTML = `<i data-lucide="calendar" class="w-3 h-3 text-theme"></i> Niên khóa ${currentUser.year || ''}`;
