@@ -465,27 +465,27 @@
             <!-- Thanh đáy tinh gọn: Bên trái là Avatar + Lời chào gọn, bên phải là 4 nút chức năng -->
             <div class="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-3 w-full">
               
-              <!-- Khu vực lời chào gọn gàng (hạ xuống sát đáy, nền nhạt kính mờ) -->
-              <div class="flex items-center gap-2.5 sm:gap-3 bg-white/85 hover:bg-white/95 backdrop-blur-md p-2 sm:p-2.5 pr-4 sm:pr-5 rounded-2xl border border-white/70 shadow-lg w-fit transition-all max-w-full lg:max-w-xl">
+              <!-- Khu vực lời chào gọn gàng (hạ xuống sát đáy, kính mờ trong suốt thấy rõ phía sau) -->
+              <div class="flex items-center gap-2.5 sm:gap-3 bg-white/45 hover:bg-white/65 backdrop-blur-md p-2 sm:p-2.5 pr-4 sm:pr-5 rounded-2xl border border-white/50 shadow-lg w-fit transition-all max-w-full lg:max-w-xl">
                 <!-- Ảnh đại diện GVCN (hạ xuống đáy, viền trắng nổi bật) -->
-                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border-2 border-white shadow-md shrink-0 relative group/avatar cursor-pointer" onclick="document.getElementById('avatar-upload').click()" title="Bấm để đổi ảnh đại diện">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border-2 border-white/90 shadow-md shrink-0 relative group/avatar cursor-pointer" onclick="document.getElementById('avatar-upload').click()" title="Bấm để đổi ảnh đại diện">
                   <div id="teacher-banner-avatar" class="w-full h-full bg-slate-100 flex items-center justify-center text-2xl shadow-inner">👩‍🏫</div>
                   <div class="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200 text-[10px] font-bold gap-0.5">
                     <i data-lucide="camera" class="w-3 h-3"></i>
                   </div>
                 </div>
 
-                <!-- Lời chào tinh gọn -->
+                <!-- Lời chào tinh gọn (chữ rõ nét trên nền kính mờ) -->
                 <div class="min-w-0 flex-1">
                   <div class="flex flex-wrap items-center gap-1.5">
-                    <h2 class="text-sm sm:text-base font-black text-slate-800 tracking-tight leading-snug">
+                    <h2 class="text-sm sm:text-base font-black text-slate-900 tracking-tight leading-snug drop-shadow-2xs">
                       <span id="teacher-banner-greeting">Chào buổi học</span>, <span id="teacher-banner-name" class="text-theme-grad">Thầy/Cô</span>! 👋
                     </h2>
-                    <span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-200/60 whitespace-nowrap">
+                    <span class="text-[10px] font-extrabold text-emerald-800 bg-white/75 px-2 py-0.5 rounded-md border border-white/80 shadow-2xs whitespace-nowrap">
                       Lớp <span id="teacher-banner-sub-class">...</span>
                     </span>
                   </div>
-                  <p id="teacher-banner-desc" class="text-[11px] text-slate-600 font-medium leading-tight mt-0.5 line-clamp-1">
+                  <p id="teacher-banner-desc" class="text-[11px] text-slate-800 font-bold leading-tight mt-0.5 line-clamp-1 drop-shadow-2xs">
                     Chúc Thầy/Cô và các em học sinh một ngày học tập sôi nổi & nhiều niềm vui!
                   </p>
                   <!-- Hidden elements to preserve updateUI bindings -->
