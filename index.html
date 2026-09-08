@@ -5077,101 +5077,247 @@
       reader.onload = function(event) {
         try {
             const data = new Uint8Array(event.target.result); const workbook = XLSX.read(data, {type: 'array'});
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]]; const json = XLSX.utils.sheet_to_json(firstSheet, {header: 1, defval: ''});
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]]; 
+            const json = XLSX.utils.sheet_to_json(firstSheet, {header: 1, defval: ''});
             let newStudents = []; let indexCounter = 1;
             
             const getVal = (val) => (val === undefined || val === null) ? '' : String(val).trim();
             
-            // Smart column detection by matching header names
-            const headerRow = json[0] || [];
-            const findCol = (keywords, defaultIndex) => {
+            // 1. TỰ ĐỘNG TÌM DÒNG TIÊU ĐỀ (HEADER ROW) THỰC TẾ
+            // Hỗ trợ file có dòng thông tin Sở/Trường/Lớp phía trên (SMAS, vnEdu, Sổ điểm...)
+            let headerRowIndex = 0;
+            let maxHeaderScore = 0;
+            const headerCheckKeywords = [
+              'ho va ten', 'ho ten', 'ten hs', 'ten hoc sinh', 'ho dem', 'ten',
+              'gioi tinh', 'phai', 'nu', 'nam',
+              'ngay sinh', 'ngaysinh', 'nam sinh', 'ns',
+              'dan toc', 'cccd', 'cmnd', 'dinh danh',
+              'noi sinh', 'khai sinh', 'que quan', 'dia chi', 'thuong tru',
+              'sdt', 'dien thoai', 'cha', 'me', 'stt'
+            ];
+
+            for (let r = 0; r < Math.min(json.length, 25); r++) {
+              const row = json[r] || [];
+              let score = 0;
+              for (let c = 0; c < row.length; c++) {
+                const cellText = removeAccents(String(row[c] || '').toLowerCase().trim());
+                if (!cellText) continue;
+                for (let kw of headerCheckKeywords) {
+                  if (cellText === kw || cellText.includes(kw)) {
+                    score++;
+                    break;
+                  }
+                }
+              }
+              if (score > maxHeaderScore) {
+                maxHeaderScore = score;
+                headerRowIndex = r;
+              }
+            }
+            if (maxHeaderScore < 2) headerRowIndex = 0;
+            const headerRow = json[headerRowIndex] || [];
+
+            const findCol = (keywords, defaultIndex = -1) => {
               for (let c = 0; c < headerRow.length; c++) {
                 const headerText = removeAccents(String(headerRow[c] || '').toLowerCase().trim());
+                if (!headerText) continue;
                 for (let kw of keywords) {
-                  if (headerText.includes(kw)) return c;
+                  const cleanKw = removeAccents(kw.toLowerCase().trim());
+                  if (headerText === cleanKw || headerText.includes(cleanKw)) return c;
                 }
               }
               return defaultIndex;
             };
 
-            const colName = findCol(['ho va ten', 'ho ten', 'ten hs', 'ten hoc sinh'], 1);
-            const colGender = findCol(['gioi tinh', 'phai'], 2);
-            const colDob = findCol(['ngay sinh', 'ngaysinh'], 3);
+            // 2. NHẬN DIỆN CÁC CỘT HỌ VÀ TÊN
+            let colName = findCol(['ho va ten', 'ho ten', 'ten hs', 'ten hoc sinh', 'ho va ten hs'], -1);
+            let colLastName = findCol(['ho dem', 'ho va dem', 'ho va ten lot', 'ho lot', 'ho'], -1);
+            let colFirstName = findCol(['ten'], -1);
+            if (colFirstName === colName) colFirstName = -1;
+            if (colName === -1 && colFirstName !== -1) colName = colFirstName;
+            if (colName === -1) colName = 1;
+
+            // 3. NHẬN DIỆN CỘT GIỚI TÍNH / NỮ / NAM
+            let colFemale = -1; // Cột "Nữ" riêng biệt
+            let colMale = -1;   // Cột "Nam" riêng biệt
+            let colGender = -1; // Cột "Giới tính" / "Phái"
+
+            for (let c = 0; c < headerRow.length; c++) {
+              const hText = removeAccents(String(headerRow[c] || '').toLowerCase().trim());
+              if (!hText || hText.includes('phu huynh')) continue;
+              
+              // Cột "Nữ": nu, nu (x), nu?, nu (danh dau x), hoc sinh nu...
+              if (hText === 'nu' || hText.startsWith('nu ') || hText.startsWith('nu(') || hText.includes('(nu)') || hText.includes('nu (x)') || hText === 'nu?') {
+                if (colFemale === -1) colFemale = c;
+              }
+              // Cột "Nam": nam, nam (x), hoc sinh nam...
+              else if (hText === 'nam' || hText.startsWith('nam ') || hText.startsWith('nam(') || hText.includes('(nam)')) {
+                if (colMale === -1) colMale = c;
+              }
+              // Cột "Giới tính" / "Phái"
+              else if (hText.includes('gioi tinh') || hText.includes('gioitinh') || hText.includes('phai') || hText.includes('gender') || hText.includes('sex')) {
+                if (colGender === -1) colGender = c;
+              }
+            }
+
+            // Quét dữ liệu mẫu nếu chưa tìm thấy qua header
+            if (colFemale === -1 && colMale === -1 && colGender === -1) {
+              for (let testC of [2, 3, 4, 1]) {
+                let matchCount = 0;
+                for (let r = headerRowIndex + 1; r < Math.min(json.length, headerRowIndex + 10); r++) {
+                  const testVal = removeAccents(String((json[r] && json[r][testC]) || '').toLowerCase().trim());
+                  if (testVal === 'x' || testVal === 'v' || testVal === 'nu' || testVal === 'nam') matchCount++;
+                }
+                if (matchCount >= 2) {
+                  colGender = testC;
+                  break;
+                }
+              }
+              if (colGender === -1) colGender = 2;
+            }
+
+            // 4. NHẬN DIỆN CÁC CỘT THÔNG TIN KHÁC
+            const colDob = findCol(['ngay sinh', 'ngaysinh', 'nam sinh hs', 'ns hs'], 3);
             const colNation = findCol(['dan toc'], 4);
-            const colCccd = findCol(['cccd', 'dinh danh', 'cmnd'], 5);
-            const colBirthplace = findCol(['noi sinh'], 6);
+            const colCccd = findCol(['cccd hs', 'cccd', 'dinh danh', 'cmnd'], 5);
+            const colBirthplace = findCol(['noi sinh', 'que quan'], 6);
             const colBirthCertPlace = findCol(['khai sinh'], 7);
-            const colPhone = findCol(['dien thoai hs', 'sdt hs', 'so dien thoai', 'sdt'], 8);
-            const colAddress = findCol(['dia chi', 'thuong tru'], 9);
-            const colFatherName = findCol(['ho ten cha', 'ten cha', 'cha'], 10);
+            const colPhone = findCol(['dien thoai hs', 'sdt hs', 'so dien thoai hs', 'sdt', 'dien thoai'], 8);
+            const colAddress = findCol(['dia chi', 'thuong tru', 'noi o'], 9);
+            const colFatherName = findCol(['ho ten cha', 'ten cha', 'ho va ten cha'], 10);
             const colFatherBirthYear = findCol(['nam sinh cha', 'ns cha'], 11);
             const colFatherJob = findCol(['nghe nghiep cha', 'nghe cha'], 12);
             const colFatherCccd = findCol(['cccd cha', 'dinh danh cha'], 13);
             const colFatherPhone = findCol(['sdt cha', 'dien thoai cha'], 14);
-            const colMotherName = findCol(['ho ten me', 'ten me', 'me'], 15);
+            const colMotherName = findCol(['ho ten me', 'ten me', 'ho va ten me'], 15);
             const colMotherBirthYear = findCol(['nam sinh me', 'ns me'], 16);
             const colMotherJob = findCol(['nghe nghiep me', 'nghe me'], 17);
             const colMotherCccd = findCol(['cccd me', 'dinh danh me'], 18);
             const colMotherPhone = findCol(['sdt me', 'dien thoai me'], 19);
 
-            for(let i = 1; i < json.length; i++) {
+            // 5. ĐỌC DỮ LIỆU TỪNG HỌC SINH
+            for(let i = headerRowIndex + 1; i < json.length; i++) {
               let row = json[i];
-              if(row && row[colName] && String(row[colName]).trim() !== '') {
-                const name = getVal(row[colName]);
-                const gender = getVal(row[colGender]) || 'Nam';
-                const dobStr = parseExcelDate(row[colDob]);
-                const nation = getVal(row[colNation]) || 'Kinh';
-                const cccd = getVal(row[colCccd]);
-                const birthplace = getVal(row[colBirthplace]);
-                const birthCertPlace = getVal(row[colBirthCertPlace]);
-                const phone = getVal(row[colPhone]);
-                const address = getVal(row[colAddress]);
-                const fatherName = getVal(row[colFatherName]);
-                const fatherBirthYear = getVal(row[colFatherBirthYear]);
-                const fatherJob = getVal(row[colFatherJob]);
-                const fatherCccd = getVal(row[colFatherCccd]);
-                const fatherPhone = getVal(row[colFatherPhone]);
-                const motherName = getVal(row[colMotherName]);
-                const motherBirthYear = getVal(row[colMotherBirthYear]);
-                const motherJob = getVal(row[colMotherJob]);
-                const motherCccd = getVal(row[colMotherCccd]);
-                const motherPhone = getVal(row[colMotherPhone]);
-                
-                let isFemale = gender.toLowerCase() === 'nữ' || gender.toLowerCase() === 'nu' || gender.toLowerCase() === 'x';
-                let avatars = isFemale ? AVATARS.female : AVATARS.male;
-                
-                newStudents.push({ 
-                  id: Date.now() + i, 
-                  name: name, 
-                  points: 0, 
-                  loginCount: 0,
-                  avatar: avatars[Math.floor(Math.random() * avatars.length)], 
-                  gender: isFemale ? 'Nữ' : 'Nam', 
-                  dob: dobStr, 
-                  role: '', 
-                  history: [], 
-                  code: generateCode(currentUser.className, currentUser.year, indexCounter),
-                  cccd: cccd,
-                  birthplace: birthplace,
-                  birthCertPlace: birthCertPlace,
-                  phone: phone,
-                  address: address,
-                  nation: nation,
-                  religion: '',
-                  fatherName: fatherName,
-                  fatherBirthYear: fatherBirthYear,
-                  fatherJob: fatherJob,
-                  fatherCccd: fatherCccd,
-                  fatherPhone: fatherPhone,
-                  motherName: motherName,
-                  motherBirthYear: motherBirthYear,
-                  motherJob: motherJob,
-                  motherCccd: motherCccd,
-                  motherPhone: motherPhone
-                }); 
-                indexCounter++;
+              if (!row) continue;
+
+              // Ghép họ và tên
+              let name = '';
+              if (colLastName !== -1 && colFirstName !== -1 && row[colLastName] && row[colFirstName]) {
+                name = `${getVal(row[colLastName])} ${getVal(row[colFirstName])}`.trim();
+              } else if (colName !== -1 && row[colName]) {
+                name = getVal(row[colName]);
+                if (colFirstName !== -1 && row[colFirstName] && !name.toLowerCase().endsWith(getVal(row[colFirstName]).toLowerCase())) {
+                  name = `${name} ${getVal(row[colFirstName])}`.trim();
+                }
               }
+
+              if (!name || name === '') continue;
+
+              // Bỏ qua dòng tiêu đề phụ hoặc chân trang
+              const nameLower = removeAccents(name.toLowerCase());
+              if (nameLower.startsWith('tong so') || nameLower.startsWith('nguoi lap') || nameLower.startsWith('hieu truong') || nameLower.startsWith('giao vien') || nameLower.startsWith('chu nhiem') || nameLower.startsWith('nam hoc') || nameLower.startsWith('danh sach')) {
+                continue;
+              }
+
+              // XÁC ĐỊNH GIỚI TÍNH CHÍNH XÁC:
+              let isFemale = false;
+              let genderDetermined = false;
+
+              // TH 1: Cột "Nữ"
+              if (colFemale !== -1 && row[colFemale] !== undefined) {
+                const valF = removeAccents(String(row[colFemale] || '').toLowerCase().trim());
+                if (['x', 'v', '1', 'true', 'nu', 'gai', 'c', '✓', '✔'].includes(valF) || valF.includes('nu') || valF === 'x') {
+                  isFemale = true;
+                  genderDetermined = true;
+                } else if (valF === '' && colMale === -1 && colGender === -1) {
+                  isFemale = false;
+                  genderDetermined = true;
+                }
+              }
+
+              // TH 2: Cột "Nam"
+              if (!genderDetermined && colMale !== -1 && row[colMale] !== undefined) {
+                const valM = removeAccents(String(row[colMale] || '').toLowerCase().trim());
+                if (['x', 'v', '1', 'true', 'nam', 'trai', 'c', '✓', '✔'].includes(valM) || valM.includes('nam') || valM === 'x') {
+                  isFemale = false;
+                  genderDetermined = true;
+                }
+              }
+
+              // TH 3: Cột "Giới tính" / "Phái"
+              if (!genderDetermined && colGender !== -1 && row[colGender] !== undefined) {
+                const rawG = String(row[colGender] || '').trim();
+                const valG = removeAccents(rawG.toLowerCase());
+                if (['x', 'v', '1', 'true', 'nu', 'gai', 'female', 'f', 'c', '✓', '✔'].includes(valG) || valG.includes('nu') || valG.includes('gai') || valG === 'x') {
+                  isFemale = true;
+                  genderDetermined = true;
+                } else if (valG.includes('nam') || valG === 'male' || valG === 'm' || valG === 'trai' || valG === '0') {
+                  isFemale = false;
+                  genderDetermined = true;
+                }
+              }
+
+              // TH 4: Quét dự phòng ở cột 2 hoặc 3 nếu không có cột nào khớp
+              if (!genderDetermined) {
+                const c2 = removeAccents(String(row[2] || '').toLowerCase().trim());
+                const c3 = removeAccents(String(row[3] || '').toLowerCase().trim());
+                if (c2 === 'x' || c2 === 'nu' || c2.includes('nu')) isFemale = true;
+                else if (c3 === 'x' || c3 === 'nu' || c3.includes('nu')) isFemale = true;
+                else isFemale = false;
+              }
+
+              const dobStr = parseExcelDate(row[colDob]);
+              const nation = getVal(row[colNation]) || 'Kinh';
+              const cccd = getVal(row[colCccd]);
+              const birthplace = getVal(row[colBirthplace]);
+              const birthCertPlace = getVal(row[colBirthCertPlace]);
+              const phone = getVal(row[colPhone]);
+              const address = getVal(row[colAddress]);
+              const fatherName = getVal(row[colFatherName]);
+              const fatherBirthYear = getVal(row[colFatherBirthYear]);
+              const fatherJob = getVal(row[colFatherJob]);
+              const fatherCccd = getVal(row[colFatherCccd]);
+              const fatherPhone = getVal(row[colFatherPhone]);
+              const motherName = getVal(row[colMotherName]);
+              const motherBirthYear = getVal(row[colMotherBirthYear]);
+              const motherJob = getVal(row[colMotherJob]);
+              const motherCccd = getVal(row[colMotherCccd]);
+              const motherPhone = getVal(row[colMotherPhone]);
+              
+              let avatars = isFemale ? AVATARS.female : AVATARS.male;
+              
+              newStudents.push({ 
+                id: Date.now() + i, 
+                name: name, 
+                points: 0, 
+                loginCount: 0,
+                avatar: avatars[Math.floor(Math.random() * avatars.length)], 
+                gender: isFemale ? 'Nữ' : 'Nam', 
+                dob: dobStr, 
+                role: '', 
+                history: [], 
+                code: generateCode(currentUser.className, currentUser.year, indexCounter),
+                cccd: cccd,
+                birthplace: birthplace,
+                birthCertPlace: birthCertPlace,
+                phone: phone,
+                address: address,
+                nation: nation,
+                religion: '',
+                fatherName: fatherName,
+                fatherBirthYear: fatherBirthYear,
+                fatherJob: fatherJob,
+                fatherCccd: fatherCccd,
+                fatherPhone: fatherPhone,
+                motherName: motherName,
+                motherBirthYear: motherBirthYear,
+                motherJob: motherJob,
+                motherCccd: motherCccd,
+                motherPhone: motherPhone
+              }); 
+              indexCounter++;
             }
+
             if(newStudents.length > 0) { 
               if(students.length > 0) {
                   closeModalUi('custom-modal', 'custom-modal-content');
@@ -5181,27 +5327,42 @@
                           let addedCount = 0;
                           let mergeIndexCounter = students.length + 1;
                           
+                          const normalizeDob = (d) => {
+                            if (!d) return '';
+                            const parts = String(d).replace(/[-.]/g, '/').split('/');
+                            if (parts.length === 3) {
+                              return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
+                            }
+                            return String(d).trim();
+                          };
+
                           newStudents.forEach(ns => {
                             const normalizedNewName = ns.name.trim().toLowerCase().replace(/\s+/g, ' ');
-                            const normalizedNewDob = ns.dob.trim().replace(/[-.]/g, '/');
+                            const normalizedNewDob = normalizeDob(ns.dob);
                             
                             let existingStudent = students.find(s => {
                               const sName = (s.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
-                              const sDob = (s.dob || '').trim().replace(/[-.]/g, '/');
-                              return sName === normalizedNewName && sDob === normalizedNewDob;
+                              const sDob = normalizeDob(s.dob);
+                              // Khớp tên và ngày sinh (hoặc nếu ngày sinh 1 bên trống thì vẫn khớp theo tên duy nhất)
+                              if (sName === normalizedNewName) {
+                                if (sDob && normalizedNewDob) return sDob === normalizedNewDob;
+                                return true;
+                              }
+                              return false;
                             });
                             
                             if (existingStudent) {
-                              // Update details if they are not empty in the excel file
+                              // Cập nhật giới tính và avatar
                               if (ns.gender !== '') {
                                 let isFemale = ns.gender === 'Nữ';
                                 let currentIsFemale = existingStudent.gender === 'Nữ';
-                                if (currentIsFemale !== isFemale) {
+                                if (currentIsFemale !== isFemale || !existingStudent.gender) {
                                   existingStudent.gender = ns.gender;
                                   let avatars = isFemale ? AVATARS.female : AVATARS.male;
                                   existingStudent.avatar = avatars[Math.floor(Math.random() * avatars.length)];
                                 }
                               }
+                              if (ns.dob !== '') existingStudent.dob = ns.dob;
                               if (ns.cccd !== '') existingStudent.cccd = ns.cccd;
                               if (ns.birthplace !== '') existingStudent.birthplace = ns.birthplace;
                               if (ns.birthCertPlace !== '') existingStudent.birthCertPlace = ns.birthCertPlace;
@@ -5220,7 +5381,6 @@
                               if (ns.motherPhone !== '') existingStudent.motherPhone = ns.motherPhone;
                               updatedCount++;
                             } else {
-                              // Add as new student
                               ns.code = generateCode(currentUser.className, currentUser.year, mergeIndexCounter);
                               students.push(ns);
                               mergeIndexCounter++;
@@ -5232,8 +5392,8 @@
                       });
                   }, 400);
               } else { students = newStudents; saveAppData(); renderAll(); updateUI(); closeModalUi('custom-modal'); setTimeout(() => showModal('success', 'Thành công', `Đã nhập ${students.length} học sinh!`), 400); }
-            } else { closeModalUi('custom-modal'); setTimeout(() => showModal('error', 'Lỗi dữ liệu', 'Không tìm thấy dữ liệu học sinh! Đảm bảo Cột B là Họ và Tên.'), 400); }
-        } catch(err) { closeModalUi('custom-modal'); setTimeout(() => showModal('error', 'Lỗi file', 'Không thể đọc định dạng file Excel này.'), 400); }
+            } else { closeModalUi('custom-modal'); setTimeout(() => showModal('error', 'Lỗi dữ liệu', 'Không tìm thấy dữ liệu học sinh trong file Excel!'), 400); }
+        } catch(err) { closeModalUi('custom-modal'); setTimeout(() => showModal('error', 'Lỗi file', 'Không thể đọc định dạng file Excel này: ' + err.message), 400); }
       }; reader.readAsArrayBuffer(file);
     }
     
