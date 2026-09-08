@@ -4819,7 +4819,14 @@
                 }
             }
         }
-        if(currentUser.cover) document.getElementById('cover-photo').style.backgroundImage = `url('${currentUser.cover}')`; 
+        // Đồng bộ ảnh bìa dùng chung cho tất cả các giao diện (GVCN, GVBM, Học sinh)
+        const activeCoverPhoto = (currentUser && (currentUser.cover || currentUser.coverPhoto)) || 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80';
+        const elCoverStudent = document.getElementById('cover-photo');
+        if (elCoverStudent) elCoverStudent.style.backgroundImage = `url('${activeCoverPhoto}')`;
+        const elCoverTeacher = document.getElementById('teacher-banner-cover');
+        if (elCoverTeacher) elCoverTeacher.style.backgroundImage = `url('${activeCoverPhoto}')`;
+        const elCoverGvbm = document.getElementById('gvbm-banner-cover');
+        if (elCoverGvbm) elCoverGvbm.style.backgroundImage = `url('${activeCoverPhoto}')`;
         
         // Start real-time clock on header
         startClockOnce();
@@ -4871,8 +4878,7 @@
             
             const gvbmBannerCover = document.getElementById('gvbm-banner-cover');
             if (gvbmBannerCover) {
-                const coverImg = currentUser.coverPhoto || 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80';
-                gvbmBannerCover.style.backgroundImage = `url('${coverImg}')`;
+                gvbmBannerCover.style.backgroundImage = `url('${activeCoverPhoto}')`;
             }
             const gvbmClassBadge = document.getElementById('gvbm-class-badge');
             if (gvbmClassBadge) gvbmClassBadge.innerText = currentUser.className || '...';
@@ -4953,8 +4959,8 @@
             }
             
             const teacherBannerCover = document.getElementById('teacher-banner-cover');
-            if (teacherBannerCover && currentUser.cover) {
-                teacherBannerCover.style.backgroundImage = `url('${currentUser.cover}')`;
+            if (teacherBannerCover) {
+                teacherBannerCover.style.backgroundImage = `url('${activeCoverPhoto}')`;
             }
 
             // Sync settings & modal input values
@@ -4986,7 +4992,24 @@
         configureSidebarForRole();
         lucide.createIcons(); 
     }
-    function handleCoverUpload(e) { const file = e.target.files[0]; if(!file) return; compressImage(file, 1200, 800, function(dataUrl) { currentUser.cover = dataUrl; if(saveUserToStorage()) { document.getElementById('cover-photo').style.backgroundImage = `url('${currentUser.cover}')`; const tCover = document.getElementById('teacher-banner-cover'); if (tCover) tCover.style.backgroundImage = `url('${currentUser.cover}')`; } }, 0.85); e.target.value = ''; }
+    function handleCoverUpload(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        compressImage(file, 1200, 800, function(dataUrl) {
+            currentUser.cover = dataUrl;
+            currentUser.coverPhoto = dataUrl;
+            if(saveUserToStorage()) {
+                const cPhoto = document.getElementById('cover-photo');
+                if (cPhoto) cPhoto.style.backgroundImage = `url('${dataUrl}')`;
+                const tCover = document.getElementById('teacher-banner-cover');
+                if (tCover) tCover.style.backgroundImage = `url('${dataUrl}')`;
+                const gCover = document.getElementById('gvbm-banner-cover');
+                if (gCover) gCover.style.backgroundImage = `url('${dataUrl}')`;
+                showToast && showToast('Đã cập nhật ảnh bìa lớp học và đồng bộ cho tất cả tài khoản!');
+            }
+        }, 0.85);
+        e.target.value = '';
+    }
     function handleAvatarUpload(e) {
         const file = e.target.files[0];
         if(!file) return;
