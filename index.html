@@ -165,17 +165,35 @@
   <!-- AUTH SCREEN -->
   <div id="auth-screen" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[600] hidden items-center justify-center p-4 transition-opacity duration-300">
     <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md">
-      <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-theme-grad rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4 transform rotate-3"><i data-lucide="graduation-cap" class="w-8 h-8 text-white -rotate-3"></i></div>
+      <div class="text-center mb-5">
+        <div class="w-16 h-16 bg-theme-grad rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-3 transform rotate-3"><i data-lucide="graduation-cap" class="w-8 h-8 text-white -rotate-3"></i></div>
         <h2 id="auth-title" class="text-2xl font-black text-slate-800 tracking-tight">Đăng Nhập</h2>
-        <p class="text-sm text-slate-500 mt-1">Hệ thống quản lý lớp học</p>
+        <p class="text-xs text-slate-500 mt-1 font-medium">Hệ thống quản lý lớp học</p>
       </div>
-      <div class="space-y-4">
-        <div><label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Tài khoản (ID)</label><input type="text" id="auth-id" placeholder="admin" value="admin" class="w-full mt-1.5 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none"></div>
-        <div><label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Mật khẩu</label><input type="password" id="auth-pass" placeholder="admin" value="admin" class="w-full mt-1.5 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none"></div>
+
+      <!-- 2 KHU VỰC TAB: ĐĂNG NHẬP / ĐĂNG KÝ -->
+      <div class="flex p-1 bg-slate-100 rounded-2xl mb-5 border border-slate-200/80 text-xs font-bold">
+        <button type="button" id="auth-tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 py-2.5 rounded-xl bg-white text-slate-800 shadow-sm transition flex items-center justify-center gap-1.5 font-black">
+          <i data-lucide="log-in" class="w-4 h-4 text-emerald-600"></i> Đăng Nhập
+        </button>
+        <button type="button" id="auth-tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 transition flex items-center justify-center gap-1.5 font-bold">
+          <i data-lucide="user-plus" class="w-4 h-4 text-indigo-500"></i> Đăng Ký
+        </button>
+      </div>
+
+      <!-- KHU VỰC 1: ĐĂNG NHẬP -->
+      <div id="auth-login-section" class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Tài khoản (ID)</label>
+          <input type="text" id="auth-id" placeholder="admin" value="admin" onkeydown="if(event.key==='Enter') handleAuth()" class="w-full mt-1.5 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none">
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Mật khẩu</label>
+          <input type="password" id="auth-pass" placeholder="admin" value="admin" onkeydown="if(event.key==='Enter') handleAuth()" class="w-full mt-1.5 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none">
+        </div>
         <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-2.5 rounded-xl text-xs flex items-center gap-2 font-medium">
           <i data-lucide="info" class="w-4 h-4 text-emerald-600 shrink-0"></i>
-          <span>Tài khoản mới: <strong class="font-bold text-emerald-700">admin</strong> / Mật khẩu: <strong class="font-bold text-emerald-700">admin</strong></span>
+          <span>Tài khoản: <strong class="font-bold text-emerald-700">admin</strong> / Mật khẩu: <strong class="font-bold text-emerald-700">admin</strong></span>
         </div>
         <p id="auth-error" class="text-xs text-rose-500 font-bold hidden bg-rose-50 p-2 rounded-lg text-center">Sai tài khoản hoặc mật khẩu!</p>
         <div id="auth-loading" class="hidden w-full flex flex-col items-center gap-2.5 my-3 bg-slate-50 border border-slate-100 p-3 rounded-2xl shadow-sm">
@@ -184,48 +202,38 @@
             </div>
             <span class="text-[9px] text-slate-400 font-black uppercase tracking-widest animate-pulse">Đang kết nối đám mây...</span>
         </div>
-        <button id="auth-btn" onclick="handleAuth()" class="w-full bg-theme-grad text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] transition-all">Đăng Nhập</button>
+        <button id="auth-btn" onclick="handleAuth()" class="w-full bg-theme-grad text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i> Đăng Nhập
+        </button>
       </div>
-      <div class="mt-4 text-center text-sm"><span class="text-slate-500" id="auth-toggle-text">Chưa có tài khoản?</span> <button onclick="toggleAuthMode()" class="text-theme font-bold hover:underline" id="auth-toggle-btn">Đăng ký ngay</button></div>
-      <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
-        <div class="flex items-center justify-between text-xs px-1">
-          <div id="auth-cloud-status-badge" class="flex items-center gap-1.5 font-bold text-slate-400 text-[11px]">
-            <span class="w-2 h-2 rounded-full bg-slate-300"></span> Chưa kết nối Đám mây
-          </div>
-          <button type="button" onclick="toggleAuthCloudConfig()" class="text-theme font-bold text-[11px] hover:underline flex items-center gap-1">
-            <i data-lucide="settings" class="w-3 h-3"></i> Cấu hình Đám mây
-          </button>
-        </div>
 
-        <!-- Khung nhập Supabase ngay tại màn hình đăng nhập (cho trình duyệt mới) -->
-        <div id="auth-cloud-config-box" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2.5 text-left transition-all">
-          <div>
-            <label class="text-[10px] font-bold text-slate-600 uppercase">Supabase URL</label>
-            <input type="text" id="auth-input-supabase-url" placeholder="https://xyz.supabase.co" class="w-full mt-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none ring-theme">
-          </div>
-          <div>
-            <label class="text-[10px] font-bold text-slate-600 uppercase">Supabase Anon Key</label>
-            <input type="password" id="auth-input-supabase-key" placeholder="anon key..." class="w-full mt-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none ring-theme">
-          </div>
-          <div class="flex gap-2 pt-1">
-            <button type="button" onclick="saveAuthCloudConfig()" class="flex-1 bg-theme-grad text-white py-2 rounded-xl font-bold text-xs shadow-sm hover:scale-[1.02] transition flex items-center justify-center gap-1">
-              <i data-lucide="check" class="w-3.5 h-3.5"></i> Lưu & Kết nối
-            </button>
-            <button type="button" onclick="toggleAuthCloudConfig()" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs hover:bg-slate-300 transition">
-              Đóng
-            </button>
-          </div>
+      <!-- KHU VỰC 2: ĐĂNG KÝ -->
+      <div id="auth-register-section" class="space-y-3.5 hidden">
+        <div>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Tên tài khoản (ID) <span class="text-rose-500">*</span></label>
+          <input type="text" id="reg-id" placeholder="vd: giaovien1" onkeydown="if(event.key==='Enter') handleRegister()" class="w-full mt-1.5 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none text-sm">
         </div>
-
-        <button type="button" onclick="openInputSyncCodeModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-2.5 rounded-xl font-bold transition text-xs flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01]">
-          <i data-lucide="download-cloud" class="w-4 h-4"></i>
-          <span>📥 Nhận dữ liệu từ Chrome sang Safari</span>
-        </button>
-        <button type="button" onclick="manualCloudPull()" class="w-full bg-emerald-50 text-emerald-700 border border-emerald-200 py-2.5 rounded-xl font-bold hover:bg-emerald-100 transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
-          <i data-lucide="cloud-download" class="w-4 h-4 text-emerald-600"></i> Tải nhanh dữ liệu từ Đám mây
-        </button>
-        <button type="button" id="btn-copy-sync-link-auth" onclick="openSyncModal()" class="w-full bg-sky-50 text-sky-700 border border-sky-200 py-2 rounded-xl font-bold hover:bg-sky-100 transition text-xs flex items-center justify-center gap-1.5 shadow-sm">
-          <i data-lucide="share-2" class="w-3.5 h-3.5 text-sky-600"></i> Trung tâm Đồng bộ & Chia sẻ
+        <div>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Họ tên Giáo viên</label>
+          <input type="text" id="reg-name" placeholder="vd: Cô Việt Hà" onkeydown="if(event.key==='Enter') handleRegister()" class="w-full mt-1.5 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none text-sm">
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Mật khẩu <span class="text-rose-500">*</span></label>
+          <input type="password" id="reg-pass" placeholder="Nhập mật khẩu" onkeydown="if(event.key==='Enter') handleRegister()" class="w-full mt-1.5 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none text-sm">
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600 uppercase tracking-wider">Xác nhận Mật khẩu <span class="text-rose-500">*</span></label>
+          <input type="password" id="reg-pass-confirm" placeholder="Nhập lại mật khẩu" onkeydown="if(event.key==='Enter') handleRegister()" class="w-full mt-1.5 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl ring-theme outline-none text-sm">
+        </div>
+        <p id="reg-error" class="text-xs text-rose-500 font-bold hidden bg-rose-50 p-2 rounded-lg text-center"></p>
+        <div id="reg-loading" class="hidden w-full flex flex-col items-center gap-2.5 my-2 bg-slate-50 border border-slate-100 p-2.5 rounded-2xl shadow-sm">
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden relative">
+                <div class="bg-gradient-to-r from-theme to-cyan-500 h-full w-1/3 rounded-full absolute top-0 left-0 animate-loading-bar shadow-sm"></div>
+            </div>
+            <span class="text-[9px] text-slate-400 font-black uppercase tracking-widest animate-pulse">Đang tạo tài khoản trên đám mây...</span>
+        </div>
+        <button id="reg-btn" onclick="handleRegister()" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4"></i> Đăng Ký Tài Khoản
         </button>
       </div>
     </div>
@@ -1062,16 +1070,34 @@
               <!-- QUẢN LÝ HỆ THỐNG & DỮ LIỆU -->
               <div class="bg-rose-50 p-5 md:p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
                  <div>
-                   <h3 class="text-lg md:text-xl font-black text-slate-800 mb-2">Sao Lưu & Quản Lý Dữ Liệu</h3>
-                   <p class="text-xs md:text-sm text-slate-500 mb-4 md:mb-6 font-medium">Xuất file JSON để chuyển sang máy khác, hoặc nạp file để khôi phục.</p>
+                   <h3 class="text-lg md:text-xl font-black text-slate-800 mb-1 flex items-center gap-2"><i data-lucide="shield-alert" class="w-5 h-5 text-rose-500"></i> Sao Lưu & Quản Lý Dữ Liệu</h3>
+                   <p class="text-xs md:text-sm text-slate-500 mb-3 font-medium">Xuất file JSON để chuyển sang máy khác, hoặc nạp file để khôi phục.</p>
                  </div>
-                 <div class="flex flex-wrap gap-2.5 pt-3 justify-start">
-                    <button onclick="exportData()" class="bg-blue-600 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="download" class="w-3.5 h-3.5"></i> Xuất file sao lưu (.json)</button>
-                    <button onclick="document.getElementById('import-upload').click()" class="bg-emerald-600 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Nạp từ file (.json)</button>
-                    <input type="file" id="import-upload" accept=".json" class="hidden" onchange="importData(event)">
-                    <button onclick="resetAllPoints()" class="bg-rose-50 text-rose-600 border border-rose-200 px-3.5 py-2.5 rounded-xl font-bold hover:bg-rose-100 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset điểm</button>
-                    <button onclick="cleanAndResetAllClassData()" class="bg-rose-600 hover:bg-rose-700 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-xs" title="Làm sạch trắng dữ liệu học sinh, điểm danh, sơ đồ"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Làm sạch dữ liệu lớp</button>
-                    <button onclick="factoryResetAllData()" class="bg-slate-800 hover:bg-black text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-xs" title="Xóa sạch toàn bộ dữ liệu, tài khoản và đưa web về trạng thái mới tinh 100%"><i data-lucide="power" class="w-3.5 h-3.5 text-rose-400"></i> Xóa sạch toàn bộ (Reset 100%)</button>
+
+                 <!-- Nút bấm mở rộng/thu gọn công cụ quản lý dữ liệu -->
+                 <div>
+                    <button type="button" onclick="toggleBackupManagementTools()" class="w-full flex items-center justify-between py-2 px-3 bg-white hover:bg-rose-100/60 border border-rose-200/80 rounded-xl text-xs font-bold text-rose-800 transition shadow-sm cursor-pointer select-none">
+                      <span class="flex items-center gap-1.5">
+                        <i data-lucide="database" class="w-3.5 h-3.5 text-rose-600"></i>
+                        <span>Công cụ sao lưu & thiết lập dữ liệu</span>
+                      </span>
+                      <span class="flex items-center gap-1 text-[11px] text-rose-600 font-semibold">
+                        <span id="backup-tools-toggle-text">Mở ra</span>
+                        <i data-lucide="chevron-down" id="backup-tools-chevron" class="w-3.5 h-3.5 transition-transform duration-200"></i>
+                      </span>
+                    </button>
+
+                    <!-- Khung công cụ quản lý dữ liệu (mặc định ẩn) -->
+                    <div id="backup-management-tools-box" class="hidden mt-3 space-y-2.5 transition-all">
+                      <div class="flex flex-wrap gap-2.5 justify-start">
+                        <button onclick="exportData()" class="bg-blue-600 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="download" class="w-3.5 h-3.5"></i> Xuất file sao lưu (.json)</button>
+                        <button onclick="document.getElementById('import-upload').click()" class="bg-emerald-600 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold hover:bg-emerald-700 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Nạp từ file (.json)</button>
+                        <input type="file" id="import-upload" accept=".json" class="hidden" onchange="importData(event)">
+                        <button onclick="resetAllPoints()" class="bg-rose-50 text-rose-600 border border-rose-200 px-3.5 py-2.5 rounded-xl font-bold hover:bg-rose-100 transition flex items-center justify-center gap-1.5 text-xs"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset điểm</button>
+                        <button onclick="cleanAndResetAllClassData()" class="bg-rose-600 hover:bg-rose-700 text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-xs" title="Làm sạch trắng dữ liệu học sinh, điểm danh, sơ đồ"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Làm sạch dữ liệu lớp</button>
+                        <button onclick="factoryResetAllData()" class="bg-slate-800 hover:bg-black text-white shadow-sm px-3.5 py-2.5 rounded-xl font-bold transition flex items-center justify-center gap-1.5 text-xs" title="Xóa sạch toàn bộ dữ liệu, tài khoản và đưa web về trạng thái mới tinh 100%"><i data-lucide="power" class="w-3.5 h-3.5 text-rose-400"></i> Xóa sạch toàn bộ (Reset 100%)</button>
+                      </div>
+                    </div>
                  </div>
               </div>
 
@@ -2355,6 +2381,26 @@
         }
     }
 
+    function toggleBackupManagementTools() {
+        const box = document.getElementById('backup-management-tools-box');
+        const chevron = document.getElementById('backup-tools-chevron');
+        const textEl = document.getElementById('backup-tools-toggle-text');
+        if (!box) return;
+        const isHidden = box.classList.contains('hidden');
+        if (isHidden) {
+            box.classList.remove('hidden');
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+            if (textEl) textEl.innerText = 'Thu gọn';
+        } else {
+            box.classList.add('hidden');
+            if (chevron) chevron.style.transform = 'rotate(0deg)';
+            if (textEl) textEl.innerText = 'Mở ra';
+        }
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+            lucide.createIcons();
+        }
+    }
+
     async function saveAuthCloudConfig() {
         let url = document.getElementById('auth-input-supabase-url').value.trim();
         const key = document.getElementById('auth-input-supabase-key').value.trim();
@@ -3329,8 +3375,8 @@
             } catch(e) {}
         }
 
-        // 5. Nếu chưa có dữ liệu hoặc chưa đăng nhập: Hiển thị màn hình đăng nhập
         if (!loaded || !currentUser) {
+            switchAuthTab('login');
             authScreen.classList.remove('hidden');
             authScreen.classList.add('flex');
             if (obScreen) {
@@ -3465,8 +3511,152 @@
         checkAndSyncFromCloud();
     });
 
-    setInterval(checkAndSyncFromCloud, 10000);
-    function toggleAuthMode() { isLoginMode = !isLoginMode; document.getElementById('auth-title').innerText = isLoginMode ? 'Đăng Nhập' : 'Tạo Tài Khoản'; document.getElementById('auth-btn').innerText = isLoginMode ? 'Đăng Nhập' : 'Đăng Ký Nhanh'; document.getElementById('auth-toggle-text').innerText = isLoginMode ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'; document.getElementById('auth-toggle-btn').innerText = isLoginMode ? 'Đăng ký ngay' : 'Đăng nhập'; document.getElementById('auth-error').classList.add('hidden'); const authLoading = document.getElementById('auth-loading'); if (authLoading) authLoading.classList.add('hidden'); }
+    function switchAuthTab(tab) {
+        const loginSec = document.getElementById('auth-login-section');
+        const regSec = document.getElementById('auth-register-section');
+        const loginBtn = document.getElementById('auth-tab-login-btn');
+        const regBtn = document.getElementById('auth-tab-register-btn');
+        const authTitle = document.getElementById('auth-title');
+        const authError = document.getElementById('auth-error');
+        const regError = document.getElementById('reg-error');
+
+        if (authError) authError.classList.add('hidden');
+        if (regError) regError.classList.add('hidden');
+
+        if (tab === 'login') {
+            isLoginMode = true;
+            if (loginSec) loginSec.classList.remove('hidden');
+            if (regSec) regSec.classList.add('hidden');
+            if (authTitle) authTitle.innerText = 'Đăng Nhập';
+            if (loginBtn) {
+                loginBtn.className = "flex-1 py-2.5 rounded-xl bg-white text-slate-800 shadow-sm transition flex items-center justify-center gap-1.5 font-black";
+            }
+            if (regBtn) {
+                regBtn.className = "flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 transition flex items-center justify-center gap-1.5 font-bold";
+            }
+            const authIdInput = document.getElementById('auth-id');
+            if (authIdInput) authIdInput.focus();
+        } else {
+            isLoginMode = false;
+            if (loginSec) loginSec.classList.add('hidden');
+            if (regSec) regSec.classList.remove('hidden');
+            if (authTitle) authTitle.innerText = 'Đăng Ký Tài Khoản';
+            if (loginBtn) {
+                loginBtn.className = "flex-1 py-2.5 rounded-xl text-slate-500 hover:text-slate-700 transition flex items-center justify-center gap-1.5 font-bold";
+            }
+            if (regBtn) {
+                regBtn.className = "flex-1 py-2.5 rounded-xl bg-white text-slate-800 shadow-sm transition flex items-center justify-center gap-1.5 font-black";
+            }
+            const regIdInput = document.getElementById('reg-id');
+            if (regIdInput) regIdInput.focus();
+        }
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+            lucide.createIcons();
+        }
+    }
+
+    function toggleAuthMode() { 
+        const loginSec = document.getElementById('auth-login-section');
+        const isLogin = loginSec && !loginSec.classList.contains('hidden');
+        switchAuthTab(isLogin ? 'register' : 'login');
+    }
+
+    async function handleRegister() {
+        const regIdInput = document.getElementById('reg-id');
+        const regNameInput = document.getElementById('reg-name');
+        const regPassInput = document.getElementById('reg-pass');
+        const regConfirmInput = document.getElementById('reg-pass-confirm');
+        const regError = document.getElementById('reg-error');
+        const regLoading = document.getElementById('reg-loading');
+
+        const id = regIdInput ? regIdInput.value.trim().toLowerCase() : '';
+        const name = regNameInput ? regNameInput.value.trim() : '';
+        const pass = regPassInput ? regPassInput.value.trim() : '';
+        const confirm = regConfirmInput ? regConfirmInput.value.trim() : '';
+
+        if (regError) regError.classList.add('hidden');
+
+        if (!id || !pass) {
+            if (regError) {
+                regError.innerText = 'Vui lòng điền tài khoản và mật khẩu!';
+                regError.classList.remove('hidden');
+            }
+            return;
+        }
+
+        if (pass !== confirm) {
+            if (regError) {
+                regError.innerText = 'Mật khẩu xác nhận không trùng khớp!';
+                regError.classList.remove('hidden');
+            }
+            return;
+        }
+
+        // Check duplicate locally
+        if (id === 'admin' || localStorage.getItem('user_' + id)) {
+            if (regError) {
+                regError.innerText = 'Tài khoản này đã tồn tại!';
+                regError.classList.remove('hidden');
+            }
+            return;
+        }
+
+        // Check duplicate on Supabase
+        if (isSupabaseConnected) {
+            if (regLoading) regLoading.classList.remove('hidden');
+            try {
+                const existingRow = await callSupabaseRest('GET', id);
+                if (existingRow) {
+                    if (regError) {
+                        regError.innerText = 'Tài khoản này đã tồn tại trên Đám mây!';
+                        regError.classList.remove('hidden');
+                    }
+                    return;
+                }
+            } catch(e) {
+                console.warn("Cloud duplicate check error:", e);
+            } finally {
+                if (regLoading) regLoading.classList.add('hidden');
+            }
+        }
+
+        const newUser = {
+            id: id,
+            pass: pass,
+            teacherName: name || id,
+            gender: 'Cô',
+            className: '',
+            year: '2026 - 2027',
+            slogan: '',
+            theme: 'emerald',
+            role: 'teacher'
+        };
+
+        localStorage.setItem('user_' + id, JSON.stringify(newUser));
+        localStorage.setItem('currentUserRole', 'teacher');
+
+        if (isSupabaseConnected) {
+            if (regLoading) regLoading.classList.remove('hidden');
+            try {
+                const payload = {
+                    currentUser: newUser,
+                    students: [],
+                    seatingCharts: [],
+                    timetables: [],
+                    teacherTimetable: { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} },
+                    attendanceData: {},
+                    announcements: []
+                };
+                await callSupabaseRest('UPSERT', id, payload);
+            } catch(e) {
+                console.warn("Error creating cloud record for new user:", e);
+            } finally {
+                if (regLoading) regLoading.classList.add('hidden');
+            }
+        }
+
+        loginSuccess(newUser);
+    }
     async function handleAuth() {
         const idInput = document.getElementById('auth-id').value.trim();
         const id = idInput.toLowerCase();
