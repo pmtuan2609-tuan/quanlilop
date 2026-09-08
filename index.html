@@ -2152,10 +2152,10 @@
     // Đảm bảo bảo toàn 100% dữ liệu LocalStorage và thông tin kết nối Đám mây
     const APP_VERSION = 'qllh_v2.5_multi_browser_sync';
 
-    // Cấu hình Supabase (để trống - Thầy/Cô có thể tự kết nối với Supabase mới trong mục Cài đặt):
+    // Cấu hình Supabase mặc định:
     const SUPABASE_CONFIG = {
-        url: '', 
-        key: ''  
+        url: 'https://myitsoesfxrfhhybjvin.supabase.co', 
+        key: 'sb_publishable__kHf35XjbipZ9-1l8QKVaw_U0cMy5fP'  
     };
 
     const MOCK_ADMIN = { id: 'admin', pass: 'admin' };
@@ -2237,6 +2237,12 @@
             console.warn("Could not parse cloud params from URL:", e);
         }
 
+        if (localStorage.getItem('supabase_disabled') === 'true') {
+            isSupabaseConnected = null;
+            updateSupabaseStatus(false, "Chưa kết nối đám mây");
+            return;
+        }
+
         let url = localStorage.getItem('supabase_url') || SUPABASE_CONFIG.url;
         const key = localStorage.getItem('supabase_key') || SUPABASE_CONFIG.key;
         
@@ -2244,6 +2250,9 @@
             if (url.endsWith('/')) url = url.slice(0, -1);
             if (url.includes('/rest/v1')) url = url.replace('/rest/v1', '');
             localStorage.setItem('supabase_url', url);
+        }
+        if (key) {
+            localStorage.setItem('supabase_key', key);
         }
         
         const urlInput = document.getElementById('set-supabase-url');
@@ -2334,6 +2343,7 @@
             }
             localStorage.setItem('supabase_url', url);
             localStorage.setItem('supabase_key', key);
+            localStorage.removeItem('supabase_disabled');
             isSupabaseConnected = { url, key };
             updateSupabaseStatus(true, "Đã kết nối đám mây");
             const setUrl = document.getElementById('set-supabase-url');
@@ -2654,6 +2664,8 @@
             const data = await res.json();
             return data && data.length > 0 ? data[0] : null;
         } else if (method === 'UPSERT') {
+            const nowIso = new Date().toISOString();
+            lastCloudUpdatedAt = nowIso;
             // Bước 1: Thử PostgREST UPSERT chuẩn với ?on_conflict=id
             try {
                 const upsertUrl = `${url}?on_conflict=id`;
@@ -2663,7 +2675,7 @@
                         ...headers,
                         'Prefer': 'resolution=merge-duplicates'
                     },
-                    body: JSON.stringify({ id, data: payload, updated_at: new Date().toISOString() })
+                    body: JSON.stringify({ id, data: payload, updated_at: nowIso })
                 });
                 if (res.ok) {
                     return true;
@@ -2736,6 +2748,7 @@
             
             localStorage.setItem('supabase_url', url);
             localStorage.setItem('supabase_key', key);
+            localStorage.removeItem('supabase_disabled');
             isSupabaseConnected = { url, key };
             updateSupabaseStatus(true, "Kết nối thành công & Đồng bộ");
             updateCloudSyncStatus('synced');
@@ -2756,6 +2769,7 @@
     function disconnectSupabase() {
         localStorage.removeItem('supabase_url');
         localStorage.removeItem('supabase_key');
+        localStorage.setItem('supabase_disabled', 'true');
         isSupabaseConnected = null;
         document.getElementById('set-supabase-url').value = '';
         document.getElementById('set-supabase-key').value = '';
@@ -3155,28 +3169,26 @@
 
         let savedUserStr = localStorage.getItem('currentUser');
 
-        // 2. Kiểm tra Đám mây Supabase nếu đã kết nối
+        // 2. Kiểm tra Đám mây Supabase nếu đã kết nối và có phiên đăng nhập / liên kết
         const targetUserId = paramTeacher || (savedUserStr ? JSON.parse(savedUserStr).id : null);
-        if (!loaded && isSupabaseConnected) {
+        if (!loaded && isSupabaseConnected && (targetUserId || paramStudent || paramRole === 'student')) {
             updateCloudSyncStatus('syncing');
             try {
                 let row = null;
                 if (targetUserId) {
                     row = await callSupabaseRest('GET', targetUserId);
-                }
-                
-                // Nếu chưa có targetUserId hoặc không tìm thấy, lấy lớp mới nhất trên Supabase
-                if (!row) {
-                    const latestRes = await fetch(`${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data,updated_at&order=updated_at.desc&limit=1`, {
-                        method: 'GET',
-                        headers: {
-                            'apikey': isSupabaseConnected.key,
-                            'Authorization': `Bearer ${isSupabaseConnected.key}`
+                    if (!row && targetUserId === 'admin') {
+                        const latestRes = await fetch(`${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data,updated_at&order=updated_at.desc&limit=1`, {
+                            method: 'GET',
+                            headers: {
+                                'apikey': isSupabaseConnected.key,
+                                'Authorization': `Bearer ${isSupabaseConnected.key}`
+                            }
+                        });
+                        if (latestRes.ok) {
+                            const rows = await latestRes.json();
+                            if (rows && rows.length > 0) row = rows[0];
                         }
-                    });
-                    if (latestRes.ok) {
-                        const rows = await latestRes.json();
-                        if (rows && rows.length > 0) row = rows[0];
                     }
                 }
 
@@ -3345,7 +3357,7 @@
     async function checkAndSyncFromCloud() {
         if (!isSupabaseConnected || !isInitialLoadingComplete || !currentUser) return;
         try {
-            const targetId = currentUser.id || 'admin';
+            const targetId = currentTeacherId || (currentUser && currentUser.id) || 'admin';
             const url = `${isSupabaseConnected.url}/rest/v1/classroom_data?id=eq.${targetId}&select=id,updated_at,data`;
             const res = await fetch(url, {
                 method: 'GET',
@@ -3380,6 +3392,14 @@
                             localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
                             localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
                             localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
+
+                            if (currentUserRole === 'student' && currentStudent) {
+                                const refreshed = students.find(s => String(s.code) === String(currentStudent.code) || String(s.id) === String(currentStudent.id));
+                                if (refreshed) {
+                                    currentStudent = refreshed;
+                                    localStorage.setItem('currentStudent', JSON.stringify(currentStudent));
+                                }
+                            }
 
                             renderAll();
                             initAttendance();
@@ -3868,6 +3888,12 @@
                     attendanceData = cloudData.attendanceData || {};
                     announcements = cloudData.announcements || [];
                     loadedFromCloud = true;
+                    localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
+                    localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
+                    localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
+                    localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
+                    localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
+                    localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
                     updateCloudSyncStatus('synced');
                     console.log("Loaded student data from Supabase successfully!");
                 }
