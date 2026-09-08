@@ -447,66 +447,61 @@
 
         <!-- TEACHER HOME PAGE CONTAINER -->
         <div id="teacher-overview-container" class="space-y-4 md:space-y-6 hidden">
-          <!-- HERO BANNER (Ảnh bìa tràn toàn bộ xuống chân, nút đổi ảnh góc trên chỉ hiện khi hover, khu lời chào có nền nhạt) -->
-          <div class="relative group rounded-[2rem] border border-slate-200/80 shadow-md overflow-hidden min-h-[380px] md:min-h-[440px] flex flex-col justify-end p-4 sm:p-6 md:p-8">
-            <!-- Ảnh bìa nền tràn toàn bộ banner xuống tận các nút -->
+          <!-- HERO BANNER (Ảnh bìa tràn toàn bộ, lời chào siêu gọn & avatar hạ xuống sát đáy) -->
+          <div class="relative group rounded-[2rem] border border-slate-200/80 shadow-md overflow-hidden min-h-[320px] sm:min-h-[360px] md:min-h-[420px] flex flex-col justify-end p-3 sm:p-5 md:p-6">
+            <!-- Ảnh bìa nền tràn toàn bộ banner xuống tận chân -->
             <div id="teacher-banner-cover" class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80');"></div>
             
-            <!-- Lớp phủ bóng gradient nhẹ ở đáy để đảm bảo nút và viền luôn nổi bật -->
-            <div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent pointer-events-none"></div>
+            <!-- Lớp gradient rất nhẹ ở đáy để tạo tương phản cho text & nút -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
 
-            <!-- Nút đổi ảnh bìa: Đẩy lên góc trên bên phải, chỉ hiện khi đưa chuột vào (hover) -->
-            <label class="absolute top-4 right-4 bg-black/60 hover:bg-black/85 text-white backdrop-blur-md px-3.5 py-2 rounded-xl text-xs font-bold shadow-lg cursor-pointer flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 border border-white/20">
+            <!-- Nút đổi ảnh bìa: Đẩy lên góc trên bên phải, chỉ hiện khi hover chuột vào -->
+            <label class="absolute top-4 right-4 bg-black/60 hover:bg-black/85 text-white backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-bold shadow-lg cursor-pointer flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 border border-white/20">
               <i data-lucide="image" class="w-4 h-4"></i>
               <span>Đổi ảnh bìa</span>
               <input type="file" id="cover-upload-new" accept="image/*" class="hidden" onchange="handleCoverUpload(event)">
             </label>
 
-            <!-- Khu vực nội dung đáy: Bên trái lời chào (nền nhạt để thấy rõ), bên phải các nút -->
-            <div class="relative z-10 flex flex-col xl:flex-row xl:items-end justify-between gap-4 w-full">
+            <!-- Thanh đáy tinh gọn: Bên trái là Avatar + Lời chào gọn, bên phải là 4 nút chức năng -->
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-3 w-full">
               
-              <!-- Khung lời chào bên trái với nền nhạt kính mờ để chữ hiển thị sắc nét trên ảnh bìa -->
-              <div class="bg-white/85 hover:bg-white/95 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/70 shadow-lg max-w-2xl transition-all">
-                <div class="flex items-start gap-3.5">
-                  <!-- Ảnh đại diện GVCN -->
-                  <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-white shadow-md shrink-0 relative group/avatar cursor-pointer" onclick="document.getElementById('avatar-upload').click()" title="Bấm để đổi ảnh đại diện">
-                    <div id="teacher-banner-avatar" class="w-full h-full bg-slate-100 flex items-center justify-center text-3xl shadow-inner">👩‍🏫</div>
-                    <div class="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200 text-[10px] font-bold gap-1">
-                      <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-                    </div>
+              <!-- Khu vực lời chào gọn gàng (hạ xuống sát đáy, nền nhạt kính mờ) -->
+              <div class="flex items-center gap-2.5 sm:gap-3 bg-white/85 hover:bg-white/95 backdrop-blur-md p-2 sm:p-2.5 pr-4 sm:pr-5 rounded-2xl border border-white/70 shadow-lg w-fit transition-all max-w-full lg:max-w-xl">
+                <!-- Ảnh đại diện GVCN (hạ xuống đáy, viền trắng nổi bật) -->
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border-2 border-white shadow-md shrink-0 relative group/avatar cursor-pointer" onclick="document.getElementById('avatar-upload').click()" title="Bấm để đổi ảnh đại diện">
+                  <div id="teacher-banner-avatar" class="w-full h-full bg-slate-100 flex items-center justify-center text-2xl shadow-inner">👩‍🏫</div>
+                  <div class="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200 text-[10px] font-bold gap-0.5">
+                    <i data-lucide="camera" class="w-3 h-3"></i>
                   </div>
+                </div>
 
-                  <!-- Thông tin & Lời chào -->
-                  <div class="space-y-1.5 flex-1 min-w-0">
-                    <!-- Huy hiệu hàng đầu -->
-                    <div class="flex flex-wrap gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-600">
-                      <span id="banner-badge-year" class="bg-white/90 border border-slate-200/80 px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs"><i data-lucide="calendar" class="w-3 h-3 text-theme"></i> Niên khóa ...</span>
-                      <span id="banner-badge-school" class="bg-white/90 border border-slate-200/80 px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs"><i data-lucide="school" class="w-3 h-3 text-teal-500"></i> Lớp học hạnh phúc</span>
-                      <span id="banner-badge-role" class="bg-white/90 border border-slate-200/80 px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs"><i data-lucide="award" class="w-3 h-3 text-amber-500"></i> Chủ nhiệm</span>
-                    </div>
-
-                    <!-- Lời chào & Lời chúc -->
-                    <div>
-                      <h2 class="text-base sm:text-lg md:text-xl font-black text-slate-800 tracking-tight leading-snug">
-                        <span id="teacher-banner-greeting">Chào buổi học</span>, <span id="teacher-banner-name" class="text-theme-grad">Thầy/Cô</span>! 👋
-                      </h2>
-                      <p id="teacher-banner-sub" class="text-xs font-bold text-slate-500 mt-0.5">
-                        Giáo viên chủ nhiệm lớp <span id="teacher-banner-sub-class" class="text-theme font-black">...</span>
-                      </p>
-                      <p id="teacher-banner-desc" class="text-xs text-slate-600 font-medium leading-relaxed mt-1 line-clamp-2 sm:line-clamp-none">
-                        Chúc Thầy/Cô và các em học sinh một ngày học tập sôi nổi, tràn đầy hứng khởi và nhiều niềm vui!
-                      </p>
-                    </div>
+                <!-- Lời chào tinh gọn -->
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <h2 class="text-sm sm:text-base font-black text-slate-800 tracking-tight leading-snug">
+                      <span id="teacher-banner-greeting">Chào buổi học</span>, <span id="teacher-banner-name" class="text-theme-grad">Thầy/Cô</span>! 👋
+                    </h2>
+                    <span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-200/60 whitespace-nowrap">
+                      Lớp <span id="teacher-banner-sub-class">...</span>
+                    </span>
                   </div>
+                  <p id="teacher-banner-desc" class="text-[11px] text-slate-600 font-medium leading-tight mt-0.5 line-clamp-1">
+                    Chúc Thầy/Cô và các em học sinh một ngày học tập sôi nổi & nhiều niềm vui!
+                  </p>
+                  <!-- Hidden elements to preserve updateUI bindings -->
+                  <span id="banner-badge-year" class="hidden"></span>
+                  <span id="banner-badge-school" class="hidden"></span>
+                  <span id="banner-badge-role" class="hidden"></span>
+                  <span id="teacher-banner-sub" class="hidden"></span>
                 </div>
               </div>
 
-              <!-- Các nút hành động bên phải (nằm ở vị trí như cũ) -->
-              <div class="flex flex-wrap gap-2.5 shrink-0">
-                <button onclick="switchTab('tab-attendance')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5"><i data-lucide="user-check" class="w-4 h-4"></i> Điểm danh</button>
-                <button onclick="switchTab('tab-notebook')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5"><i data-lucide="contact" class="w-4 h-4"></i> Sổ theo dõi</button>
-                <button onclick="openSubjectTeachersModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4"></i> GVBM</button>
-                <button onclick="openTeacherInfoModal()" class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5" title="Xem và sửa thông tin GVCN"><i data-lucide="user-check" class="w-4 h-4"></i> Thông tin GVCN</button>
+              <!-- Các nút hành động bên phải (giữ nguyên vị trí ở đáy) -->
+              <div class="flex flex-wrap gap-2 shrink-0">
+                <button onclick="switchTab('tab-attendance')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5"><i data-lucide="user-check" class="w-4 h-4"></i> Điểm danh</button>
+                <button onclick="switchTab('tab-notebook')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5"><i data-lucide="contact" class="w-4 h-4"></i> Sổ theo dõi</button>
+                <button onclick="openSubjectTeachersModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4"></i> GVBM</button>
+                <button onclick="openTeacherInfoModal()" class="bg-sky-500 hover:bg-sky-600 text-white px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5" title="Xem và sửa thông tin GVCN"><i data-lucide="user-check" class="w-4 h-4"></i> Thông tin GVCN</button>
               </div>
 
             </div>
