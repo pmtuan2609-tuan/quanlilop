@@ -3261,20 +3261,7 @@
             } catch(e){}
         }
 
-        // 4. Thử nạp từ file data.json nếu mở qua web server và chưa có dữ liệu local
-        if (!loaded && !savedUserStr) {
-            try {
-                const res = await fetch('./data.json');
-                if (res.ok) {
-                    const fData = await res.json();
-                    if (fData && (fData.currentUser || (fData.students && fData.students.length > 0))) {
-                        applySyncData(fData, 'Đã tự động nhận dữ liệu từ file data.json!');
-                        loaded = true;
-                        return;
-                    }
-                }
-            } catch(e) {}
-        }
+
 
         // Dọn sạch URL hash/query sau khi đã đọc xong
         if (paramData || (hashStr && (hashStr.includes('sync_data') || hashStr.includes('cloud_url')))) {
