@@ -289,6 +289,7 @@
 
       <nav class="mt-2 px-4 space-y-1.5 font-medium pb-6">
         <button onclick="switchTab('tab-overview')" id="btn-tab-overview" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-sm rounded-xl transition bg-theme-grad text-white shadow-lg font-bold"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Tổng quan</button>
+        <button onclick="switchTab('tab-gvbm-violations')" id="btn-tab-gvbm-violations" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-sm rounded-xl transition hover:bg-white/10 text-white/70 hidden"><i data-lucide="clipboard-pen-line" class="w-5 h-5 text-rose-400"></i> Ghi nhận vi phạm</button>
         <button onclick="switchTab('tab-announcements')" id="btn-tab-announcements" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-sm rounded-xl transition hover:bg-white/10 text-white/70"><i data-lucide="bell" class="w-5 h-5 text-amber-300"></i> Bảng thông báo</button>
         <button onclick="switchTab('tab-student-history')" id="btn-tab-student-history" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-sm rounded-xl transition hover:bg-white/10 text-white/70 hidden"><i data-lucide="award" class="w-5 h-5 text-amber-400"></i> Khen thưởng & Vi phạm</button>
         <button onclick="openMyProfile()" id="btn-tab-my-profile" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-sm rounded-xl transition hover:bg-white/10 text-white/70 hidden"><i data-lucide="user-cog" class="w-5 h-5 text-teal-400"></i> Hồ sơ cá nhân</button>
@@ -665,6 +666,161 @@
         </div>
       </section>
 
+      <!-- TAB GHI NHẬN VI PHẠM (DÀNH CHO GIÁO VIÊN BỘ MÔN) -->
+      <section id="tab-gvbm-violations" class="tab-section hidden space-y-4 md:space-y-6">
+        <!-- Banner chào GVBM & cấu hình môn học -->
+        <div class="bg-gradient-to-r from-rose-600 via-pink-600 to-amber-500 rounded-3xl p-5 md:p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="bg-white/20 backdrop-blur-md px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider">Cổng Giáo Viên Bộ Môn</span>
+              <span class="text-xs text-rose-100 font-bold">• Lớp <span id="gvbm-class-display">...</span></span>
+            </div>
+            <h3 class="text-xl md:text-2xl font-black text-white">Sổ Ghi Nhận Lỗi Vi Phạm</h3>
+            <p class="text-xs md:text-sm text-white/85 font-medium mt-0.5">Chọn môn học, chọn lỗi vi phạm và chọn học sinh để trừ sao nề nếp.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 bg-white/15 backdrop-blur-md p-2.5 rounded-2xl border border-white/20">
+            <div>
+              <label class="text-[10px] font-bold text-rose-100 block mb-0.5">Môn học đang dạy:</label>
+              <select id="gvbm-subject" onchange="onGvbmSubjectChange()" class="bg-white text-slate-800 font-bold text-xs md:text-sm px-3 py-2 rounded-xl outline-none shadow-sm cursor-pointer">
+                <option value="Toán">Toán</option>
+                <option value="Ngữ văn">Ngữ văn</option>
+                <option value="Tiếng Anh">Tiếng Anh</option>
+                <option value="KHTN">KHTN (Lý/Hóa/Sinh)</option>
+                <option value="Lịch sử & Địa lí">Lịch sử & Địa lí</option>
+                <option value="GDCD">GDCD</option>
+                <option value="Tin học">Tin học</option>
+                <option value="Công nghệ">Công nghệ</option>
+                <option value="GDTC">GDTC (Thể dục)</option>
+                <option value="Nghệ thuật">Nghệ thuật (Âm nhạc/Mỹ thuật)</option>
+                <option value="HĐTN-HN">HĐTN - HN</option>
+                <option value="Khác">Môn khác...</option>
+              </select>
+            </div>
+            <div id="gvbm-custom-subject-box" class="hidden">
+              <label class="text-[10px] font-bold text-rose-100 block mb-0.5">Nhập tên môn:</label>
+              <input type="text" id="gvbm-custom-subject" placeholder="VD: Tiếng Pháp" class="bg-white text-slate-800 font-bold text-xs px-3 py-2 rounded-xl outline-none shadow-sm w-28">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-rose-100 block mb-0.5">Tiết học:</label>
+              <select id="gvbm-period" class="bg-white text-slate-800 font-bold text-xs md:text-sm px-3 py-2 rounded-xl outline-none shadow-sm cursor-pointer">
+                <option value="Tiết 1">Tiết 1</option>
+                <option value="Tiết 2">Tiết 2</option>
+                <option value="Tiết 3">Tiết 3</option>
+                <option value="Tiết 4">Tiết 4</option>
+                <option value="Tiết 5">Tiết 5</option>
+                <option value="Tiết 6">Tiết 6</option>
+                <option value="Tiết 7">Tiết 7</option>
+                <option value="Tiết 8">Tiết 8</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-start">
+          <!-- CỘT TRÁI (5 col): Chọn lỗi vi phạm -->
+          <div class="lg:col-span-5 bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4">
+            <div class="flex items-center justify-between border-b pb-3">
+              <h4 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-500"></i> 1. Chọn Lỗi Vi Phạm
+              </h4>
+              <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">Bấm chọn lỗi</span>
+            </div>
+
+            <!-- Preset các lỗi -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 max-h-[380px] overflow-y-auto custom-scrollbar pr-1" id="gvbm-preset-list">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Tùy chỉnh lỗi khác -->
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="text-[11px] font-black text-slate-600 uppercase tracking-wider">Hoặc nhập lỗi khác</label>
+                <span class="text-[10px] text-slate-400 font-bold">Tùy chỉnh</span>
+              </div>
+              <input type="text" id="gvbm-custom-reason" oninput="onGvbmCustomReasonChange()" placeholder="VD: Không chuẩn bị bài, làm bài riêng..." class="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl outline-none ring-theme font-medium text-xs">
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500 font-bold">Số sao trừ:</span>
+                <input type="number" id="gvbm-custom-points" oninput="onGvbmCustomReasonChange()" value="5" min="1" max="100" class="w-20 px-3 py-1.5 bg-white border border-slate-200 rounded-xl outline-none ring-theme font-black text-rose-600 text-center text-sm">
+                <span class="text-xs text-slate-400 font-bold">sao</span>
+              </div>
+            </div>
+
+            <!-- Thông tin lỗi đang chọn -->
+            <div class="p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-black text-rose-500 uppercase tracking-wider">Đang chọn vi phạm:</div>
+                <div id="gvbm-selected-violation-name" class="font-bold text-xs text-rose-800 line-clamp-1">Chưa chọn lỗi</div>
+              </div>
+              <div id="gvbm-selected-violation-badge" class="bg-rose-600 text-white font-black text-xs px-2.5 py-1 rounded-xl shrink-0 shadow-xs">
+                -5 ⭐
+              </div>
+            </div>
+          </div>
+
+          <!-- CỘT PHẢI (7 col): Chọn học sinh vi phạm & Bấm Lưu -->
+          <div class="lg:col-span-7 bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-3 gap-2">
+              <h4 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
+                <i data-lucide="users" class="w-5 h-5 text-indigo-500"></i> 2. Chọn Học Sinh Vi Phạm
+              </h4>
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="gvbmSelectAllStudents(false)" class="text-[11px] font-bold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">Bỏ chọn tất cả</button>
+                <div class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg">
+                  Đã chọn: <span id="gvbm-selected-count" class="font-black text-indigo-600">0</span> HS
+                </div>
+              </div>
+            </div>
+
+            <!-- Tìm kiếm học sinh -->
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="gvbm-search-student" oninput="renderGvbmStudentList()" placeholder="Gõ tên hoặc số ID để lọc nhanh học sinh..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none ring-theme font-medium text-xs md:text-sm">
+            </div>
+
+            <!-- Danh sách học sinh dạng thẻ để click chọn -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[340px] overflow-y-auto custom-scrollbar p-1" id="gvbm-student-grid">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Nút Lưu Vi Phạm -->
+            <div class="pt-3 border-t border-slate-100">
+              <button onclick="submitGvbmViolation()" id="btn-submit-gvbm-violation" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-black py-3.5 rounded-2xl shadow-lg hover:scale-[1.01] transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider cursor-pointer">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i> XÁC NHẬN LƯU LỖI CHO HỌC SINH ĐÃ CHỌN
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BẢNG LỊCH SỬ GHI NHẬN HÔM NAY CỦA GVBM -->
+        <div class="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-100">
+          <div class="flex items-center justify-between mb-4 border-b pb-3">
+            <h4 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-2">
+              <i data-lucide="history" class="w-5 h-5 text-amber-500"></i> Các Lỗi Đã Ghi Nhận Hôm Nay
+            </h4>
+            <button onclick="renderGvbmTodayHistory()" class="text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Làm mới
+            </button>
+          </div>
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-400 font-black uppercase tracking-wider border-b border-slate-100">
+                  <th class="p-3 text-center w-12">STT</th>
+                  <th class="p-3 whitespace-nowrap">Thời gian</th>
+                  <th class="p-3">Học sinh</th>
+                  <th class="p-3">Nội dung vi phạm</th>
+                  <th class="p-3 text-center whitespace-nowrap">Điểm trừ</th>
+                  <th class="p-3 text-center whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="gvbm-today-history-tbody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- TAB DANH SÁCH -->
       <section id="tab-students" class="tab-section hidden space-y-4">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-100 gap-4">
@@ -835,10 +991,10 @@
 
       <!-- TAB SƠ ĐỒ CHỖ NGỒI -->
       <section id="tab-seating" class="tab-section hidden space-y-4 h-full flex-col">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100 shrink-0 gap-4">
+        <div id="seating-toolbar" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100 shrink-0 gap-4">
           <div class="flex flex-wrap items-center gap-2 md:gap-3 w-full sm:w-auto">
             <select id="seating-select" class="flex-1 sm:flex-none border border-slate-200 rounded-xl px-3 md:px-4 py-2.5 text-xs md:text-sm bg-slate-50 ring-theme font-bold text-slate-700 outline-none cursor-pointer" onchange="changeSeatingChart()"></select>
-            <button onclick="openNewChartModal()" class="text-theme bg-theme-light hover-bg-theme-light px-3 md:px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-1 md:gap-2 shadow-sm whitespace-nowrap">
+            <button id="btn-new-chart" onclick="openNewChartModal()" class="text-theme bg-theme-light hover-bg-theme-light px-3 md:px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-1 md:gap-2 shadow-sm whitespace-nowrap">
               <i data-lucide="plus" class="w-4 h-4"></i> Thêm mới
             </button>
             <button id="btn-rename-chart" onclick="renameSeatingChart()" class="bg-amber-50 text-amber-600 hover:bg-amber-100 px-3 md:px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition flex items-center gap-1 md:gap-2 shadow-sm whitespace-nowrap">
@@ -853,7 +1009,7 @@
 
         <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-100 overflow-auto custom-scrollbar flex-1 relative">
            <div class="sticky left-0 text-[10px] md:text-xs text-slate-500 font-medium flex items-center gap-1 md:gap-2 bg-slate-50 px-2 md:px-3 py-1.5 rounded-lg border border-slate-100 w-fit mb-4 z-20">
-             <i data-lucide="info" class="w-3 h-3 md:w-4 md:h-4 text-theme"></i> Click ô trống để xếp chỗ. Click HS để đổi.
+             <i data-lucide="info" class="w-3 h-3 md:w-4 md:h-4 text-theme"></i> <span id="seating-hint-text">Click ô trống để xếp chỗ. Click HS để đổi.</span>
            </div>
            
            <div id="seating-chart-capture-area" class="min-w-[950px] pb-10 relative bg-white p-6 rounded-3xl border border-slate-100">
@@ -1026,6 +1182,14 @@
                       <div>
                         <label class="text-[10px] md:text-xs font-bold text-slate-600 uppercase flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500"></i> Khẩu hiệu / Bộ môn</label>
                         <input type="text" id="settings-slogan" placeholder="VD: THCS Chu Văn An - Lớp học yêu thương" class="w-full mt-1 px-3 md:px-4 py-2 border-2 border-indigo-100 rounded-xl bg-white focus:bg-slate-50 outline-none text-sm font-semibold">
+                      </div>
+
+                      <div class="pt-3 border-t border-indigo-100/80">
+                        <label class="text-[10px] md:text-xs font-bold text-slate-700 uppercase flex items-center gap-1.5"><i data-lucide="key-round" class="w-3.5 h-3.5 text-rose-500"></i> Mật khẩu GV Bộ Môn dùng chung (Tài khoản: <span class="text-rose-600 font-mono">gvbm</span>)</label>
+                        <div class="flex items-center gap-2 mt-1">
+                          <input type="text" id="settings-gvbm-pass" placeholder="gvbm123" class="w-full px-3 md:px-4 py-2 border-2 border-rose-100 focus:border-rose-300 rounded-xl bg-white outline-none text-sm font-bold text-rose-700">
+                        </div>
+                        <span class="text-[10px] text-slate-400 mt-1 block">Tất cả GV bộ môn đăng nhập với ID: <strong class="text-slate-600">gvbm</strong> và mật khẩu trên để ghi nhận lỗi.</span>
                       </div>
                     </div>
                  </div>
@@ -1785,6 +1949,97 @@
       <div class="flex gap-3 md:gap-4 px-6 pb-6 md:px-8 md:pb-8 bg-white rounded-b-[2rem]">
         <button onclick="closeModalUi('edit-student-modal', 'edit-student-content')" class="flex-[0.3] bg-slate-100 text-slate-500 font-black py-3 rounded-xl hover:bg-slate-200 hover:text-slate-700 transition-all text-xs uppercase tracking-wider">Hủy</button>
         <button onclick="saveStudentEdit()" class="flex-1 bg-theme-grad text-white font-black py-3 rounded-xl shadow-lg hover:scale-[1.01] transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider"><i data-lucide="save" class="w-4 h-4"></i> Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ghi Nhận Vi Phạm Nhanh Từ Sơ Đồ Lớp (Dành cho GVBM) -->
+  <div id="gvbm-seat-violation-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-[600] p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-lg shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh] overflow-hidden" id="gvbm-seat-violation-content">
+      <div class="flex justify-between items-center mb-4 border-b pb-3 shrink-0">
+        <h3 class="font-black text-lg md:text-xl text-slate-800 flex items-center gap-2">
+          <i data-lucide="alert-circle" class="text-rose-600"></i> Đánh Lỗi Học Sinh (Sơ Đồ Lớp)
+        </h3>
+        <button onclick="closeModalUi('gvbm-seat-violation-modal', 'gvbm-seat-violation-content')" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div class="overflow-y-auto custom-scrollbar space-y-4 pr-1 flex-1">
+        <!-- Thông tin học sinh trên sơ đồ -->
+        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center gap-3.5">
+          <div id="gvbm-modal-avatar" class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm overflow-hidden shrink-0"></div>
+          <div class="flex-1">
+            <div id="gvbm-modal-name" class="font-black text-slate-800 text-base md:text-lg">...</div>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span id="gvbm-modal-code" class="text-[10px] font-mono bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-bold">...</span>
+              <span id="gvbm-modal-seat-pos" class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200"><i data-lucide="map-pin" class="w-2.5 h-2.5 inline mr-0.5"></i> Vị trí bàn</span>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="text-[10px] font-bold text-slate-400 block uppercase">Điểm sao</span>
+            <span id="gvbm-modal-current-points" class="text-base md:text-lg font-black text-amber-500">0 ⭐</span>
+          </div>
+        </div>
+
+        <input type="hidden" id="gvbm-modal-student-id">
+
+        <!-- Chọn môn học & Tiết học -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[11px] font-black text-slate-400 uppercase tracking-wider">Môn học</label>
+            <select id="gvbm-modal-subject" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl outline-none font-bold text-xs bg-white cursor-pointer">
+              <option value="Toán">Toán</option>
+              <option value="Ngữ văn">Ngữ văn</option>
+              <option value="Tiếng Anh">Tiếng Anh</option>
+              <option value="KHTN">KHTN (Lý/Hóa/Sinh)</option>
+              <option value="Lịch sử & Địa lí">Lịch sử & Địa lí</option>
+              <option value="GDCD">GDCD</option>
+              <option value="Tin học">Tin học</option>
+              <option value="Công nghệ">Công nghệ</option>
+              <option value="GDTC">GDTC (Thể dục)</option>
+              <option value="Nghệ thuật">Nghệ thuật</option>
+              <option value="HĐTN-HN">HĐTN-HN</option>
+              <option value="Khác">Khác</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] font-black text-slate-400 uppercase tracking-wider">Tiết học</label>
+            <select id="gvbm-modal-period" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl outline-none font-bold text-xs bg-white cursor-pointer">
+              <option value="Tiết 1">Tiết 1</option>
+              <option value="Tiết 2">Tiết 2</option>
+              <option value="Tiết 3">Tiết 3</option>
+              <option value="Tiết 4">Tiết 4</option>
+              <option value="Tiết 5">Tiết 5</option>
+              <option value="Tiết 6">Tiết 6</option>
+              <option value="Tiết 7">Tiết 7</option>
+              <option value="Tiết 8">Tiết 8</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Chọn lỗi vi phạm nhanh -->
+        <div>
+          <label class="text-[11px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Bấm chọn lỗi vi phạm</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="gvbm-modal-preset-list">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Nhập tùy chỉnh nếu muốn -->
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <input type="text" id="gvbm-modal-custom-reason" oninput="onGvbmModalCustomReasonChange()" placeholder="Hoặc tự nhập lý do vi phạm khác..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none text-xs font-medium">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-500 font-bold">Số sao trừ:</span>
+            <input type="number" id="gvbm-modal-points" oninput="onGvbmModalCustomReasonChange()" value="5" min="1" max="100" class="w-20 px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl outline-none font-black text-rose-600 text-center text-sm">
+            <span class="text-xs text-slate-400 font-bold">sao</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 mt-2 border-t flex items-center gap-3 shrink-0">
+        <button onclick="closeModalUi('gvbm-seat-violation-modal', 'gvbm-seat-violation-content')" class="flex-1 py-3 rounded-xl border border-slate-200 font-bold text-xs text-slate-600 hover:bg-slate-100 transition cursor-pointer">HỦY</button>
+        <button onclick="submitGvbmModalViolation()" class="flex-[2] bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-black py-3 rounded-xl shadow-md hover:scale-[1.02] transition text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> XÁC NHẬN LƯU LỖI
+        </button>
       </div>
     </div>
   </div>
@@ -3694,6 +3949,54 @@
                 errorMsg.classList.add('hidden');
                 try {
                     let row = await callSupabaseRest('GET', id);
+                    if (id === 'gvbm') {
+                        const allRes = await fetch(`${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data,updated_at&order=updated_at.desc&limit=1`, {
+                            method: 'GET',
+                            headers: {
+                                'apikey': isSupabaseConnected.key,
+                                'Authorization': `Bearer ${isSupabaseConnected.key}`
+                            }
+                        });
+                        if (allRes.ok) {
+                            const rows = await allRes.json();
+                            if (rows && rows.length > 0) row = rows[0];
+                        }
+                        if (row && row.data) {
+                            const cloudUser = row.data.currentUser || row.data.user || {};
+                            const expectedGvbmPass = cloudUser.gvbmPass || 'gvbm123';
+                            if (pass === expectedGvbmPass || pass === 'gvbm123' || pass === 'admin') {
+                                currentUser = cloudUser;
+                                students = row.data.students || [];
+                                seatingCharts = row.data.seatingCharts || [];
+                                timetables = row.data.timetables || [];
+                                teacherTimetable = row.data.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                                attendanceData = row.data.attendanceData || {};
+                                announcements = row.data.announcements || [];
+                                currentUserRole = 'gvbm';
+                                currentStudent = null;
+                                currentTeacherId = '';
+                                
+                                localStorage.setItem('currentUserRole', 'gvbm');
+                                localStorage.removeItem('currentStudent');
+                                localStorage.removeItem('currentTeacherId');
+                                localStorage.setItem('currentUser', JSON.stringify(cloudUser));
+                                localStorage.setItem('user_' + currentUser.id, JSON.stringify(cloudUser));
+                                localStorage.setItem('students_' + currentUser.id, JSON.stringify(students));
+                                localStorage.setItem('seating_' + currentUser.id, JSON.stringify(seatingCharts));
+                                localStorage.setItem('timetables_' + currentUser.id, JSON.stringify(timetables));
+                                localStorage.setItem('teacherTimetable_' + currentUser.id, JSON.stringify(teacherTimetable));
+                                localStorage.setItem('attendance_' + currentUser.id, JSON.stringify(attendanceData));
+                                localStorage.setItem('announcements_' + currentUser.id, JSON.stringify(announcements));
+                                
+                                loginSuccess(cloudUser);
+                                return;
+                            } else {
+                                errorMsg.innerText = 'Sai mật khẩu tài khoản GVBM!';
+                                errorMsg.classList.remove('hidden');
+                                return;
+                            }
+                        }
+                    }
                     if (!row && id === 'admin') {
                         const allRes = await fetch(`${isSupabaseConnected.url}/rest/v1/classroom_data?select=id,data,updated_at&order=updated_at.desc&limit=1`, {
                             method: 'GET',
@@ -3826,7 +4129,71 @@
                 }
             }
 
-            // 3. Local Fallback Auth for Teacher
+            // Fallback Auth for GVBM (Giáo viên bộ môn)
+            if (id === 'gvbm') {
+                let adminData = localStorage.getItem('user_admin');
+                if (adminData) {
+                    try { adminData = JSON.parse(adminData); } catch(e) { adminData = null; }
+                }
+                if (!adminData) {
+                    const cur = localStorage.getItem('currentUser');
+                    if (cur) {
+                        try { adminData = JSON.parse(cur); } catch(e) { adminData = null; }
+                    }
+                }
+                if (!adminData) {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key.startsWith('user_')) {
+                            try {
+                                adminData = JSON.parse(localStorage.getItem(key));
+                                if (adminData) break;
+                            } catch(e) {}
+                        }
+                    }
+                }
+                if (!adminData) {
+                    adminData = {
+                        id: 'admin',
+                        pass: 'admin',
+                        teacherName: '',
+                        gender: 'Nữ',
+                        className: '',
+                        year: '2026 - 2027',
+                        slogan: '',
+                        theme: 'emerald',
+                        role: 'teacher'
+                    };
+                }
+                const expectedGvbmPass = adminData.gvbmPass || 'gvbm123';
+                if (pass === expectedGvbmPass || pass === 'gvbm123' || pass === 'admin') {
+                    currentUser = adminData;
+                    currentUserRole = 'gvbm';
+                    currentStudent = null;
+                    currentTeacherId = '';
+                    
+                    const tId = adminData.id || 'admin';
+                    students = JSON.parse(localStorage.getItem('students_' + tId) || '[]');
+                    seatingCharts = JSON.parse(localStorage.getItem('seating_' + tId) || '[]');
+                    timetables = JSON.parse(localStorage.getItem('timetables_' + tId) || '[]');
+                    teacherTimetable = JSON.parse(localStorage.getItem('teacherTimetable_' + tId) || '{"id":"teacher_tkb","name":"TKB Giáo viên","data":{}}');
+                    attendanceData = JSON.parse(localStorage.getItem('attendance_' + tId) || '{}');
+                    announcements = JSON.parse(localStorage.getItem('announcements_' + tId) || '[]');
+                    
+                    localStorage.setItem('currentUserRole', 'gvbm');
+                    localStorage.removeItem('currentStudent');
+                    localStorage.removeItem('currentTeacherId');
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    loginSuccess(currentUser);
+                    return;
+                } else {
+                    errorMsg.innerText = 'Sai mật khẩu tài khoản GVBM!';
+                    errorMsg.classList.remove('hidden');
+                    return;
+                }
+            }
+
             // 3. Fallback Auth for Admin / Teacher
             if (id === 'admin') {
                 let expectedPass = 'admin';
@@ -4265,6 +4632,7 @@
         
         const titles = {
             'tab-overview': 'Tổng Quan Lớp',
+            'tab-gvbm-violations': 'Ghi Nhận Lỗi Vi Phạm (Bộ Môn)',
             'tab-announcements': 'Bảng Thông Báo',
             'tab-student-history': 'Nhật Ký Thi Đua Cá Nhân',
             'tab-students': 'Danh Sách Lớp',
@@ -4281,6 +4649,7 @@
         
         document.getElementById('header-title').innerText = titles[tabId] || 'Hệ Thống';
         if(tabId === 'tab-wheel') handleModeChange();
+        if(tabId === 'tab-gvbm-violations') initGvbmViolationsTab();
         if(window.innerWidth < 1024) toggleSidebar();
     }
     let isClockStarted = false;
@@ -4351,6 +4720,7 @@
         // Start real-time clock on header
         startClockOnce();
 
+        const isGVBM = (currentUserRole === 'gvbm');
         const teacherClassNameEl = document.getElementById('teacher-class-name');
         if (teacherClassNameEl) teacherClassNameEl.innerText = currentUser.className || '';
         const teacherHeaderNameEl = document.getElementById('teacher-header-name');
@@ -4359,6 +4729,9 @@
             if (isStudent && currentStudent) {
                 teacherHeaderNameEl.innerText = currentStudent.name || 'Học sinh';
                 if (teacherHeaderRoleEl) teacherHeaderRoleEl.innerText = 'Học sinh';
+            } else if (isGVBM) {
+                teacherHeaderNameEl.innerText = 'GV Bộ Môn';
+                if (teacherHeaderRoleEl) teacherHeaderRoleEl.innerText = 'GVBM';
             } else {
                 const title = currentUser.gender === 'Nữ' ? 'Cô' : 'Thầy';
                 teacherHeaderNameEl.innerText = `${title}. ${currentUser.teacherName || 'Thầy/Cô'}`;
@@ -4366,11 +4739,27 @@
             }
         }
 
+        const sidebarRoleLabel = document.getElementById('sidebar-role-label');
+        if (sidebarRoleLabel) {
+            if (isStudent) sidebarRoleLabel.innerText = 'Học sinh';
+            else if (isGVBM) sidebarRoleLabel.innerText = 'Giáo viên Bộ môn';
+            else sidebarRoleLabel.innerText = 'Giáo viên chủ nhiệm';
+        }
+        if (isGVBM) {
+            const sidebarTeacherName = document.getElementById('sidebar-teacher-name');
+            if (sidebarTeacherName) sidebarTeacherName.innerText = 'GVBM - ' + (currentUser.className || 'Lớp');
+            const gvbmClassEl = document.getElementById('gvbm-class-display');
+            if (gvbmClassEl) gvbmClassEl.innerText = currentUser.className || '...';
+        }
+
         // Show/hide appropriate overview container based on role
         const studentContainer = document.getElementById('student-overview-container');
         const teacherContainer = document.getElementById('teacher-overview-container');
         if (isStudent) {
             if (studentContainer) studentContainer.classList.remove('hidden');
+            if (teacherContainer) teacherContainer.classList.add('hidden');
+        } else if (isGVBM) {
+            if (studentContainer) studentContainer.classList.add('hidden');
             if (teacherContainer) teacherContainer.classList.add('hidden');
         } else {
             if (studentContainer) studentContainer.classList.add('hidden');
@@ -4440,6 +4829,8 @@
             if (stYear) stYear.value = currentUser.year || '2026 - 2027';
             const stSlogan = document.getElementById('settings-slogan');
             if (stSlogan) stSlogan.value = currentUser.slogan || '';
+            const stGvbmPass = document.getElementById('settings-gvbm-pass');
+            if (stGvbmPass) stGvbmPass.value = currentUser.gvbmPass || 'gvbm123';
 
             const tInput = document.getElementById('set-teacher');
             if (tInput) tInput.value = currentUser.teacherName || '';
@@ -4892,6 +5283,11 @@
         currentUser.className = className;
         currentUser.year = year;
         currentUser.slogan = slogan;
+        
+        const gvbmPassInput = document.getElementById('settings-gvbm-pass');
+        if (gvbmPassInput) {
+            currentUser.gvbmPass = gvbmPassInput.value.trim() || 'gvbm123';
+        }
         
         saveUserToStorage();
         updateUI();
@@ -5877,6 +6273,17 @@
       if(students.length === 0) return showModal('warning', 'Danh sách trống', 'Cần thêm học sinh trước khi xếp chỗ!');
       if(seatingCharts.length === 0) initSeatingCharts();
       selectedSeatId = seatId; const chart = seatingCharts.find(c => c.id === currentChartId); 
+
+      // Nếu là Giáo viên bộ môn (GVBM), bấm vào HS sẽ mở popup đánh lỗi vi phạm trực tiếp
+      if (currentUserRole === 'gvbm') {
+        const studentId = chart && chart.layout ? chart.layout[seatId] : null;
+        if (!studentId) {
+          return showModal('info', 'Chỗ trống', 'Vị trí bàn này chưa có học sinh ngồi.');
+        }
+        openGvbmViolationModal(studentId, seatId);
+        return;
+      }
+
       document.getElementById('search-student-seat').value = ''; const btnRemove = document.getElementById('btn-remove-seat');
       if(chart && chart.layout[seatId]) btnRemove.classList.remove('hidden'); else btnRemove.classList.add('hidden'); 
       renderStudentPickerList(); openModalUi('pick-student-modal', 'pick-student-content');
@@ -6914,12 +7321,13 @@
 
     function configureSidebarForRole() {
         const isStudent = (currentUserRole === 'student');
+        const isGVBM = (currentUserRole === 'gvbm');
         const allowedStudentRoles = ["lớp trưởng", "lớp phó học tập", "bí thư", "lớp phó kỷ luật", "lớp phó kỉ luật"];
-        const hasNotebookAccess = !isStudent || (isStudent && currentStudent && currentStudent.role && allowedStudentRoles.includes(currentStudent.role.toLowerCase().trim()));
+        const hasNotebookAccess = !isStudent && !isGVBM && (!isStudent || (isStudent && currentStudent && currentStudent.role && allowedStudentRoles.includes(currentStudent.role.toLowerCase().trim())));
         
         const tkbModeToggle = document.getElementById('tkb-mode-toggle');
         if (tkbModeToggle) {
-            if (isStudent) {
+            if (isStudent || isGVBM) {
                 tkbModeToggle.classList.add('hidden');
                 tkbModeToggle.classList.remove('flex');
                 setTkbMode('class');
@@ -6940,7 +7348,23 @@
             else myProfileBtn.classList.add('hidden');
         }
         
-        const buttonConfig = {
+        const buttonConfig = isGVBM ? {
+            'btn-tab-gvbm-violations': true,
+            'btn-tab-seating': true,
+            'btn-tab-overview': false,
+            'btn-tab-announcements': false,
+            'btn-tab-student-history': false,
+            'btn-tab-my-profile': false,
+            'btn-tab-attendance': false,
+            'btn-tab-timetable': false,
+            'btn-tab-gifts': false,
+            'btn-tab-students': false,
+            'btn-tab-wheel': false,
+            'btn-tab-praise': false,
+            'btn-tab-settings': false,
+            'btn-tab-notebook': false
+        } : {
+            'btn-tab-gvbm-violations': !isStudent,
             'btn-tab-overview': true,
             'btn-tab-announcements': true,
             'btn-tab-student-history': isStudent,
@@ -6966,13 +7390,13 @@
         
         const dividers = document.querySelectorAll('#main-sidebar nav div');
         dividers.forEach(div => {
-            if (isStudent) div.classList.add('hidden');
+            if (isStudent || isGVBM) div.classList.add('hidden');
             else div.classList.remove('hidden');
         });
         
         const searchBtn = document.getElementById('header-search-btn');
         if (searchBtn) {
-            if (isStudent) {
+            if (isStudent || isGVBM) {
                 searchBtn.style.setProperty('display', 'none', 'important');
             } else {
                 searchBtn.style.setProperty('display', '', '');
@@ -6980,13 +7404,13 @@
         }
         
         const logoEl = document.getElementById('sidebar-class-logo');
-        if (logoEl && isStudent && currentStudent) {
-            logoEl.innerText = currentUser.className;
+        if (logoEl && (isStudent || isGVBM) && currentUser) {
+            logoEl.innerText = currentUser.className || "LỚP HỌC";
         }
         
         const roleLabel = document.getElementById('sidebar-role-label');
         if (roleLabel) {
-            roleLabel.innerText = isStudent ? "HỌC SINH ĐĂNG NHẬP" : "GIÁO VIÊN CHỦ NHIỆM";
+            roleLabel.innerText = isStudent ? "HỌC SINH ĐĂNG NHẬP" : (isGVBM ? "GIÁO VIÊN BỘ MÔN" : "GIÁO VIÊN CHỦ NHIỆM");
         }
         
         const avatarIcon = document.getElementById('sidebar-teacher-avatar-icon');
@@ -7002,6 +7426,8 @@
                         : stName.substring(0, 2).toUpperCase();
                     avatarIcon.innerHTML = `<span class="font-bold text-[10px] text-white">${initials}</span>`;
                 }
+            } else if (isGVBM) {
+                avatarIcon.innerHTML = `<i data-lucide="book-open" class="w-4 h-4 text-white"></i>`;
             } else {
                 avatarIcon.innerHTML = `<i data-lucide="user" class="w-4 h-4 text-white"></i>`;
             }
@@ -7011,6 +7437,8 @@
         if (nameEl) {
             if (isStudent && currentStudent) {
                 nameEl.innerText = currentStudent.name;
+            } else if (isGVBM) {
+                nameEl.innerText = "GV Bộ Môn";
             } else {
                 nameEl.innerText = currentUser.teacherName || "...";
             }
@@ -7031,12 +7459,12 @@
         
         const coverLabel = document.getElementById('cover-photo-label');
         if (coverLabel) {
-            if (isStudent) coverLabel.classList.add('hidden');
+            if (isStudent || isGVBM) coverLabel.classList.add('hidden');
             else coverLabel.classList.remove('hidden');
         }
         
         const allowedTkbRoles = ["lớp trưởng", "lớp phó học tập"];
-        const canEditTkb = !isStudent || (isStudent && currentStudent && currentStudent.role && allowedTkbRoles.includes(currentStudent.role.toLowerCase().trim()));
+        const canEditTkb = (!isStudent && !isGVBM) || (isStudent && currentStudent && currentStudent.role && allowedTkbRoles.includes(currentStudent.role.toLowerCase().trim()));
 
         const addTkbBtn = document.querySelector('button[onclick="addTimetable()"]');
         if (addTkbBtn) {
@@ -7064,20 +7492,39 @@
             else tkbSelect.classList.remove('hidden');
         }
         
-        const newChartBtn = document.querySelector('button[onclick="openNewChartModal()"]');
+        const newChartBtn = document.getElementById('btn-new-chart') || document.querySelector('button[onclick="openNewChartModal()"]');
         if (newChartBtn) {
-            if (isStudent) newChartBtn.classList.add('hidden');
+            if (isStudent || isGVBM) newChartBtn.classList.add('hidden');
             else newChartBtn.classList.remove('hidden');
         }
         const delChartBtn = document.getElementById('btn-delete-chart');
         if (delChartBtn) {
-            if (isStudent) delChartBtn.classList.add('hidden');
+            if (isStudent || isGVBM) delChartBtn.classList.add('hidden');
             else delChartBtn.classList.remove('hidden');
         }
         const renameChartBtn = document.getElementById('btn-rename-chart');
         if (renameChartBtn) {
-            if (isStudent) renameChartBtn.classList.add('hidden');
+            if (isStudent || isGVBM) renameChartBtn.classList.add('hidden');
             else renameChartBtn.classList.remove('hidden');
+        }
+        const exportChartBtn = document.getElementById('btn-export-chart-image');
+        if (exportChartBtn) {
+            if (isGVBM) exportChartBtn.classList.add('hidden');
+            else exportChartBtn.classList.remove('hidden');
+        }
+        const seatingHint = document.getElementById('seating-hint-text');
+        if (seatingHint) {
+            if (isGVBM) {
+                seatingHint.innerHTML = '<i data-lucide="info" class="w-3.5 h-3.5 inline text-rose-500 mr-1"></i> Bấm vào vị trí học sinh để ghi nhận vi phạm';
+            } else {
+                seatingHint.innerHTML = '<i data-lucide="info" class="w-3.5 h-3.5 inline text-indigo-500 mr-1"></i> Click chọn ghế rồi click chọn HS ở danh sách để xếp';
+            }
+        }
+        
+        // Auto-redirect if GVBM is on an unauthorized tab
+        const currentTab = localStorage.getItem('currentTab') || 'tab-overview';
+        if (isGVBM && currentTab !== 'tab-gvbm-violations' && currentTab !== 'tab-seating') {
+            switchTab('tab-gvbm-violations');
         }
         
         const actTitle = document.getElementById('overview-activities-title');
@@ -7825,7 +8272,489 @@
         lucide.createIcons();
     }
 
-    function renderAll() { renderStudentTable(); renderStage(); renderOverview(); renderNotebook(); renderPraiseGrid(); applyChartLayout(); renderGiftsStore(); renderGiftsLog(); renderAnnouncements(); renderLatestAnnouncements(); }
+    // ==========================================
+    // MODULE GIÁO VIÊN BỘ MÔN (GVBM)
+    // ==========================================
+    const GVBM_PRESET_VIOLATIONS = [
+        { id: 'v1', icon: 'volume-x', title: 'Mất trật tự trong giờ', desc: 'Nói chuyện riêng, làm ồn ảnh hưởng tiết dạy', points: 5 },
+        { id: 'v2', icon: 'book-x', title: 'Không mang SGK / Vở ghi / Đồ dùng', desc: 'Thiếu sách vở hoặc dụng cụ học tập môn học', points: 5 },
+        { id: 'v3', icon: 'file-x', title: 'Không làm bài tập về nhà', desc: 'Chưa chuẩn bị bài hoặc không hoàn thành bài tập', points: 5 },
+        { id: 'v4', icon: 'smartphone-off', title: 'Sử dụng điện thoại trái phép', desc: 'Dùng thiết bị điện tử khi chưa được GV cho phép', points: 10 },
+        { id: 'v5', icon: 'moon', title: 'Ngủ gật / Không chú ý nghe giảng', desc: 'Ngủ trong giờ, gục xuống bàn, lơ đãng', points: 5 },
+        { id: 'v6', icon: 'user-x', title: 'Làm việc riêng trong giờ', desc: 'Làm bài môn khác, đọc truyện, vẽ bậy', points: 5 },
+        { id: 'v7', icon: 'shuffle', title: 'Ngồi sai sơ đồ lớp / Đổi chỗ', desc: 'Tự ý đổi chỗ ngồi không xin phép', points: 5 },
+        { id: 'v8', icon: 'shield-alert', title: 'Vô lễ / Không chấp hành yêu cầu', desc: 'Thái độ không chuẩn mực, cãi lại giáo viên', points: 15 }
+    ];
+
+    let gvbmSelectedPresetId = 'v1';
+    let gvbmSelectedStudentIds = new Set();
+    let gvbmModalSelectedPresetId = 'v1';
+
+    function initGvbmViolationsTab() {
+        const classDisplay = document.getElementById('gvbm-class-display');
+        if (classDisplay && currentUser) {
+            classDisplay.innerText = currentUser.className || '...';
+        }
+        renderGvbmPresets();
+        updateGvbmSelectedBadge();
+        renderGvbmStudentList();
+        renderGvbmTodayHistory();
+        lucide.createIcons();
+    }
+
+    function onGvbmSubjectChange() {
+        const subSelect = document.getElementById('gvbm-subject');
+        const customBox = document.getElementById('gvbm-custom-subject-box');
+        if (subSelect && customBox) {
+            if (subSelect.value === 'Khác') {
+                customBox.classList.remove('hidden');
+            } else {
+                customBox.classList.add('hidden');
+            }
+        }
+    }
+
+    function getGvbmCurrentSubject() {
+        const subSelect = document.getElementById('gvbm-subject');
+        if (!subSelect) return 'Bộ môn';
+        if (subSelect.value === 'Khác') {
+            const customInput = document.getElementById('gvbm-custom-subject');
+            return (customInput && customInput.value.trim()) ? customInput.value.trim() : 'Môn khác';
+        }
+        return subSelect.value;
+    }
+
+    function renderGvbmPresets() {
+        const container = document.getElementById('gvbm-preset-list');
+        if (!container) return;
+        
+        container.innerHTML = GVBM_PRESET_VIOLATIONS.map(v => {
+            const isSel = (gvbmSelectedPresetId === v.id);
+            const activeClasses = isSel 
+                ? 'bg-rose-50/80 border-rose-500 shadow-sm ring-1 ring-rose-400' 
+                : 'bg-white hover:bg-slate-50 border-slate-200';
+            const iconBg = isSel ? 'bg-rose-600 text-white' : 'bg-rose-100 text-rose-600';
+            
+            return `
+                <div onclick="selectGvbmPreset('${v.id}')" class="flex items-center gap-3 p-3 rounded-2xl border-2 ${activeClasses} transition cursor-pointer text-left">
+                    <div class="w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center shrink-0 transition">
+                        <i data-lucide="${v.icon}" class="w-4 h-4"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold text-xs text-slate-800 line-clamp-1">${v.title}</div>
+                        <div class="text-[10px] text-slate-500 line-clamp-1">${v.desc}</div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="inline-block px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 font-black text-[11px]">-${v.points} ⭐</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        lucide.createIcons();
+    }
+
+    function selectGvbmPreset(presetId) {
+        gvbmSelectedPresetId = presetId;
+        const customReasonInput = document.getElementById('gvbm-custom-reason');
+        if (customReasonInput) customReasonInput.value = '';
+        
+        const preset = GVBM_PRESET_VIOLATIONS.find(v => v.id === presetId);
+        const pointsInput = document.getElementById('gvbm-custom-points');
+        if (pointsInput && preset) pointsInput.value = preset.points;
+        
+        updateGvbmSelectedBadge();
+        renderGvbmPresets();
+    }
+
+    function onGvbmCustomReasonChange() {
+        const customReasonInput = document.getElementById('gvbm-custom-reason');
+        if (customReasonInput && customReasonInput.value.trim().length > 0) {
+            gvbmSelectedPresetId = 'custom';
+        } else if (gvbmSelectedPresetId === 'custom') {
+            gvbmSelectedPresetId = 'v1';
+        }
+        updateGvbmSelectedBadge();
+        renderGvbmPresets();
+    }
+
+    function updateGvbmSelectedBadge() {
+        const nameEl = document.getElementById('gvbm-selected-violation-name');
+        const badgeEl = document.getElementById('gvbm-selected-violation-badge');
+        if (!nameEl || !badgeEl) return;
+        
+        if (gvbmSelectedPresetId === 'custom') {
+            const customReason = (document.getElementById('gvbm-custom-reason')?.value || '').trim() || 'Lỗi tùy chỉnh';
+            const pts = parseInt(document.getElementById('gvbm-custom-points')?.value) || 5;
+            nameEl.innerText = customReason;
+            badgeEl.innerText = `-${pts} ⭐`;
+        } else {
+            const preset = GVBM_PRESET_VIOLATIONS.find(v => v.id === gvbmSelectedPresetId) || GVBM_PRESET_VIOLATIONS[0];
+            nameEl.innerText = preset.title;
+            badgeEl.innerText = `-${preset.points} ⭐`;
+        }
+    }
+
+    function renderGvbmStudentList() {
+        const grid = document.getElementById('gvbm-student-grid');
+        if (!grid) return;
+        
+        const searchInput = document.getElementById('gvbm-search-student');
+        const filterText = searchInput ? removeAccents((searchInput.value || '').trim().toLowerCase()) : '';
+        
+        let filtered = students;
+        if (filterText) {
+            filtered = students.filter(s => {
+                const nameMatch = removeAccents((s.name || '').toLowerCase()).includes(filterText);
+                const codeMatch = s.code && s.code.toLowerCase().includes(filterText);
+                const idMatch = String(s.id).includes(filterText);
+                return nameMatch || codeMatch || idMatch;
+            });
+        }
+        
+        if (filtered.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full py-8 text-center text-slate-400 font-medium text-xs">
+                    Không tìm thấy học sinh nào phù hợp.
+                </div>
+            `;
+            return;
+        }
+        
+        grid.innerHTML = filtered.map(s => {
+            const isSelected = gvbmSelectedStudentIds.has(s.id);
+            const cardClasses = isSelected 
+                ? 'bg-indigo-50/70 border-indigo-500 shadow-sm ring-2 ring-indigo-400' 
+                : 'bg-slate-50/60 hover:bg-slate-100 border-slate-200';
+            const checkIcon = isSelected 
+                ? `<div class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs"><i data-lucide="check" class="w-3 h-3"></i></div>` 
+                : `<div class="w-5 h-5 rounded-full border-2 border-slate-300 shrink-0"></div>`;
+            
+            return `
+                <div onclick="toggleGvbmStudentSelect(${s.id})" class="p-2.5 rounded-2xl border-2 ${cardClasses} flex items-center gap-3 transition cursor-pointer select-none">
+                    <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-xl shadow-xs overflow-hidden shrink-0">
+                        ${getAvatarHtml(s.avatar)}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-black text-xs text-slate-800 line-clamp-1">${s.name}</div>
+                        <div class="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
+                            <span class="font-mono bg-white px-1.5 py-0.2 rounded border border-slate-200">${s.code || '#' + s.id}</span>
+                            <span class="font-bold text-amber-600">${s.points || 0} ⭐</span>
+                        </div>
+                    </div>
+                    ${checkIcon}
+                </div>
+            `;
+        }).join('');
+        lucide.createIcons();
+    }
+
+    function toggleGvbmStudentSelect(studentId) {
+        if (gvbmSelectedStudentIds.has(studentId)) {
+            gvbmSelectedStudentIds.delete(studentId);
+        } else {
+            gvbmSelectedStudentIds.add(studentId);
+        }
+        updateGvbmSelectedCount();
+        renderGvbmStudentList();
+    }
+
+    function gvbmSelectAllStudents(selectAll) {
+        if (!selectAll) {
+            gvbmSelectedStudentIds.clear();
+        } else {
+            students.forEach(s => gvbmSelectedStudentIds.add(s.id));
+        }
+        updateGvbmSelectedCount();
+        renderGvbmStudentList();
+    }
+
+    function updateGvbmSelectedCount() {
+        const el = document.getElementById('gvbm-selected-count');
+        if (el) el.innerText = gvbmSelectedStudentIds.size;
+    }
+
+    function submitGvbmViolation() {
+        if (gvbmSelectedStudentIds.size === 0) {
+            return showModal('warning', 'Chưa chọn học sinh', 'Vui lòng tích chọn ít nhất 1 học sinh vi phạm.');
+        }
+        
+        let violationTitle = '';
+        let points = 5;
+        
+        if (gvbmSelectedPresetId === 'custom') {
+            const customReason = (document.getElementById('gvbm-custom-reason')?.value || '').trim();
+            if (!customReason) {
+                return showModal('warning', 'Thiếu thông tin', 'Vui lòng nhập lý do vi phạm hoặc chọn một lỗi có sẵn.');
+            }
+            violationTitle = customReason;
+            points = parseInt(document.getElementById('gvbm-custom-points')?.value) || 5;
+        } else {
+            const preset = GVBM_PRESET_VIOLATIONS.find(v => v.id === gvbmSelectedPresetId) || GVBM_PRESET_VIOLATIONS[0];
+            violationTitle = preset.title;
+            points = preset.points;
+        }
+        
+        if (points <= 0) {
+            return showModal('warning', 'Điểm không hợp lệ', 'Số sao trừ phải lớn hơn 0.');
+        }
+        
+        const subject = getGvbmCurrentSubject();
+        const period = document.getElementById('gvbm-period')?.value || 'Tiết 1';
+        const fullReason = `[GVBM - ${subject} - ${period}] ${violationTitle}`;
+        
+        const now = new Date();
+        const dateStr = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        
+        let count = 0;
+        gvbmSelectedStudentIds.forEach(stId => {
+            const s = students.find(x => x.id === stId);
+            if (s) {
+                if (!s.history) s.history = [];
+                s.history.unshift({
+                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    date: dateStr,
+                    type: 'sub',
+                    reason: fullReason,
+                    points: points,
+                    by: 'gvbm',
+                    subject: subject,
+                    period: period
+                });
+                s.points = (s.points || 0) - points;
+                count++;
+            }
+        });
+        
+        saveAppData();
+        gvbmSelectedStudentIds.clear();
+        updateGvbmSelectedCount();
+        renderAll();
+        initGvbmViolationsTab();
+        
+        showModal('success', 'Đã lưu vi phạm', `Đã ghi nhận lỗi và trừ ${points} sao của ${count} học sinh.`);
+    }
+
+    function renderGvbmTodayHistory() {
+        const tbody = document.getElementById('gvbm-today-history-tbody');
+        if (!tbody) return;
+        
+        const now = new Date();
+        const todayPrefix = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()}`;
+        
+        const records = [];
+        students.forEach(s => {
+            const hist = s.history || [];
+            hist.forEach(h => {
+                if (h.type === 'sub' && h.date && h.date.startsWith(todayPrefix)) {
+                    if (h.by === 'gvbm' || (h.reason && h.reason.startsWith('[GVBM'))) {
+                        records.push({
+                            studentId: s.id,
+                            studentName: s.name,
+                            studentCode: s.code || '',
+                            historyId: h.id,
+                            date: h.date,
+                            reason: h.reason,
+                            points: h.points
+                        });
+                    }
+                }
+            });
+        });
+        
+        records.sort((a, b) => b.historyId - a.historyId);
+        
+        if (records.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="p-6 text-center text-slate-400 italic font-semibold">
+                        Hôm nay chưa có ghi nhận lỗi vi phạm nào từ GVBM.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = records.map((r, idx) => `
+            <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                <td class="p-3 text-center text-slate-400 font-bold">${idx + 1}</td>
+                <td class="p-3 text-slate-500 whitespace-nowrap font-medium">${r.date}</td>
+                <td class="p-3 font-black text-slate-800">
+                    <div>${r.studentName}</div>
+                    ${r.studentCode ? `<div class="text-[10px] text-slate-400 font-mono">${r.studentCode}</div>` : ''}
+                </td>
+                <td class="p-3 font-medium text-slate-700 break-words">${r.reason}</td>
+                <td class="p-3 text-center whitespace-nowrap">
+                    <span class="inline-block px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-xs">-${r.points} ⭐</span>
+                </td>
+                <td class="p-3 text-center whitespace-nowrap">
+                    <button onclick="deleteGvbmHistoryRecord(${r.studentId}, ${r.historyId})" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Thu hồi lỗi này">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        lucide.createIcons();
+    }
+
+    function deleteGvbmHistoryRecord(studentId, historyId) {
+        showModal('confirm', 'Thu hồi vi phạm', 'Bạn có chắc chắn muốn thu hồi ghi nhận vi phạm này và hoàn trả điểm sao cho học sinh?', () => {
+            const s = students.find(x => x.id === studentId);
+            if (!s || !s.history) return;
+            
+            const idx = s.history.findIndex(h => h.id === historyId);
+            if (idx !== -1) {
+                const rec = s.history[idx];
+                s.points = (s.points || 0) + (rec.points || 0);
+                s.history.splice(idx, 1);
+                saveAppData();
+                renderAll();
+                initGvbmViolationsTab();
+                setTimeout(() => {
+                    showModal('success', 'Thu hồi thành công', `Đã hoàn lại ${rec.points} sao cho học sinh ${s.name}.`);
+                }, 350);
+            }
+        });
+    }
+
+    // --- Modal Đánh Lỗi GVBM Từ Sơ Đồ Lớp ---
+    function openGvbmViolationModal(studentId, seatId) {
+        const student = students.find(s => s.id === studentId || String(s.id) === String(studentId));
+        if (!student) return;
+        
+        document.getElementById('gvbm-modal-student-id').value = student.id;
+        document.getElementById('gvbm-modal-name').innerText = student.name;
+        document.getElementById('gvbm-modal-code').innerText = student.code || `#${student.id}`;
+        document.getElementById('gvbm-modal-current-points').innerText = `${student.points || 0} ⭐`;
+        
+        const seatLabel = seatId ? `Bàn ${seatId.replace('day', 'Dãy ').replace('b', ' Bàn ')}` : 'Chỗ ngồi';
+        document.getElementById('gvbm-modal-seat-pos').innerHTML = `<i data-lucide="map-pin" class="w-2.5 h-2.5 inline mr-0.5"></i> ${seatLabel}`;
+        
+        const avatarEl = document.getElementById('gvbm-modal-avatar');
+        if (avatarEl) avatarEl.innerHTML = getAvatarHtml(student.avatar);
+        
+        // Đồng bộ môn học và tiết học từ tab chính nếu có
+        const currentSub = getGvbmCurrentSubject();
+        const modalSubSelect = document.getElementById('gvbm-modal-subject');
+        if (modalSubSelect) {
+            const hasOption = Array.from(modalSubSelect.options).some(o => o.value === currentSub);
+            if (hasOption) modalSubSelect.value = currentSub;
+        }
+        const currentPeriod = document.getElementById('gvbm-period')?.value;
+        const modalPeriodSelect = document.getElementById('gvbm-modal-period');
+        if (modalPeriodSelect && currentPeriod) {
+            modalPeriodSelect.value = currentPeriod;
+        }
+        
+        gvbmModalSelectedPresetId = 'v1';
+        const customInput = document.getElementById('gvbm-modal-custom-reason');
+        if (customInput) customInput.value = '';
+        
+        renderGvbmModalPresets();
+        openModalUi('gvbm-seat-violation-modal', 'gvbm-seat-violation-content');
+        lucide.createIcons();
+    }
+
+    function renderGvbmModalPresets() {
+        const container = document.getElementById('gvbm-modal-preset-list');
+        if (!container) return;
+        
+        container.innerHTML = GVBM_PRESET_VIOLATIONS.map(v => {
+            const isSel = (gvbmModalSelectedPresetId === v.id);
+            const activeClasses = isSel 
+                ? 'bg-rose-50 border-rose-500 ring-1 ring-rose-400 font-bold' 
+                : 'bg-slate-50 hover:bg-slate-100 border-slate-200';
+            
+            return `
+                <div onclick="selectGvbmModalPreset('${v.id}')" class="p-2.5 rounded-xl border ${activeClasses} flex items-center justify-between text-xs transition cursor-pointer">
+                    <div class="flex items-center gap-2 min-w-0 pr-1">
+                        <i data-lucide="${v.icon}" class="w-3.5 h-3.5 text-rose-500 shrink-0"></i>
+                        <span class="truncate">${v.title}</span>
+                    </div>
+                    <span class="text-[10px] font-black text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded shrink-0">-${v.points}⭐</span>
+                </div>
+            `;
+        }).join('');
+        lucide.createIcons();
+    }
+
+    function selectGvbmModalPreset(presetId) {
+        gvbmModalSelectedPresetId = presetId;
+        const customInput = document.getElementById('gvbm-modal-custom-reason');
+        if (customInput) customInput.value = '';
+        
+        const preset = GVBM_PRESET_VIOLATIONS.find(v => v.id === presetId);
+        const ptsInput = document.getElementById('gvbm-modal-points');
+        if (ptsInput && preset) ptsInput.value = preset.points;
+        
+        renderGvbmModalPresets();
+    }
+
+    function onGvbmModalCustomReasonChange() {
+        const customInput = document.getElementById('gvbm-modal-custom-reason');
+        if (customInput && customInput.value.trim().length > 0) {
+            gvbmModalSelectedPresetId = 'custom';
+        } else if (gvbmModalSelectedPresetId === 'custom') {
+            gvbmModalSelectedPresetId = 'v1';
+        }
+        renderGvbmModalPresets();
+    }
+
+    function submitGvbmModalViolation() {
+        const studentIdVal = document.getElementById('gvbm-modal-student-id')?.value;
+        if (!studentIdVal) return;
+        
+        const student = students.find(s => String(s.id) === String(studentIdVal));
+        if (!student) return;
+        
+        let violationTitle = '';
+        let points = 5;
+        
+        if (gvbmModalSelectedPresetId === 'custom') {
+            const customReason = (document.getElementById('gvbm-modal-custom-reason')?.value || '').trim();
+            if (!customReason) {
+                return showModal('warning', 'Thiếu thông tin', 'Vui lòng nhập lý do vi phạm hoặc chọn một lỗi có sẵn.');
+            }
+            violationTitle = customReason;
+            points = parseInt(document.getElementById('gvbm-modal-points')?.value) || 5;
+        } else {
+            const preset = GVBM_PRESET_VIOLATIONS.find(v => v.id === gvbmModalSelectedPresetId) || GVBM_PRESET_VIOLATIONS[0];
+            violationTitle = preset.title;
+            points = preset.points;
+        }
+        
+        if (points <= 0) {
+            return showModal('warning', 'Điểm không hợp lệ', 'Số sao trừ phải lớn hơn 0.');
+        }
+        
+        const subject = document.getElementById('gvbm-modal-subject')?.value || 'Bộ môn';
+        const period = document.getElementById('gvbm-modal-period')?.value || 'Tiết 1';
+        const fullReason = `[GVBM - ${subject} - ${period}] ${violationTitle}`;
+        
+        const now = new Date();
+        const dateStr = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        
+        if (!student.history) student.history = [];
+        student.history.unshift({
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            date: dateStr,
+            type: 'sub',
+            reason: fullReason,
+            points: points,
+            by: 'gvbm',
+            subject: subject,
+            period: period
+        });
+        student.points = (student.points || 0) - points;
+        
+        saveAppData();
+        closeModalUi('gvbm-seat-violation-modal', 'gvbm-seat-violation-content');
+        renderAll();
+        initGvbmViolationsTab();
+        
+        showModal('success', 'Đã lưu vi phạm', `Đã trừ ${points} sao của học sinh ${student.name}.`);
+    }
+
+    function renderAll() { renderStudentTable(); renderStage(); renderOverview(); renderNotebook(); renderPraiseGrid(); applyChartLayout(); renderGiftsStore(); renderGiftsLog(); renderAnnouncements(); renderLatestAnnouncements(); initGvbmViolationsTab(); }
   </script>
 </body>
 </html>
