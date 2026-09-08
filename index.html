@@ -3198,8 +3198,31 @@
                     currentUser = cloudData.currentUser || cloudData.user || { id: row.id, role: 'teacher' };
                     students = cloudData.students || [];
                     seatingCharts = cloudData.seatingCharts || [];
-                    timetables = cloudData.timetables || [];
-                    teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                    
+                    // Bảo vệ dữ liệu Thời Khóa Biểu: nếu Cloud rỗng mà Local có môn học thì ưu tiên Local
+                    const localTkbStr = localStorage.getItem('timetables_' + currentUser.id);
+                    let localTkb = null;
+                    try { localTkb = localTkbStr ? JSON.parse(localTkbStr) : null; } catch(e){}
+                    const hasCloudTkb = cloudData.timetables && cloudData.timetables.some(t => t.data && Object.keys(t.data).length > 0);
+                    const hasLocalTkb = localTkb && localTkb.some(t => t.data && Object.keys(t.data).length > 0);
+
+                    if (!hasCloudTkb && hasLocalTkb) {
+                        timetables = localTkb;
+                    } else {
+                        timetables = cloudData.timetables || [];
+                    }
+
+                    const localTeacherTkbStr = localStorage.getItem('teacherTimetable_' + currentUser.id);
+                    let localTeacherTkb = null;
+                    try { localTeacherTkb = localTeacherTkbStr ? JSON.parse(localTeacherTkbStr) : null; } catch(e){}
+                    const hasCloudTeacherTkb = cloudData.teacherTimetable && cloudData.teacherTimetable.data && Object.keys(cloudData.teacherTimetable.data).length > 0;
+                    const hasLocalTeacherTkb = localTeacherTkb && localTeacherTkb.data && Object.keys(localTeacherTkb.data).length > 0;
+
+                    if (!hasCloudTeacherTkb && hasLocalTeacherTkb) {
+                        teacherTimetable = localTeacherTkb;
+                    } else {
+                        teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                    }
                     attendanceData = cloudData.attendanceData || {};
                     announcements = cloudData.announcements || [];
 
@@ -3870,8 +3893,31 @@
                     const cloudData = row.data;
                     students = cloudData.students || [];
                     seatingCharts = cloudData.seatingCharts || [];
-                    timetables = cloudData.timetables || [];
-                    teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                    
+                    // Bảo vệ dữ liệu Thời Khóa Biểu: nếu Cloud rỗng mà Local có môn học thì ưu tiên Local
+                    const localTkbStr = localStorage.getItem('timetables_' + currentUser.id);
+                    let localTkb = null;
+                    try { localTkb = localTkbStr ? JSON.parse(localTkbStr) : null; } catch(e){}
+                    const hasCloudTkb = cloudData.timetables && cloudData.timetables.some(t => t.data && Object.keys(t.data).length > 0);
+                    const hasLocalTkb = localTkb && localTkb.some(t => t.data && Object.keys(t.data).length > 0);
+
+                    if (!hasCloudTkb && hasLocalTkb) {
+                        timetables = localTkb;
+                    } else {
+                        timetables = cloudData.timetables || [];
+                    }
+
+                    const localTeacherTkbStr = localStorage.getItem('teacherTimetable_' + currentUser.id);
+                    let localTeacherTkb = null;
+                    try { localTeacherTkb = localTeacherTkbStr ? JSON.parse(localTeacherTkbStr) : null; } catch(e){}
+                    const hasCloudTeacherTkb = cloudData.teacherTimetable && cloudData.teacherTimetable.data && Object.keys(cloudData.teacherTimetable.data).length > 0;
+                    const hasLocalTeacherTkb = localTeacherTkb && localTeacherTkb.data && Object.keys(localTeacherTkb.data).length > 0;
+
+                    if (!hasCloudTeacherTkb && hasLocalTeacherTkb) {
+                        teacherTimetable = localTeacherTkb;
+                    } else {
+                        teacherTimetable = cloudData.teacherTimetable || { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
+                    }
                     attendanceData = cloudData.attendanceData || {};
                     announcements = cloudData.announcements || [];
                     loadedFromCloud = true;
@@ -4214,16 +4260,23 @@
     }
 
     function initTimetables() { 
-        const saved = localStorage.getItem('timetables_' + currentUser.id); 
-        if (saved) timetables = JSON.parse(saved); 
+        if (!timetables || timetables.length === 0) {
+            const saved = localStorage.getItem('timetables_' + currentUser.id); 
+            if (saved) {
+                try { timetables = JSON.parse(saved); } catch(e){}
+            }
+        }
         if (!timetables || timetables.length === 0) { 
             timetables = [{ id: 'tkb_' + Date.now(), name: 'TKB Lần 1', data: {} }]; 
             saveTimetables(); 
         } 
-        const savedTeacher = localStorage.getItem('teacherTimetable_' + currentUser.id);
-        if (savedTeacher) {
-            teacherTimetable = JSON.parse(savedTeacher);
-        } else {
+        if (!teacherTimetable || !teacherTimetable.data || Object.keys(teacherTimetable.data).length === 0) {
+            const savedTeacher = localStorage.getItem('teacherTimetable_' + currentUser.id);
+            if (savedTeacher) {
+                try { teacherTimetable = JSON.parse(savedTeacher); } catch(e){}
+            }
+        }
+        if (!teacherTimetable) {
             teacherTimetable = { id: 'teacher_tkb', name: 'TKB Giáo viên', data: {} };
         }
         currentTimetableId = currentUser.activeTimetableId || timetables[0].id; 
@@ -6444,7 +6497,7 @@
                 const cloudUser = cloudData.currentUser || cloudData.user || {};
                 const name = cloudUser.teacherName || 'Chưa cập nhật';
                 const className = cloudUser.className || 'Chưa thiết lập';
-                const pass = cloudUser.pass || 'vietha';
+                const pass = cloudUser.pass || 'admin';
                 const isSelf = r.id === currentUser.id;
                 
                 // Initials avatar
@@ -6737,7 +6790,7 @@
 
     function teacherSelfChangePassword() {
         if (!currentUser) return;
-        const currentPass = currentUser.pass || 'vietha';
+        const currentPass = currentUser.pass || 'admin';
         showPrompt("Đổi Mật Khẩu Giáo Viên", "Nhập mật khẩu mới của bạn (tối thiểu 4 ký tự):", currentPass, (newPass) => {
             const trimmed = newPass.trim();
             if (trimmed.length < 4) {
