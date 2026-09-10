@@ -7695,17 +7695,20 @@
         return t * t * (3 - 2 * t);
       };
 
-      // Chọn 2 thí sinh dẫn đầu theo từng khoảng thời gian riêng biệt:
-      // Leader 1: Giữ vị trí đầu tiên trong ~38% chặng đầu (khoảng 2 - 2.5s)
-      // Leader 2: Vượt lên và giữ vị trí đầu tiên trong ~34% chặng tiếp theo
-      // Winner: Tăng tốc lội ngược dòng ở 26% chặng cuối và cán đích!
+      // Chọn 2 thí sinh dẫn đầu theo từng khoảng thời gian:
+      // - Leader 1: Dẫn đầu chặng 1 (0% - ~38%)
+      // - Leader 2: Dẫn đầu chặng 2 (38% - 75%)
+      // - 25% cuối cùng (75% - 100%): Top 2 (Winner & Runner-up) TÁCH ĐOÀN bứt phá, bỏ xa cả đoàn phía sau!
       const nonWinners = duckRaceState.ducks.filter(d => String(d.id) !== String(winnerStudent.id));
       const shuffledNonWinners = [...nonWinners].sort(() => Math.random() - 0.5);
       const duckLeader1 = shuffledNonWinners.length > 0 ? shuffledNonWinners[0] : null;
       const duckLeader2 = shuffledNonWinners.length > 1 ? shuffledNonWinners[1] : null;
+      const duckRunnerUp = duckLeader2 || duckLeader1;
 
       duckRaceState.ducks.forEach(d => {
         d.isWinner = (String(d.id) === String(winnerStudent.id));
+        d.isRunnerUp = (!d.isWinner && d === duckRunnerUp);
+        d.isBreakaway = (d.isWinner || d.isRunnerUp);
         d.raceRole = d.isWinner ? 'winner' : (d === duckLeader1 ? 'leader1' : (d === duckLeader2 ? 'leader2' : 'pack'));
         d.startX = startX;
         d.speed = 0;
@@ -7717,12 +7720,14 @@
         d.wobblePhase = Math.random() * Math.PI * 2;
         d.seed = Math.random() * 10;
 
-        // Đích đến so kè suýt soát (photo-finish)
+        // Đích đến: Top 2 về đích trước và TÁCH ĐOÀN, đoàn phía sau cách xa rõ rệt
         if (d.isWinner) {
-          d.finalTargetX = finishX + 40;
+          d.finalTargetX = finishX + 45; // Về nhất
+        } else if (d.isRunnerUp) {
+          d.finalTargetX = finishX + 18; // Về nhì sát nút người thắng (chênh ~27px)
         } else {
-          // Các vịt khác bám sát phía sau suýt soát
-          d.finalTargetX = finishX - (10 + Math.random() * 20);
+          // Cả đoàn phía sau bị tụt lại cách xa top 2 từ 85px đến 135px
+          d.finalTargetX = finishX - (85 + Math.random() * 45);
         }
       });
 
@@ -7734,6 +7739,16 @@
 
         const elapsed = now - duckRaceState.raceStartTime;
         const progress = Math.min(elapsed / raceDuration, 1);
+        duckRaceState.progress = progress;
+
+        // Hiển thị thông báo khi top 2 bắt đầu tách đoàn ở 25% chặng cuối
+        if (progress >= 0.75 && !duckRaceState.tapeBroken && statusEl) {
+          if (!statusEl.dataset.breakaway) {
+            statusEl.dataset.breakaway = "1";
+            statusEl.className = "text-xs font-bold text-amber-200 bg-amber-950/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-amber-400/50 shadow-md flex items-center gap-1.5 animate-pulse";
+            statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> ⚡ TOP 2 TÁCH ĐOÀN BƠI NƯỚC RÚT!`;
+          }
+        }
 
         let maxDuckX = 0;
         let leaderDuck = null;
@@ -7753,55 +7768,55 @@
           const packJostle = Math.sin(progress * 10 + d.seed * 2.2) * 10 + (d.burstFactor || 0) * 0.3;
 
           let targetX;
-          if (progress < 0.72) {
-            // --- GIAI ĐOẠN 1 & 2 (0% - 72% chặng đua): CÓ KHOẢNG THỜI GIAN RÕ RÀNG DẪN ĐẦU ---
+          if (progress < 0.75) {
+            // --- GIAI ĐOẠN 1 & 2 (0% - 75% chặng đua): CÓ KHOẢNG THỜI GIAN RÕ RÀNG DẪN ĐẦU ---
             const baseFlockX = d.startX + totalDistance * progress;
-            const LEAD_MARGIN = 45; // Khoảng cách bứt phá tạo ngôi đầu rõ ràng
+            const LEAD_MARGIN = 48; // Khoảng cách bứt phá tạo ngôi đầu rõ ràng
 
             let leadOffset = 0;
             if (duckLeader2) {
-              // 2 chú vịt thay phiên nhau dẫn đầu trong các khoảng thời gian rõ ràng
               if (d.raceRole === 'leader1') {
                 // Leader 1 dẫn đầu vững vàng suốt ~38% chặng đầu (khoảng 2 - 2.5 giây)
                 const w1 = smoothStep(0.0, 0.10, progress) * (1 - smoothStep(0.36, 0.44, progress));
                 leadOffset = w1 * LEAD_MARGIN;
               } else if (d.raceRole === 'leader2') {
-                // Leader 2 bứt lên vượt Leader 1 và giữ ngôi đầu suốt 44% - 72% chặng
+                // Leader 2 bứt lên vượt Leader 1 và giữ ngôi đầu suốt 44% - 75% chặng
                 const w2 = smoothStep(0.36, 0.44, progress);
                 leadOffset = w2 * LEAD_MARGIN;
               } else if (d.raceRole === 'winner') {
-                // Vịt quán quân chạy ẩn mình ở vị trí thứ 3 hoặc thứ 4 trong tốp
-                leadOffset = -10;
+                // Vịt quán quân chạy ẩn mình trong tốp rồi lướt lên vị trí thứ 2 sát đuôi Leader 2 trước mốc 75%
+                const readyStep = smoothStep(0.52, 0.75, progress);
+                leadOffset = -8 * (1 - readyStep) + 30 * readyStep;
               }
             } else if (duckLeader1) {
-              // Chỉ có 1 đối thủ: Leader 1 giữ ngôi đầu suốt 0% - 72%
               if (d.raceRole === 'leader1') {
                 leadOffset = smoothStep(0.0, 0.12, progress) * LEAD_MARGIN;
               } else if (d.raceRole === 'winner') {
-                leadOffset = -10;
+                const readyStep = smoothStep(0.52, 0.75, progress);
+                leadOffset = -8 * (1 - readyStep) + 30 * readyStep;
               }
             }
 
-            // Gán toạ độ đích: Leader luôn bứt hẳn phía trước đoàn
-            if (d.raceRole === 'leader1' || d.raceRole === 'leader2') {
+            // Gán toạ độ đích
+            if (d.raceRole === 'leader1' || d.raceRole === 'leader2' || d.isWinner) {
               targetX = baseFlockX + leadOffset + packJostle * 0.2;
             } else {
               targetX = baseFlockX + leadOffset + packJostle;
             }
 
           } else {
-            // --- GIAI ĐOẠN 3 (72% - 100% chặng đua): CÚ LỘI NGƯỢC DÒNG NGOẠN MỤC & VỀ ĐÍCH! ---
-            const sprintT = (progress - 0.72) / 0.28;
+            // --- GIAI ĐOẠN 3 (75% - 100% chặng đua): 25% CUỐI CÙNG TOP 2 TÁCH ĐOÀN BỨT TỐC! ---
+            const sprintT = (progress - 0.75) / 0.25;
             const sprintEase = sprintT * sprintT * (3 - 2 * sprintT);
-            const startSprintX = d.startX + totalDistance * 0.72;
+            const startSprintX = d.startX + totalDistance * 0.75;
 
             let sprintFromOffset = 0;
-            if (d.raceRole === 'winner') {
-              sprintFromOffset = -10;
-            } else if (d.raceRole === 'leader2' || (d.raceRole === 'leader1' && !duckLeader2)) {
-              sprintFromOffset = 45;
+            if (d.isWinner) {
+              sprintFromOffset = 30; // Bắt đầu nước rút từ vị trí sát sau Leader 2
+            } else if (d.isRunnerUp) {
+              sprintFromOffset = 48; // Bắt đầu nước rút từ vị trí dẫn đầu
             } else {
-              sprintFromOffset = packJostle;
+              sprintFromOffset = packJostle; // Cả đoàn tụt lại phía sau
             }
 
             const currentStartPos = startSprintX + sprintFromOffset;
@@ -7927,24 +7942,26 @@
 
       // 2. Gợn sóng bơi rẽ nước sinh động (Bow wave & wake ripples)
       ctx.save();
-      const wavePhase = (duck.paddleTime || 0);
-      const waveAlpha = 0.35 + Math.sin(wavePhase * 2) * 0.15;
+      const isDuckBreakaway = duck.isBreakaway && (duckRaceState.progress >= 0.75);
+      const wavePhase = (duck.paddleTime || 0) * (isDuckBreakaway ? 1.4 : 1);
+      const waveAlpha = isDuckBreakaway ? (0.6 + Math.sin(wavePhase * 2.5) * 0.25) : (0.35 + Math.sin(wavePhase * 2) * 0.15);
       ctx.strokeStyle = `rgba(255, 255, 255, ${waveAlpha})`;
-      ctx.lineWidth = 1.8;
+      ctx.lineWidth = isDuckBreakaway ? 2.6 : 1.8;
       ctx.lineCap = 'round';
       
       // Sóng rẽ trước mũi
       ctx.beginPath();
-      ctx.arc(14, 8, 7, -0.6, 0.6);
+      ctx.arc(14, 8, isDuckBreakaway ? 9 : 7, -0.6, 0.6);
       ctx.stroke();
 
       // Hai dải nước rẽ sau đuôi vịt
-      const wakeOffset = (wavePhase * 4) % 16;
+      const wakeOffset = (wavePhase * 4) % 18;
+      const wakeLen = isDuckBreakaway ? 45 : 34;
       ctx.beginPath();
       ctx.moveTo(-16, 6);
-      ctx.lineTo(-34 - wakeOffset, 2 - wakeOffset * 0.2);
+      ctx.lineTo(-wakeLen - wakeOffset, 2 - wakeOffset * 0.25);
       ctx.moveTo(-16, 9);
-      ctx.lineTo(-34 - wakeOffset, 16 + wakeOffset * 0.2);
+      ctx.lineTo(-wakeLen - wakeOffset, 16 + wakeOffset * 0.25);
       ctx.stroke();
       ctx.restore();
 
@@ -8549,17 +8566,20 @@
         return t * t * (3 - 2 * t);
       };
 
-      // Chọn 2 thí sinh dẫn đầu theo từng khoảng thời gian riêng biệt:
-      // LeadCar 1: Giữ vị trí đầu tiên trong ~38% chặng đầu (khoảng 2 - 2.5s)
-      // LeadCar 2: Vượt lên và giữ vị trí đầu tiên trong ~36% chặng tiếp theo
-      // Winner: Bật nitro lội ngược dòng ở 26% chặng cuối và cán đích!
+      // Chọn 2 thí sinh dẫn đầu theo từng khoảng thời gian:
+      // - Leader 1: Dẫn đầu chặng 1 (0% - ~38%)
+      // - Leader 2: Dẫn đầu chặng 2 (38% - 75%)
+      // - 25% cuối cùng (75% - 100%): Top 2 (Winner & Runner-up) TÁCH ĐOÀN bứt tốc, bỏ xa cả đoàn phía sau!
       const nonWinningCars = carRaceState.cars.filter(c => String(c.id) !== String(winnerStudent.id));
       const shuffledCars = [...nonWinningCars].sort(() => Math.random() - 0.5);
       const leadCar1 = shuffledCars.length > 0 ? shuffledCars[0] : null;
       const leadCar2 = shuffledCars.length > 1 ? shuffledCars[1] : null;
+      const carRunnerUp = leadCar2 || leadCar1;
 
       carRaceState.cars.forEach(c => {
         c.isWinner = (String(c.id) === String(winnerStudent.id));
+        c.isRunnerUp = (!c.isWinner && c === carRunnerUp);
+        c.isBreakaway = (c.isWinner || c.isRunnerUp);
         c.raceRole = c.isWinner ? 'winner' : (c === leadCar1 ? 'leader1' : (c === leadCar2 ? 'leader2' : 'pack'));
         c.startX = startX;
         c.vibrateTime = Math.random() * Math.PI * 2;
@@ -8567,12 +8587,14 @@
         c.burstFactor = 0;
         c.seed = Math.random() * 10;
 
-        // Khoảng cách cán đích cực kỳ sít sao (photo-finish)
+        // Đích đến: Top 2 về đích trước và TÁCH ĐOÀN, đoàn phía sau cách xa rõ rệt
         if (c.isWinner) {
-          c.finalTargetX = finishX + 45;
+          c.finalTargetX = finishX + 48; // Về nhất
+        } else if (c.isRunnerUp) {
+          c.finalTargetX = finishX + 18; // Về nhì sát nút người thắng (chênh ~30px)
         } else {
-          // Các xe bám đuổi suýt soát ngay sau đuôi xe dẫn đầu
-          c.finalTargetX = finishX - (10 + Math.random() * 20);
+          // Các xe bám đuổi bị tụt lại cách xa top 2 từ 90px đến 140px
+          c.finalTargetX = finishX - (90 + Math.random() * 45);
         }
       });
 
@@ -8584,6 +8606,16 @@
 
         const elapsed = now - carRaceState.raceStartTime;
         const progress = Math.min(elapsed / raceDuration, 1);
+        carRaceState.progress = progress;
+
+        // Hiển thị thông báo khi top 2 bắt đầu tách đoàn ở 25% chặng cuối
+        if (progress >= 0.75 && !carRaceState.tapeBroken && statusEl) {
+          if (!statusEl.dataset.breakaway) {
+            statusEl.dataset.breakaway = "1";
+            statusEl.className = "text-xs font-bold text-amber-300 bg-red-950/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-red-500/60 shadow-md flex items-center gap-1.5 animate-pulse";
+            statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> ⚡ TOP 2 TÁCH ĐOÀN BỨT TỐC!`;
+          }
+        }
 
         let maxCarX = 0;
         let leaderCar = null;
@@ -8603,53 +8635,54 @@
           const packJostle = Math.sin(progress * 10 + c.seed * 2.2) * 10 + (c.burstFactor || 0) * 0.3;
 
           let targetX;
-          if (progress < 0.74) {
-            // --- GIAI ĐOẠN 1 & 2 (0% - 74% chặng đua): CÓ KHOẢNG THỜI GIAN RÕ RÀNG DẪN ĐẦU ---
+          if (progress < 0.75) {
+            // --- GIAI ĐOẠN 1 & 2 (0% - 75% chặng đua): CÓ KHOẢNG THỜI GIAN RÕ RÀNG DẪN ĐẦU ---
             const basePackX = c.startX + totalDistance * progress;
             const LEAD_MARGIN = 48; // Khoảng cách bứt phá tạo ngôi đầu vững vàng
 
             let leadOffset = 0;
             if (leadCar2) {
-              // 2 xe thay nhau dẫn đầu 2 khoảng thời gian rõ ràng
               if (c.raceRole === 'leader1') {
                 // Xe 1 dẫn đầu vững vàng suốt ~38% chặng đầu
                 const w1 = smoothStep(0.0, 0.10, progress) * (1 - smoothStep(0.36, 0.44, progress));
                 leadOffset = w1 * LEAD_MARGIN;
               } else if (c.raceRole === 'leader2') {
-                // Xe 2 vượt lên và giữ vững vị trí dẫn đầu suốt 44% - 74% chặng đua
+                // Xe 2 vượt lên và giữ vững vị trí dẫn đầu suốt 44% - 75% chặng đua
                 const w2 = smoothStep(0.36, 0.44, progress);
                 leadOffset = w2 * LEAD_MARGIN;
               } else if (c.raceRole === 'winner') {
-                // Xe vô địch ẩn mình ở vị trí thứ 3 trong tốp
-                leadOffset = -10;
+                // Xe vô địch ẩn mình trong tốp rồi lướt lên vị trí thứ 2 sát đuôi Xe 2 trước mốc 75%
+                const readyStep = smoothStep(0.52, 0.75, progress);
+                leadOffset = -8 * (1 - readyStep) + 32 * readyStep;
               }
             } else if (leadCar1) {
               if (c.raceRole === 'leader1') {
                 leadOffset = smoothStep(0.0, 0.12, progress) * LEAD_MARGIN;
               } else if (c.raceRole === 'winner') {
-                leadOffset = -10;
+                const readyStep = smoothStep(0.52, 0.75, progress);
+                leadOffset = -8 * (1 - readyStep) + 32 * readyStep;
               }
             }
 
-            if (c.raceRole === 'leader1' || c.raceRole === 'leader2') {
+            if (c.raceRole === 'leader1' || c.raceRole === 'leader2' || c.isWinner) {
               targetX = basePackX + leadOffset + packJostle * 0.2;
             } else {
               targetX = basePackX + leadOffset + packJostle;
             }
 
           } else {
-            // --- GIAI ĐOẠN 3 (74% - 100% chặng đua): BỨT PHÁ LỘI NGƯỢC DÒNG THẦN TỐC! ---
-            const sprintT = (progress - 0.74) / 0.26;
+            // --- GIAI ĐOẠN 3 (75% - 100% chặng đua): 25% CUỐI CÙNG TOP 2 TÁCH ĐOÀN BỨT TỐC! ---
+            const sprintT = (progress - 0.75) / 0.25;
             const sprintEase = sprintT * sprintT * (3 - 2 * sprintT);
-            const startSprintX = c.startX + totalDistance * 0.74;
+            const startSprintX = c.startX + totalDistance * 0.75;
 
             let sprintFromOffset = 0;
-            if (c.raceRole === 'winner') {
-              sprintFromOffset = -10;
-            } else if (c.raceRole === 'leader2' || (c.raceRole === 'leader1' && !leadCar2)) {
-              sprintFromOffset = 48;
+            if (c.isWinner) {
+              sprintFromOffset = 32; // Bắt đầu nước rút từ vị trí sát sau LeadCar 2
+            } else if (c.isRunnerUp) {
+              sprintFromOffset = 48; // Bắt đầu nước rút từ vị trí dẫn đầu
             } else {
-              sprintFromOffset = packJostle;
+              sprintFromOffset = packJostle; // Cả đoàn tụt lại phía sau
             }
 
             const currentStartPos = startSprintX + sprintFromOffset;
@@ -8773,15 +8806,18 @@
       // 2. Hiệu ứng vệt tốc độ / khói lửa ống xả mềm mại, không chớp giật
       if (carRaceState.isRunning) {
         ctx.save();
-        const boostAlpha = 0.4 + Math.sin(car.vibrateTime * 1.5) * 0.2;
-        const gradFlame = ctx.createLinearGradient(-46, 5, -60, 5);
-        gradFlame.addColorStop(0, `rgba(249, 115, 22, ${boostAlpha})`);
+        const isCarBreakaway = car.isBreakaway && (carRaceState.progress >= 0.75);
+        const boostAlpha = isCarBreakaway ? (0.75 + Math.sin(car.vibrateTime * 2) * 0.25) : (0.4 + Math.sin(car.vibrateTime * 1.5) * 0.2);
+        const flameTip = isCarBreakaway ? -72 : -58;
+        const gradFlame = ctx.createLinearGradient(-46, 5, flameTip, 5);
+        gradFlame.addColorStop(0, isCarBreakaway ? `rgba(59, 130, 246, ${boostAlpha})` : `rgba(249, 115, 22, ${boostAlpha})`);
+        gradFlame.addColorStop(0.35, `rgba(249, 115, 22, ${boostAlpha})`);
         gradFlame.addColorStop(1, 'rgba(239, 68, 68, 0)');
         ctx.fillStyle = gradFlame;
         ctx.beginPath();
-        ctx.moveTo(-46, 2);
-        ctx.lineTo(-58, 5);
-        ctx.lineTo(-46, 8);
+        ctx.moveTo(-46, isCarBreakaway ? 1 : 2);
+        ctx.lineTo(flameTip, 5);
+        ctx.lineTo(-46, isCarBreakaway ? 9 : 8);
         ctx.closePath();
         ctx.fill();
         ctx.restore();
