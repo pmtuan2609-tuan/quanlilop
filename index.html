@@ -7631,11 +7631,13 @@
       const startX = duckRaceState.startLineX;
       const totalDistance = finishX - startX;
 
-      duckRaceState.ducks.forEach(d => {
-        d.isWinner = (d.id === winnerStudent.id);
+      duckRaceState.ducks.forEach((d, idx) => {
+        d.isWinner = (String(d.id) === String(winnerStudent.id));
         d.burstCountdown = Math.random() * 1500 + 500;
         d.burstFactor = 0;
         d.startX = d.x;
+        const seedStr = String(d.id !== undefined && d.id !== null ? d.id : idx);
+        d.seed = (seedStr.charCodeAt(0) || 50) % 10;
       });
 
       function raceLoop(now) {
@@ -7666,7 +7668,7 @@
               d.burstFactor = (Math.random() - 0.5) * 30;
               d.burstCountdown = Math.random() * 1200 + 600;
             }
-            const nonWinnerLimit = totalDistance * (0.85 + (d.id.charCodeAt(0) % 10) * 0.012);
+            const nonWinnerLimit = totalDistance * (0.85 + (d.seed || 0) * 0.012);
             const normalProgress = Math.pow(progress, 1.04);
             d.x = d.startX + nonWinnerLimit * normalProgress + (d.burstFactor || 0);
           }
@@ -7768,7 +7770,7 @@
       ctx.restore();
 
       // 2. Trailing Student Name Tag (Floating buoy board)
-      const nameText = duck.name;
+      const nameText = String(duck.name || 'Học sinh');
       ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
       const textMetrics = ctx.measureText(nameText);
       const tagW = Math.max(textMetrics.width + 16, 54);
