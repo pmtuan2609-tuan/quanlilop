@@ -1251,7 +1251,7 @@
             </div>
 
             <!-- SÂN KHẤU ĐUA XE F1 SIÊU TỐC -->
-            <div id="car-race-container" class="hidden flex flex-col relative w-full h-[430px] md:h-[520px] bg-slate-900 rounded-2xl overflow-hidden border-2 border-amber-500 shadow-2xl select-none">
+            <div id="car-race-container" class="hidden flex flex-col relative w-full h-[460px] md:h-[560px] bg-slate-900 rounded-2xl overflow-hidden border-2 border-amber-500 shadow-2xl select-none">
                <canvas id="car-canvas" class="w-full h-full block"></canvas>
                
                <!-- Top Race Track Header Overlay -->
@@ -7689,6 +7689,11 @@
       const startX = duckRaceState.startLineX;
       const totalDistance = finishX - startX;
 
+      // Chọn ngẫu nhiên 1 hoặc 2 chú vịt "ngựa non háu đá" (fake leaders) dẫn đầu suốt chặng đầu rồi đuối sức
+      const nonWinners = duckRaceState.ducks.filter(d => !d.isWinner);
+      const fakeLeader1 = nonWinners.length > 0 ? nonWinners[Math.floor(Math.random() * nonWinners.length)] : null;
+      const fakeLeader2 = nonWinners.length > 1 ? nonWinners.find(d => d !== fakeLeader1) : null;
+
       duckRaceState.ducks.forEach(d => {
         d.isWinner = (String(d.id) === String(winnerStudent.id));
         d.startX = startX;
@@ -7696,22 +7701,24 @@
         d.targetSpeed = 0;
         d.accel = 0;
         d.tilt = 0;
-        d.burstCountdown = Math.random() * 1000 + 400;
+        d.burstCountdown = Math.random() * 600 + 300;
         d.wobblePhase = Math.random() * Math.PI * 2;
         d.seed = Math.random() * 10;
-        // Giới hạn đích cho từng chú vịt
+        d.isFakeLeader = (d === fakeLeader1 || d === fakeLeader2);
+
+        // Đích đến so kè suýt soát (photo-finish)
         if (d.isWinner) {
-          d.finalTargetX = finishX + 60;
+          d.finalTargetX = finishX + 35;
         } else {
-          // Các vịt khác về đích sau với khoảng cách ngẫu nhiên đẹp mắt
-          d.finalTargetX = finishX - 30 - (Math.random() * (totalDistance * 0.35) + 30);
+          // Các vịt khác bám sát phía sau suýt soát
+          d.finalTargetX = finishX - (8 + Math.random() * 26);
         }
       });
 
       let lastFrameTime = performance.now();
 
       function raceLoop(now) {
-        const dt = Math.min((now - lastFrameTime) / 1000, 0.08); // delta time tính bằng giây
+        const dt = Math.min((now - lastFrameTime) / 1000, 0.08);
         lastFrameTime = now;
 
         const elapsed = now - duckRaceState.raceStartTime;
@@ -7720,63 +7727,67 @@
         let maxDuckX = 0;
         let leaderDuck = null;
 
-        // Smooth easing curves
-        // Sine easing for baseline progression
-        const baseProgress = 1 - Math.cos((progress * Math.PI) / 2);
-
         duckRaceState.ducks.forEach(d => {
-          // Nhịp bơi nhấp nhô theo vận tốc
           d.bobTime += dt * 8;
           d.paddleTime += dt * 14;
 
-          if (d.isWinner) {
-            // Chú vịt thắng: lúc đầu so kè quyết liệt, 35% cuối bứt phá ngoạn mục
-            let targetX;
-            if (progress < 0.62) {
-              // Giai đoạn tranh đua: chạy ở tốp đầu (0% - 62%)
-              const pPart = progress / 0.62;
-              const smoothPart = 0.5 * (1 - Math.cos(pPart * Math.PI));
-              const leadWave = Math.sin(progress * 14 + d.seed) * 16;
-              targetX = d.startX + (totalDistance * 0.58) * smoothPart + leadWave;
-            } else {
-              // Giai đoạn bứt tốc về đích: tăng tốc siêu mượt
-              const surgeProgress = (progress - 0.62) / 0.38;
-              // Smooth cubic bezier easing
-              const easeSurge = surgeProgress * surgeProgress * (3 - 2 * surgeProgress);
-              const startSurgeX = d.startX + totalDistance * 0.58;
-              targetX = startSurgeX + (d.finalTargetX - startSurgeX) * easeSurge;
-            }
+          // Thay đổi nhịp bơi ngẫu nhiên để các vịt liên tục vượt nhau
+          d.burstCountdown -= dt * 1000;
+          if (d.burstCountdown <= 0) {
+            d.burstFactor = (Math.random() - 0.5) * 32;
+            d.burstCountdown = Math.random() * 600 + 400;
+          }
 
-            // Dùng nội suy mượt mà để tránh mọi hiện tượng giật lắc (spring-like lerp)
-            const lerpFactor = 1 - Math.exp(-12 * dt);
-            d.x += (targetX - d.x) * lerpFactor;
-            
-            // Góc nghiêng tự nhiên khi bơi nhanh
-            const currentSpeed = (targetX - d.x) * 10;
-            d.tilt = Math.sin(d.bobTime) * 0.07 + Math.min(Math.max(currentSpeed * 0.001, -0.05), 0.12);
-            d.y = d.baseY + Math.sin(d.bobTime) * 3.5 + Math.sin(d.paddleTime * 0.5) * 1.5;
+          // Hiệu ứng sóng nhấp nhô rượt đuổi
+          const overtakeWave = Math.sin(progress * 18 + d.seed * 2.5) * 20;
+
+          let targetX;
+          if (progress < 0.72) {
+            // --- GIAI ĐOẠN 1 (0% - 72% chặng đua): KỊCH TÍNH & BẤT NGỜ ---
+            // Cả đàn bơi bám sát nút nhau
+            const baseFlockX = d.startX + (totalDistance * 0.72) * (progress / 0.72);
+
+            if (d.isFakeLeader) {
+              // Vịt dẫn đầu sớm: bứt phá dẫn trước đàn từ 15px - 35px, tạo cảm giác sắp thắng chắc!
+              const fakeLeadAdvantage = Math.sin((progress / 0.72) * Math.PI) * 35;
+              targetX = baseFlockX + fakeLeadAdvantage + (d.burstFactor || 0);
+            } else if (d.isWinner) {
+              // Vịt quán quân thực sự: ẩn mình so kè ở giữa hoặc nửa sau của tốp (tạo kịch tính lội ngược dòng)
+              const underdogLag = -14 + Math.sin(progress * 14 + d.seed) * 12;
+              targetX = baseFlockX + underdogLag + (d.burstFactor || 0);
+            } else {
+              // Các vịt khác bám đuổi so kè trong tốp đông
+              targetX = baseFlockX + overtakeWave + (d.burstFactor || 0);
+            }
 
           } else {
-            // Các vịt khác: có nhịp tăng tốc (burst) và giảm tốc tự nhiên, không giật
-            d.burstCountdown -= dt * 1000;
-            if (d.burstCountdown <= 0) {
-              // Đổi nhịp bơi nhẹ nhàng
-              d.burstFactor = (Math.random() - 0.5) * 22;
-              d.burstCountdown = Math.random() * 1200 + 800;
+            // --- GIAI ĐOẠN 2 (72% - 100% chặng đua): CÚ LỘI NGƯỢC DÒNG NGOẠN MỤC! ---
+            // Vịt dẫn đầu trước đó đuối sức tụt lại phía sau, vịt thắng từ phía sau vút lên vượt qua tất cả!
+            const sprintT = (progress - 0.72) / 0.28;
+            // Smooth ease in-out cho màn rượt đuổi ngoạn mục
+            const sprintEase = sprintT * sprintT * (3 - 2 * sprintT);
+            const startSprintX = d.startX + totalDistance * 0.72;
+
+            if (d.isWinner) {
+              // VỊT CHIẾN THẮNG TĂNG TỐC THẦN TỐC VƯỢT LÊN TỪ PHÍA SAU!
+              targetX = startSprintX + (d.finalTargetX - startSprintX) * sprintEase + (sprintT * 22);
+            } else if (d.isFakeLeader) {
+              // Vịt dẫn đầu sớm bị hụt hơi, bị vượt qua và về sau
+              const fatigueDrop = Math.sin(sprintT * Math.PI) * -18;
+              targetX = startSprintX + (d.finalTargetX - startSprintX) * sprintEase + fatigueDrop;
+            } else {
+              // Các vịt khác bám đuổi sít sao tạo màn về đích sát nút
+              targetX = startSprintX + (d.finalTargetX - startSprintX) * sprintEase + overtakeWave * (1 - sprintT * 0.8);
             }
-
-            // Đường đi mượt theo hàm S-curve
-            const smoothNorm = baseProgress + (Math.sin(progress * 8 + d.seed) * 0.025);
-            const targetX = d.startX + (d.finalTargetX - d.startX) * Math.min(Math.max(smoothNorm, 0), 1) + (d.burstFactor || 0);
-
-            // Nội suy mềm x
-            const lerpFactor = 1 - Math.exp(-9 * dt);
-            d.x += (targetX - d.x) * lerpFactor;
-
-            // Nhấp nhô nhẹ nhàng
-            d.tilt = Math.sin(d.bobTime) * 0.06;
-            d.y = d.baseY + Math.sin(d.bobTime) * 3;
           }
+
+          // Nội suy mượt mà loại bỏ giật lag
+          const lerpFactor = 1 - Math.exp(-12 * dt);
+          d.x += (targetX - d.x) * lerpFactor;
+
+          // Góc nghiêng lướt sóng tự nhiên
+          d.tilt = Math.sin(d.bobTime) * 0.07;
+          d.y = d.baseY + Math.sin(d.bobTime) * 3.2;
 
           if (d.x > maxDuckX) {
             maxDuckX = d.x;
@@ -8269,7 +8280,7 @@
       const rect = container.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       const w = rect.width || 700;
-      const h = rect.height || 480;
+      const h = rect.height || 500;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
 
@@ -8290,36 +8301,62 @@
       carRaceState.winner = null;
       carRaceState.tapeBroken = false;
 
-      const topGrass = 42;
-      const botGrass = h - 42;
-      const roadH = botGrass - topGrass;
+      // 1. Phân chia lề đường và lòng đường đua rộng rãi, rõ ràng
+      const topKerbH = 36;
+      const botKerbH = 36;
+      const roadTop = topKerbH;
+      const roadBot = h - botKerbH;
+      const roadH = roadBot - roadTop;
 
-      // Chia làn đường đua đều đặn
-      const laneStep = count > 1 ? (roadH - 46) / (count - 1) : 0;
+      // Giới hạn số làn đua hiển thị (mỗi xe 1 làn riêng biệt, tối đa 8 làn nếu lớp đông)
+      const numLanes = Math.min(Math.max(count, 3), 8);
+      const laneH = roadH / numLanes;
+      carRaceState.numLanes = numLanes;
+      carRaceState.laneH = laneH;
+      carRaceState.roadTop = roadTop;
+      carRaceState.roadH = roadH;
+
+      // Scale kích thước xe đua theo độ cao làn để không bao giờ bị đè lấn
+      let carScale = 1.0;
+      if (laneH < 48) {
+        carScale = Math.max(laneH / 48, 0.65);
+      } else if (laneH > 70) {
+        carScale = 1.15;
+      }
+      carRaceState.carScale = carScale;
+
       const startX = carRaceState.startLineX;
 
-      // Bộ màu xe đua F1 phong phú, rực rỡ và thể thao (gồm cả xanh dương, hồng tím, cam... như ảnh mẫu)
+      // Bộ màu xe đua F1 phong phú, tương phản cao, cực kỳ bắt mắt
       const carThemes = [
-        { primary: '#3b82f6', secondary: '#1d4ed8', accent: '#60a5fa' }, // Xanh dương F1 (như xe Nick)
-        { primary: '#d946ef', secondary: '#c026d3', accent: '#f59e0b' }, // Hồng tím sọc cam (như xe Dan)
-        { primary: '#a855f7', secondary: '#7e22ce', accent: '#e879f9' }, // Tím hoa cà (như xe Jane)
-        { primary: '#c084fc', secondary: '#9333ea', accent: '#f472b6' }, // Tím hồng sáng (như xe Join)
-        { primary: '#ef4444', secondary: '#b91c1c', accent: '#facc15' }, // Đỏ Ferrari
-        { primary: '#f97316', secondary: '#c2410c', accent: '#fde047' }, // Cam McLaren
-        { primary: '#22c55e', secondary: '#15803d', accent: '#86efac' }, // Xanh lá Aston Martin
-        { primary: '#06b6d4', secondary: '#0e7490', accent: '#67e8f9' }, // Xanh ngọc Petronas
-        { primary: '#eab308', secondary: '#a16207', accent: '#fef08a' }, // Vàng Renault
-        { primary: '#ec4899', secondary: '#be185d', accent: '#fbcfe8' }, // Hồng phấn cá tính
-        { primary: '#14b8a6', secondary: '#0f766e', accent: '#5eead4' }, // Xanh mint thể thao
-        { primary: '#6366f1', secondary: '#4338ca', accent: '#a5b4fc' }, // Xanh chàm cá tính
-        { primary: '#f43f5e', secondary: '#be123c', accent: '#fda4af' }, // Đỏ hồng Ruby
-        { primary: '#0ea5e9', secondary: '#0369a1', accent: '#bae6fd' }, // Xanh biển sâu
-        { primary: '#84cc16', secondary: '#4d7c0f', accent: '#d9f99d' }, // Xanh neon Lime
-        { primary: '#f8fafc', secondary: '#64748b', accent: '#ef4444' }  // Trắng sọc đỏ thể thao
+        { primary: '#2563eb', secondary: '#1e3a8a', accent: '#60a5fa', name: 'Lam Đua' },
+        { primary: '#d946ef', secondary: '#86198f', accent: '#f59e0b', name: 'Hồng Cam' },
+        { primary: '#9333ea', secondary: '#581c87', accent: '#f472b6', name: 'Tím Neon' },
+        { primary: '#ef4444', secondary: '#991b1b', accent: '#fde047', name: 'Đỏ Lửa' },
+        { primary: '#f97316', secondary: '#9a3412', accent: '#fef08a', name: 'Cam Cháy' },
+        { primary: '#16a34a', secondary: '#14532d', accent: '#86efac', name: 'Xanh Lá' },
+        { primary: '#0891b2', secondary: '#164e63', accent: '#67e8f9', name: 'Xanh Ngọc' },
+        { primary: '#eab308', secondary: '#854d0e', accent: '#fef9c3', name: 'Vàng Cát' },
+        { primary: '#e11d48', secondary: '#881337', accent: '#fda4af', name: 'Đỏ Ruby' },
+        { primary: '#0d9488', secondary: '#134e4a', accent: '#5eead4', name: 'Xanh Mint' },
+        { primary: '#4f46e5', secondary: '#312e81', accent: '#a5b4fc', name: 'Xanh Chàm' },
+        { primary: '#65a30d', secondary: '#365314', accent: '#bef264', name: 'Xanh Cốm' },
+        { primary: '#0284c7', secondary: '#075985', accent: '#7dd3fc', name: 'Xanh Biển' },
+        { primary: '#c026d3', secondary: '#701a75', accent: '#f0abfc', name: 'Tím Sen' },
+        { primary: '#f43f5e', secondary: '#9f1239', accent: '#fecdd3', name: 'Hồng San Hô' },
+        { primary: '#475569', secondary: '#0f172a', accent: '#38bdf8', name: 'Xám Titan' }
       ];
 
       carRaceState.cars = visibleStudents.map((s, idx) => {
-        const laneY = count > 1 ? (topGrass + 24 + idx * laneStep) : (topGrass + roadH / 2);
+        // Phân bổ đều mỗi xe vào tâm làn chạy của mình
+        const laneIndex = count <= numLanes ? idx : (idx % numLanes);
+        // Tâm của làn đua
+        const laneCenterY = roadTop + laneIndex * laneH + laneH / 2;
+
+        // Nếu có nhiều hơn numLanes xe (ví dụ lớp 30-40 học sinh), cho lệch nhẹ trong làn mà không tràn ra ngoài
+        const subOffset = count > numLanes ? ((Math.floor(idx / numLanes) % 2 === 0 ? -1 : 1) * Math.min(laneH * 0.16, 8)) : 0;
+        const initialY = laneCenterY + subOffset;
+
         const theme = carThemes[idx % carThemes.length];
 
         return {
@@ -8328,10 +8365,12 @@
           avatar: s.avatar,
           code: s.code,
           num: idx + 1,
+          laneIndex: laneIndex,
           x: startX,
-          y: laneY,
-          baseY: laneY,
+          y: initialY,
+          baseY: initialY,
           theme: theme,
+          scale: carScale,
           wheelAngle: 0,
           vibrateTime: Math.random() * Math.PI * 2,
           burstCountdown: Math.random() * 1200 + 600,
@@ -8367,9 +8406,9 @@
         lastTime = now;
 
         carRaceState.cars.forEach(c => {
-          c.vibrateTime += dt * 18;
+          c.vibrateTime += dt * 16;
           // Xe hơi rung nhẹ tiếng động cơ gầm gừ chờ xuất phát
-          c.y = c.baseY + Math.sin(c.vibrateTime) * 0.7;
+          c.y = c.baseY + Math.sin(c.vibrateTime) * 0.5;
           c.wheelAngle += dt * 0.5;
         });
 
@@ -8384,13 +8423,12 @@
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
         const ctx = new AudioCtx();
-        // Tiếng gầm rú động cơ F1 xuất phát
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(110, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(420, ctx.currentTime + 1.2);
-        osc.frequency.exponentialRampToValueAtTime(280, ctx.currentTime + 2.5);
+        osc.frequency.setValueAtTime(120, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(460, ctx.currentTime + 1.2);
+        osc.frequency.exponentialRampToValueAtTime(290, ctx.currentTime + 2.5);
         gain.gain.setValueAtTime(0.08, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3.0);
         osc.connect(gain);
@@ -8436,17 +8474,26 @@
 
       playCarEngineSound();
 
+      // Chọn ngẫu nhiên 1 hoặc 2 xe dẫn đầu sớm (fake leader) để dẫn đầu suốt 70% chặng đầu rồi đuối sức bị vượt qua
+      const nonWinningCars = carRaceState.cars.filter(c => !c.isWinner);
+      const fakeLeadCar1 = nonWinningCars.length > 0 ? nonWinningCars[Math.floor(Math.random() * nonWinningCars.length)] : null;
+      const fakeLeadCar2 = nonWinningCars.length > 1 ? nonWinningCars.find(c => c !== fakeLeadCar1) : null;
+
       carRaceState.cars.forEach(c => {
         c.isWinner = (String(c.id) === String(winnerStudent.id));
         c.startX = startX;
         c.vibrateTime = Math.random() * Math.PI * 2;
-        c.burstCountdown = Math.random() * 1000 + 400;
+        c.burstCountdown = Math.random() * 600 + 300;
         c.burstFactor = 0;
         c.seed = Math.random() * 10;
+        c.isFakeLeader = (c === fakeLeadCar1 || c === fakeLeadCar2);
+
+        // Khoảng cách cán đích cực kỳ sít sao (photo-finish)
         if (c.isWinner) {
-          c.finalTargetX = finishX + 90;
+          c.finalTargetX = finishX + 45;
         } else {
-          c.finalTargetX = finishX - 35 - (Math.random() * (totalDistance * 0.32) + 40);
+          // Các xe bám đuổi suýt soát ngay sau đuôi xe dẫn đầu
+          c.finalTargetX = finishX - (8 + Math.random() * 24);
         }
       });
 
@@ -8462,45 +8509,61 @@
         let maxCarX = 0;
         let leaderCar = null;
 
-        const baseProgress = 1 - Math.cos((progress * Math.PI) / 2);
-
         carRaceState.cars.forEach(c => {
           c.vibrateTime += dt * 25;
-          // Vòng quay bánh xe tỉ lệ thuận với tốc độ lướt
           c.wheelAngle += dt * 45;
 
-          if (c.isWinner) {
-            let targetX;
-            if (progress < 0.62) {
-              const pPart = progress / 0.62;
-              const smoothPart = 0.5 * (1 - Math.cos(pPart * Math.PI));
-              const leadWave = Math.sin(progress * 15 + c.seed) * 18;
-              targetX = c.startX + (totalDistance * 0.58) * smoothPart + leadWave;
-            } else {
-              const surgeProgress = (progress - 0.62) / 0.38;
-              const easeSurge = surgeProgress * surgeProgress * (3 - 2 * surgeProgress);
-              const startSurgeX = c.startX + totalDistance * 0.58;
-              targetX = startSurgeX + (c.finalTargetX - startSurgeX) * easeSurge;
-            }
+          // Thay đổi nhịp bứt tốc ngẫu nhiên để các xe liên tục vượt nhau
+          c.burstCountdown -= dt * 1000;
+          if (c.burstCountdown <= 0) {
+            c.burstFactor = (Math.random() - 0.5) * 35;
+            c.burstCountdown = Math.random() * 600 + 400;
+          }
 
-            const lerpFactor = 1 - Math.exp(-12 * dt);
-            c.x += (targetX - c.x) * lerpFactor;
-            c.y = c.baseY + Math.sin(c.vibrateTime) * 1.0;
+          // Dao động so kè vị trí giữa các làn xe
+          const overtakeWave = Math.sin(progress * 20 + c.seed * 2.6) * 24;
+
+          let targetX;
+          if (progress < 0.74) {
+            // --- GIAI ĐOẠN 1 (0% - 74% chặng đua): CÁC XE SO KÈ NẢY LỬA ---
+            const basePackX = c.startX + (totalDistance * 0.74) * (progress / 0.74);
+
+            if (c.isFakeLeader) {
+              // Xe dẫn đầu sớm: bứt tốc dẫn trước đoàn đua 20px - 40px, liên tục xuất hiện trên bảng "🏆 Dẫn đầu"
+              const fakeLeadBoost = Math.sin((progress / 0.74) * Math.PI) * 40;
+              targetX = basePackX + fakeLeadBoost + (c.burstFactor || 0);
+            } else if (c.isWinner) {
+              // Xe vô địch thực sự: chạy ẩn mình ở vị trí thứ 2 hoặc thứ 3 trong tốp đông
+              const trailingOffset = -12 + Math.sin(progress * 15 + c.seed) * 10;
+              targetX = basePackX + trailingOffset + (c.burstFactor || 0);
+            } else {
+              // Các xe khác bám đuổi quyết liệt thành một khối
+              targetX = basePackX + overtakeWave + (c.burstFactor || 0);
+            }
 
           } else {
-            c.burstCountdown -= dt * 1000;
-            if (c.burstCountdown <= 0) {
-              c.burstFactor = (Math.random() - 0.5) * 25;
-              c.burstCountdown = Math.random() * 1200 + 700;
+            // --- GIAI ĐOẠN 2 (74% - 100% chặng đua): BỨT PHÁ LỘI NGƯỢC DÒNG THẦN TỐC! ---
+            const sprintT = (progress - 0.74) / 0.26;
+            const sprintEase = sprintT * sprintT * (3 - 2 * sprintT);
+            const startSprintX = c.startX + totalDistance * 0.74;
+
+            if (c.isWinner) {
+              // XE VÔ ĐỊCH BẬT NITRO TĂNG TỐC VƯỢT QUA XE DẪN ĐẦU CÁN ĐÍCH!
+              targetX = startSprintX + (c.finalTargetX - startSprintX) * sprintEase + (sprintT * 26);
+            } else if (c.isFakeLeader) {
+              // Xe dẫn đầu trước đó bị đuối sức/hụt hơi, tụt lại phía sau nhường ngôi vương
+              const engineFatigue = Math.sin(sprintT * Math.PI) * -22;
+              targetX = startSprintX + (c.finalTargetX - startSprintX) * sprintEase + engineFatigue;
+            } else {
+              // Các xe khác bám sát nút bánh sau
+              targetX = startSprintX + (c.finalTargetX - startSprintX) * sprintEase + overtakeWave * (1 - sprintT * 0.75);
             }
-
-            const smoothNorm = baseProgress + (Math.sin(progress * 8 + c.seed) * 0.025);
-            const targetX = c.startX + (c.finalTargetX - c.startX) * Math.min(Math.max(smoothNorm, 0), 1) + (c.burstFactor || 0);
-
-            const lerpFactor = 1 - Math.exp(-9 * dt);
-            c.x += (targetX - c.x) * lerpFactor;
-            c.y = c.baseY + Math.sin(c.vibrateTime) * 0.8;
           }
+
+          // Nội suy mượt mà loại bỏ khựng giật
+          const lerpFactor = 1 - Math.exp(-12 * dt);
+          c.x += (targetX - c.x) * lerpFactor;
+          c.y = c.baseY + Math.sin(c.vibrateTime) * 0.6;
 
           if (c.x > maxCarX) {
             maxCarX = c.x;
@@ -8574,10 +8637,10 @@
         carRaceState.cars.forEach(c => {
           c.vibrateTime += dt * 14;
           if (c.isWinner) {
-            c.y = c.baseY + Math.sin(c.vibrateTime * 2.5) * 5;
+            c.y = c.baseY + Math.sin(c.vibrateTime * 2.5) * 4;
             c.wheelAngle += dt * 8;
           } else {
-            c.y = c.baseY + Math.sin(c.vibrateTime) * 1.5;
+            c.y = c.baseY + Math.sin(c.vibrateTime) * 1.0;
           }
         });
 
@@ -8587,87 +8650,53 @@
       carRaceState.celebrateAnimId = requestAnimationFrame(danceLoop);
     }
 
-    // --- VẼ CHI TIẾT XE ĐUA F1 FORMULA (CHUẨN HÌNH ẢNH CÔ GỬI) ---
+    // --- VẼ CHI TIẾT XE ĐUA F1 FORMULA (CHUẨN HÌNH ẢNH CÔ GỬI, RÕ RÀNG VÀ DỄ NHÌN) ---
     function drawF1Car(ctx, car, isWinner) {
       ctx.save();
       ctx.translate(car.x, car.y);
+
+      const scale = car.scale || 1.0;
+      ctx.scale(scale, scale);
 
       // 1. Bóng xe trên mặt đường nhựa
       ctx.save();
       ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
       ctx.beginPath();
-      ctx.ellipse(5, 14, 52, 6.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(4, 13, 50, 6, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
       // 2. Hiệu ứng vệt tốc độ / khói lửa ống xả khi đua
       if (carRaceState.isRunning) {
         ctx.save();
-        const boostAlpha = 0.4 + Math.sin(car.vibrateTime * 3) * 0.3;
+        const boostAlpha = 0.5 + Math.sin(car.vibrateTime * 3) * 0.3;
         ctx.fillStyle = `rgba(249, 115, 22, ${boostAlpha})`;
         ctx.beginPath();
         ctx.moveTo(-46, 2);
-        ctx.lineTo(-64 - Math.random() * 12, 5);
+        ctx.lineTo(-62 - Math.random() * 10, 5);
         ctx.lineTo(-46, 8);
         ctx.closePath();
         ctx.fill();
 
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.beginPath();
-        ctx.arc(-48 - Math.random() * 8, 4, 3, 0, Math.PI * 2);
+        ctx.arc(-48 - Math.random() * 6, 5, 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
 
-      // 3. Bảng tên học sinh gắn trên mui xe (Phong cách Glassmorphism mờ viền trắng y hệt ảnh)
-      const nameText = `${car.num}. ${String(car.name || 'Học sinh')}`;
-      ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
-      const textMetrics = ctx.measureText(nameText);
-      const tagW = Math.max(textMetrics.width + 20, 58);
-      const tagH = 20;
-      const tagX = -tagW / 2;
-      const tagY = -34; // Đặt bảng tên nổi bật phía trên xe
-
-      // Trụ kết nối bảng tên với xe
-      ctx.strokeStyle = '#94a3b8';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(0, tagY + tagH);
-      ctx.lineTo(0, -14);
-      ctx.stroke();
-
-      // Hộp bảng tên bán trong suốt viền trắng bạc (y ảnh mẫu Nick, Dan, Jane, Join)
-      ctx.save();
-      ctx.fillStyle = isWinner ? 'rgba(254, 240, 138, 0.95)' : 'rgba(30, 41, 59, 0.85)';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetY = 2;
-      drawRoundRect(ctx, tagX, tagY, tagW, tagH, 5);
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = isWinner ? '#eab308' : 'rgba(255, 255, 255, 0.8)';
-      ctx.stroke();
-
-      // Chữ tên học sinh
-      ctx.fillStyle = isWinner ? '#854d0e' : '#ffffff';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(nameText, 0, tagY + tagH / 2 + 1);
-      ctx.restore();
-
       // --- TẠO HÌNH XE ĐUA F1 DÁNG NGANG (SIDE PROFILE) ---
       const theme = car.theme || { primary: '#3b82f6', secondary: '#1d4ed8', accent: '#60a5fa' };
 
-      // 4. Cánh gió sau (Rear Wing) nâng cao phong cách F1
+      // 3. Cánh gió sau (Rear Wing) nâng cao phong cách F1
       ctx.fillStyle = theme.secondary;
       ctx.strokeStyle = '#0f172a';
       ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.moveTo(-46, 5);
-      ctx.lineTo(-44, -14);
-      ctx.lineTo(-34, -14);
-      ctx.lineTo(-37, -6);
+      ctx.lineTo(-44, -13);
+      ctx.lineTo(-34, -13);
+      ctx.lineTo(-37, -5);
       ctx.lineTo(-39, 5);
       ctx.closePath();
       ctx.fill();
@@ -8675,10 +8704,10 @@
 
       // Tấm cánh ngang gió
       ctx.fillStyle = theme.primary;
-      ctx.fillRect(-48, -17, 16, 4);
-      ctx.strokeRect(-48, -17, 16, 4);
+      ctx.fillRect(-48, -16, 16, 3.5);
+      ctx.strokeRect(-48, -16, 16, 3.5);
 
-      // 5. Thân xe khí động học (Main Monocoque & Nose Cone)
+      // 4. Thân xe khí động học (Main Monocoque & Nose Cone)
       ctx.save();
       ctx.fillStyle = theme.primary;
       ctx.strokeStyle = '#0f172a';
@@ -8686,25 +8715,19 @@
       ctx.lineJoin = 'round';
 
       ctx.beginPath();
-      // Bắt đầu từ mũi cánh gió trước (Front Wing / Nose cone)
       ctx.moveTo(48, 10);
       ctx.lineTo(44, 4);
-      // Mũi xe vuốt thấp
       ctx.lineTo(26, 4);
-      // Nắp capo lượn lên buồng lái
       ctx.bezierCurveTo(14, 2, 8, -5, -4, -6);
-      // Cột bảo vệ Halo / mui xe nhô lên
       ctx.bezierCurveTo(-8, -13, -16, -13, -20, -7);
-      // Lưng xe lượn dốc xuống nắp động cơ khoang máy
       ctx.bezierCurveTo(-26, -5, -34, 0, -42, 5);
-      // Đáy xe F1 phẳng gần sát mặt đất
       ctx.lineTo(-42, 10);
       ctx.lineTo(48, 10);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      // 6. Hoạ tiết sọc trang trí / vân màu khí động học trên thân xe (như vệt sọc trong ảnh mẫu)
+      // Hoạ tiết sọc trang trí thân xe (vân màu khí động học như mẫu)
       ctx.fillStyle = theme.secondary;
       ctx.beginPath();
       ctx.moveTo(-16, -6);
@@ -8714,27 +8737,26 @@
       ctx.closePath();
       ctx.fill();
 
-      // Vệt màu accent (như đốm sọc cam/vàng trên xe hồng của Dan)
+      // Vệt màu accent
       ctx.fillStyle = theme.accent;
       ctx.beginPath();
-      ctx.ellipse(-6, 3, 12, 4, -0.2, 0, Math.PI * 2);
+      ctx.ellipse(-6, 3, 11, 3.5, -0.2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Số hiệu tay đua trên hông xe (như '01', '02', '03' trong ảnh mẫu)
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      // Số hiệu tay đua trên hông xe ('01', '02', '03'...)
+      ctx.fillStyle = '#ffffff';
       ctx.font = 'bold italic 9px monospace, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const carNumStr = car.num < 10 ? `0${car.num}` : `${car.num}`;
-      ctx.fillText(carNumStr, -10, 4);
+      ctx.fillText(carNumStr, -10, 3.5);
 
-      // 7. Buồng lái (Cockpit) & Mũ bảo hiểm tay đua (Driver Helmet)
-      // Kính chắn gió buồng lái
+      // 5. Buồng lái (Cockpit) & Mũ bảo hiểm tay đua
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(-10, -7, 10, 4);
 
-      // Mũ bảo hiểm tay đua nhô ra ngoài buồng lái
-      ctx.fillStyle = '#fef08a'; // Mũ vàng thể thao
+      // Mũ bảo hiểm tay đua
+      ctx.fillStyle = '#fef08a';
       ctx.beginPath();
       ctx.arc(-8, -9, 4.5, 0, Math.PI * 2);
       ctx.fill();
@@ -8742,11 +8764,11 @@
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Kính bảo hộ đen của mũ bảo hiểm (Visor)
+      // Kính bảo hộ đen visor
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(-6, -10, 4, 2.5);
 
-      // 8. Cánh lướt gió trước nhô ra mũi xe (Front Wing)
+      // 6. Cánh lướt gió trước nhô ra mũi xe (Front Wing)
       ctx.fillStyle = theme.secondary;
       ctx.strokeStyle = '#0f172a';
       ctx.lineWidth = 1.4;
@@ -8761,18 +8783,17 @@
 
       ctx.restore();
 
-      // 9. Bánh xe đua F1 bản rộng có mâm lazang hợp kim (2 bánh trước và sau)
+      // 7. Bánh xe đua F1 bản rộng có mâm lazang xoay tròn
       const wheelRadius = 10;
       const wheelPositions = [
-        { x: -32, y: 10 }, // Bánh sau (Rear tire)
-        { x: 26, y: 10 }   // Bánh trước (Front tire)
+        { x: -32, y: 10 },
+        { x: 26, y: 10 }
       ];
 
       wheelPositions.forEach(pos => {
         ctx.save();
         ctx.translate(pos.x, pos.y);
 
-        // Lốp xe cao su đen dày viền đậm
         ctx.fillStyle = '#1e293b';
         ctx.strokeStyle = '#020617';
         ctx.lineWidth = 2.2;
@@ -8781,13 +8802,11 @@
         ctx.fill();
         ctx.stroke();
 
-        // Vành mâm hợp kim nhôm (Rim)
         ctx.fillStyle = '#94a3b8';
         ctx.beginPath();
         ctx.arc(0, 0, wheelRadius * 0.65, 0, Math.PI * 2);
         ctx.fill();
 
-        // Chấu mâm xe quay tròn theo wheelAngle
         ctx.rotate(car.wheelAngle || 0);
         ctx.strokeStyle = '#334155';
         ctx.lineWidth = 1.6;
@@ -8799,7 +8818,6 @@
           ctx.rotate(Math.PI / 2);
         }
 
-        // Trục trung tâm mâm
         ctx.fillStyle = '#f8fafc';
         ctx.beginPath();
         ctx.arc(0, 0, 2, 0, Math.PI * 2);
@@ -8808,17 +8826,52 @@
         ctx.restore();
       });
 
-      // 10. Vương miện vàng 👑 khi về nhất
+      // 8. Bảng tên học sinh dạng Glassmorphism viền trắng nổi bật trên mui xe
+      const nameText = `${car.num}. ${String(car.name || 'Học sinh')}`;
+      ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
+      const textMetrics = ctx.measureText(nameText);
+      const tagW = Math.max(textMetrics.width + 18, 56);
+      const tagH = 19;
+      const tagX = -tagW / 2;
+      const tagY = -28; // Tọa độ gần nóc xe gọn gàng, không che khuất làn trên
+
+      ctx.save();
+      // Khung bảng tên bán trong suốt viền trắng bóng bẩy
+      ctx.fillStyle = isWinner ? '#fef08a' : 'rgba(15, 23, 42, 0.88)';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetY = 1.5;
+      drawRoundRect(ctx, tagX, tagY, tagW, tagH, 5);
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = isWinner ? '#eab308' : 'rgba(255, 255, 255, 0.85)';
+      ctx.stroke();
+
+      // Chấm chỉ thị màu của đội đua ở góc trái bảng tên
+      ctx.fillStyle = theme.primary;
+      ctx.beginPath();
+      ctx.arc(tagX + 7, tagY + tagH / 2, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Chữ tên học sinh
+      ctx.fillStyle = isWinner ? '#854d0e' : '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(nameText, 3, tagY + tagH / 2 + 0.8);
+      ctx.restore();
+
+      // 9. Vương miện vàng 👑 khi về nhất
       if (isWinner) {
         ctx.font = '20px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('👑', 0, -48);
+        ctx.fillText('👑', 0, -36);
       }
 
       ctx.restore();
     }
 
-    // --- VẼ TOÀN BỘ ĐƯỜNG ĐUA CAO TỐC & XE TRÊN KHUNG HÌNH ---
+    // --- VẼ TOÀN BỘ ĐƯỜNG ĐUA CAO TỐC & XE TRÊN KHUNG HÌNH (THIẾT KẾ RÕ RÀNG TỪNG LÀN) ---
     function renderCarTrackFrame(isRacing) {
       const canvas = document.getElementById('car-canvas');
       if (!canvas) return;
@@ -8832,41 +8885,50 @@
       ctx.clearRect(0, 0, width, height);
 
       const camX = carRaceState.cameraX || 0;
-      const topGrassH = 42;
-      const botGrassH = 42;
-      const roadH = height - topGrassH - botGrassH;
+      const roadTop = carRaceState.roadTop || 36;
+      const roadH = carRaceState.roadH || (height - 72);
+      const numLanes = carRaceState.numLanes || 4;
+      const laneH = roadH / numLanes;
 
-      // 1. Mặt đường đua nhựa Asphalt màu xám đen chuyên nghiệp (như ảnh mẫu)
-      const asphaltGrad = ctx.createLinearGradient(0, topGrassH, 0, height - botGrassH);
-      asphaltGrad.addColorStop(0, '#334155');
-      asphaltGrad.addColorStop(0.5, '#475569');
-      asphaltGrad.addColorStop(1, '#334155');
-      ctx.fillStyle = asphaltGrad;
-      ctx.fillRect(0, topGrassH, width, roadH);
+      // 1. Vẽ mặt đường đua với từng làn xe phân biệt rõ ràng (Zebra Lanes)
+      for (let i = 0; i < numLanes; i++) {
+        const ly = roadTop + i * laneH;
+        // Xen kẽ tông màu xám giữa các làn để phân tách thị giác cực kỳ rõ ràng
+        ctx.fillStyle = i % 2 === 0 ? '#334155' : '#1e293b';
+        ctx.fillRect(0, ly, width, laneH);
 
-      // Kết cấu nhám mặt đường
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
-      for (let i = 0; i < width; i += 60) {
-        ctx.fillRect(i, topGrassH, 30, roadH);
+        // Hiệu ứng vạch phân cách làn sơn trắng nét đứt rõ rệt
+        if (i > 0) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([26, 18]);
+          carRaceState.roadStripeOffset = (carRaceState.roadStripeOffset + 2) % 44;
+          ctx.lineDashOffset = -carRaceState.roadStripeOffset;
+          ctx.beginPath();
+          ctx.moveTo(0, ly);
+          ctx.lineTo(width, ly);
+          ctx.stroke();
+          ctx.restore();
+        }
       }
 
-      // 2. Vạch kẻ phân làn đường cao tốc (Lane Stripes)
-      const laneCount = Math.max(carRaceState.cars.length, 4);
-      const laneH = roadH / laneCount;
+      // 2. Vẽ biển số làn đường (Lane Badges: LÀN 1, LÀN 2, LÀN 3...) ở mép trái
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([24, 20]);
-      // Di chuyển vạch kẻ theo nhịp đường đua
-      carRaceState.roadStripeOffset = (carRaceState.roadStripeOffset + 2) % 44;
-      ctx.lineDashOffset = -carRaceState.roadStripeOffset;
-
-      for (let i = 1; i < laneCount; i++) {
-        const ly = topGrassH + i * laneH;
-        ctx.beginPath();
-        ctx.moveTo(0, ly);
-        ctx.lineTo(width, ly);
+      for (let i = 0; i < numLanes; i++) {
+        const ly = roadTop + i * laneH;
+        // Bảng số thứ tự làn xe
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+        drawRoundRect(ctx, 8, ly + laneH / 2 - 10, 36, 20, 4);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1;
         ctx.stroke();
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 9px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`LÀN ${i + 1}`, 26, ly + laneH / 2);
       }
       ctx.restore();
 
@@ -8874,33 +8936,31 @@
       ctx.save();
       ctx.translate(-camX, 0);
 
-      // 3. Vạch Xuất Phát (Start Line)
+      // 3. Vạch Xuất Phát (Start Line rõ nét)
       const startX = carRaceState.startLineX;
       ctx.save();
-      ctx.strokeStyle = '#f8fafc';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(startX, topGrassH);
-      ctx.lineTo(startX, height - botGrassH);
-      ctx.stroke();
-
       // Ô cờ caro xuất phát
-      const sqStartSize = 10;
+      const sqStartSize = 12;
       const numStartRows = Math.floor(roadH / sqStartSize);
       for (let r = 0; r < numStartRows; r++) {
-        ctx.fillStyle = r % 2 === 0 ? '#ffffff' : '#0f172a';
-        ctx.fillRect(startX - sqStartSize, topGrassH + r * sqStartSize, sqStartSize, sqStartSize);
+        for (let c = 0; c < 2; c++) {
+          ctx.fillStyle = (r + c) % 2 === 0 ? '#ffffff' : '#0f172a';
+          ctx.fillRect(startX - c * sqStartSize, roadTop + r * sqStartSize, sqStartSize, sqStartSize);
+        }
       }
 
-      // Bảng biển hiệu xuất phát
+      // Cột mốc & Bảng hiệu vạch xuất phát
       ctx.fillStyle = '#0f172a';
-      drawRoundRect(ctx, startX - 45, topGrassH + 8, 90, 22, 6);
+      drawRoundRect(ctx, startX - 45, roadTop + 6, 90, 22, 6);
       ctx.fill();
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
       ctx.fillStyle = '#fbbf24';
       ctx.font = 'bold 10px system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('XUẤT PHÁT 🚦', startX, topGrassH + 19);
+      ctx.fillText('XUẤT PHÁT 🚦', startX, roadTop + 17);
       ctx.restore();
 
       // 4. Vạch Đích (Finish Line Ô cờ đen trắng F1)
@@ -8911,29 +8971,32 @@
       for (let r = 0; r < numRows; r++) {
         for (let c = 0; c < 2; c++) {
           ctx.fillStyle = (r + c) % 2 === 0 ? '#ffffff' : '#0f172a';
-          ctx.fillRect(finishX + c * sqSize - sqSize, topGrassH + r * sqSize, sqSize, sqSize);
+          ctx.fillRect(finishX + c * sqSize - sqSize, roadTop + r * sqSize, sqSize, sqSize);
         }
       }
 
       // Dải ruy băng vạch đích
       if (!carRaceState.tapeBroken) {
         ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 4.5;
+        ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.moveTo(finishX, topGrassH);
-        ctx.lineTo(finishX, height - botGrassH);
+        ctx.moveTo(finishX, roadTop);
+        ctx.lineTo(finishX, roadTop + roadH);
         ctx.stroke();
       }
 
       // Biển báo ĐÍCH ĐẾN F1
       ctx.fillStyle = '#dc2626';
-      drawRoundRect(ctx, finishX - 35, topGrassH + 8, 70, 22, 6);
+      drawRoundRect(ctx, finishX - 35, roadTop + 6, 70, 22, 6);
       ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
       ctx.fillStyle = '#ffffff';
       ctx.font = 'black 11px system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('ĐÍCH ĐẾN 🏆', finishX, topGrassH + 19);
+      ctx.fillText('ĐÍCH ĐẾN 🏆', finishX, roadTop + 17);
       ctx.restore();
 
       // 5. Vẽ tất cả các xe F1 sắp xếp theo Y để xe dưới đè tự nhiên lên xe trên
@@ -8946,29 +9009,29 @@
 
       // 6. Vẽ lề đường đua & rào chắn va chạm (Curbs & Guardrails)
       ctx.save();
-      // Lề trên: sọc đỏ trắng kerb F1
-      const curbH = 10;
+      const curbH = 12;
       const curbStep = 24;
+      // Kerb trên và dưới (Sọc đỏ trắng F1 chuyên nghiệp)
       for (let x = 0; x < width + curbStep; x += curbStep) {
         ctx.fillStyle = Math.floor(x / curbStep) % 2 === 0 ? '#ef4444' : '#ffffff';
-        ctx.fillRect(x, topGrassH - curbH, curbStep, curbH);
-        ctx.fillRect(x, height - botGrassH, curbStep, curbH);
+        ctx.fillRect(x, roadTop - curbH, curbStep, curbH);
+        ctx.fillRect(x, roadTop + roadH, curbStep, curbH);
       }
 
-      // Dải cỏ xanh bên ngoài đường đua
-      ctx.fillStyle = '#15803d';
-      ctx.fillRect(0, 0, width, topGrassH - curbH);
-      ctx.fillRect(0, height - botGrassH + curbH, width, botGrassH - curbH);
-
-      // Rào chắn bảo vệ đường đua
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 3;
+      // Rào chắn bảo vệ đường đua màu bạc
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.moveTo(0, topGrassH - curbH);
-      ctx.lineTo(width, topGrassH - curbH);
-      ctx.moveTo(0, height - botGrassH + curbH);
-      ctx.lineTo(width, height - botGrassH + curbH);
+      ctx.moveTo(0, roadTop - curbH);
+      ctx.lineTo(width, roadTop - curbH);
+      ctx.moveTo(0, roadTop + roadH + curbH);
+      ctx.lineTo(width, roadTop + roadH + curbH);
       ctx.stroke();
+
+      // Thảm cỏ xanh mướt hai bên
+      ctx.fillStyle = '#15803d';
+      ctx.fillRect(0, 0, width, roadTop - curbH);
+      ctx.fillRect(0, roadTop + roadH + curbH, width, height - (roadTop + roadH + curbH));
       ctx.restore();
 
       // Empty state nếu không có học sinh
