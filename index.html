@@ -7510,9 +7510,10 @@
       const bottomBank = h - 46;
       const riverH = bottomBank - topBank;
 
-      // Distribute ducks across vertical lanes
-      const numLanes = Math.min(Math.max(count, 1), 11);
-      const laneStep = riverH / (numLanes + 1);
+      // Làn bơi trải đều theo chiều cao sông
+      const laneStep = count > 1 ? (riverH - 40) / (count - 1) : 0;
+      // TẤT CẢ CÁC CHÚ VỊT CÙNG ĐỨNG CHUNG 1 VỊ TRÍ XUẤT PHÁT (startX)
+      const startX = duckRaceState.startLineX;
 
       const duckColors = [
         '#facc15', '#fde047', '#eab308', '#fbbf24', 
@@ -7520,24 +7521,23 @@
       ];
 
       duckRaceState.ducks = visibleStudents.map((s, idx) => {
-        const laneIndex = idx % numLanes;
-        const laneY = topBank + (laneIndex + 1) * laneStep;
-        const staggerCol = Math.floor(idx / numLanes);
-        const startX = duckRaceState.startLineX - (staggerCol * 65) - (Math.random() * 15);
+        const laneY = count > 1 ? (topBank + 20 + idx * laneStep) : (topBank + riverH / 2);
 
         return {
           id: s.id,
           name: s.name,
           avatar: s.avatar,
           code: s.code,
-          x: startX,
-          y: laneY + (Math.random() * 6 - 3),
+          num: idx + 1, // Số áo trên cánh vịt (giống hình Cô gửi)
+          x: startX,   // Vị trí xuất phát cùng nhau 100%
+          y: laneY,
           baseY: laneY,
           color: duckColors[idx % duckColors.length],
           bobTime: Math.random() * Math.PI * 2,
           paddleTime: Math.random() * Math.PI * 2,
           burstCountdown: Math.random() * 1500 + 800,
           burstFactor: 0,
+          seed: Math.random() * 10, // Hoàn toàn không dùng charCodeAt
           isWinner: false
         };
       });
@@ -7631,13 +7631,12 @@
       const startX = duckRaceState.startLineX;
       const totalDistance = finishX - startX;
 
-      duckRaceState.ducks.forEach((d, idx) => {
+      duckRaceState.ducks.forEach(d => {
         d.isWinner = (String(d.id) === String(winnerStudent.id));
         d.burstCountdown = Math.random() * 1500 + 500;
         d.burstFactor = 0;
-        d.startX = d.x;
-        const seedStr = String(d.id !== undefined && d.id !== null ? d.id : idx);
-        d.seed = (seedStr.charCodeAt(0) || 50) % 10;
+        d.startX = duckRaceState.startLineX;
+        d.seed = Math.random() * 10;
       });
 
       function raceLoop(now) {
@@ -7668,7 +7667,7 @@
               d.burstFactor = (Math.random() - 0.5) * 30;
               d.burstCountdown = Math.random() * 1200 + 600;
             }
-            const nonWinnerLimit = totalDistance * (0.85 + (d.seed || 0) * 0.012);
+            const nonWinnerLimit = totalDistance * (0.85 + (d.seed * 0.01));
             const normalProgress = Math.pow(progress, 1.04);
             d.x = d.startX + nonWinnerLimit * normalProgress + (d.burstFactor || 0);
           }
@@ -7757,36 +7756,36 @@
       ctx.save();
       ctx.translate(duck.x, duck.y);
 
-      // 1. Water Wake / ripples behind duck
+      // 1. Gợn sóng / vệt nước rẽ sau đuôi vịt
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(-10, 4);
-      ctx.lineTo(-26, -5);
-      ctx.moveTo(-10, 6);
-      ctx.lineTo(-26, 15);
+      ctx.moveTo(-18, 6);
+      ctx.lineTo(-34, 1);
+      ctx.moveTo(-18, 8);
+      ctx.lineTo(-34, 15);
       ctx.stroke();
       ctx.restore();
 
-      // 2. Trailing Student Name Tag (Floating buoy board)
-      const nameText = String(duck.name || 'Học sinh');
+      // 2. Bảng tên học sinh dạng phao nổi kéo theo đuôi vịt
+      const nameText = `${duck.num}. ${String(duck.name || 'Học sinh')}`;
       ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
       const textMetrics = ctx.measureText(nameText);
-      const tagW = Math.max(textMetrics.width + 16, 54);
-      const tagH = 20;
-      const tagX = -18 - tagW;
-      const tagY = -10;
+      const tagW = Math.max(textMetrics.width + 16, 56);
+      const tagH = 22;
+      const tagX = -26 - tagW;
+      const tagY = -11;
 
-      // Rope connecting duck to tag
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 1.4;
+      // Dây thừng kéo bảng tên từ đuôi vịt
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(-8, 2);
+      ctx.moveTo(-18, 0);
       ctx.lineTo(tagX + tagW, tagY + tagH / 2);
       ctx.stroke();
 
-      // Tag Background
+      // Khung bảng tên
       ctx.fillStyle = isWinner ? '#fef08a' : '#ffffff';
       ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
       ctx.shadowBlur = 5;
@@ -7794,78 +7793,110 @@
       drawRoundRect(ctx, tagX, tagY, tagW, tagH, 6);
       ctx.fill();
       ctx.shadowColor = 'transparent';
-      ctx.lineWidth = isWinner ? 2 : 1;
-      ctx.strokeStyle = isWinner ? '#eab308' : '#cbd5e1';
+      ctx.lineWidth = isWinner ? 2 : 1.2;
+      ctx.strokeStyle = isWinner ? '#eab308' : '#334155';
       ctx.stroke();
 
-      // Text inside Tag
-      ctx.fillStyle = isWinner ? '#854d0e' : '#1e293b';
+      // Chữ tên học sinh
+      ctx.fillStyle = isWinner ? '#854d0e' : '#0f172a';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(nameText, tagX + tagW / 2, tagY + tagH / 2 + 1);
 
-      // 3. Duck Body
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-      ctx.shadowBlur = 4;
-      ctx.shadowOffsetY = 3;
+      // --- HÌNH DÁNG CON VỊT CAO SU VÀNG (Y CHANG ẢNH CÔ GỬI) ---
+      const duckColor = duck.color || '#facc15';
 
-      // Main body (yellow ellipse)
-      ctx.fillStyle = duck.color || '#facc15';
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 16, 12, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Tail feathers
-      ctx.beginPath();
-      ctx.moveTo(-13, 0);
-      ctx.lineTo(-19, -5);
-      ctx.lineTo(-11, -7);
-      ctx.closePath();
-      ctx.fill();
-
-      // Duck Head
-      ctx.beginPath();
-      ctx.arc(10, -8, 9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-
-      // Flapping Wing
-      const wingAngle = Math.sin(duck.paddleTime) * 0.28;
       ctx.save();
-      ctx.translate(-2, -2);
-      ctx.rotate(wingAngle);
-      ctx.fillStyle = '#eab308';
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 9, 6, -0.2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
+      ctx.fillStyle = duckColor;
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
 
-      // Beak (orange)
-      ctx.fillStyle = '#f97316';
+      // 3. Đường nét thân vịt: Đầu tròn + Ngực nở + Đáy nổi trên nước + Đuôi cong vút lên nhọn
       ctx.beginPath();
-      ctx.moveTo(17, -10);
-      ctx.lineTo(25, -6);
-      ctx.lineTo(17, -3);
+      // Bắt đầu từ ức ngực
+      ctx.moveTo(12, 0);
+      // Ngực cong tròn nở nang xuống mép nước
+      ctx.bezierCurveTo(16, 6, 12, 12, 4, 13);
+      // Bụng nổi trên mặt nước ra phía sau
+      ctx.bezierCurveTo(-4, 13, -14, 12, -18, 8);
+      // Đuôi vịt nhọn uốn cong vút lên trên (y hệt trong ảnh)
+      ctx.bezierCurveTo(-22, 6, -26, 0, -26, -6);
+      ctx.bezierCurveTo(-23, -3, -18, 0, -12, -1);
+      // Lưng uốn lên gáy cổ
+      ctx.bezierCurveTo(-8, -2, -5, -6, -5, -12);
+      // Vòng đầu tròn
+      ctx.bezierCurveTo(-8, -17, -5, -24, 2, -25);
+      ctx.bezierCurveTo(9, -25, 14, -20, 13, -13);
+      // Cổ trước xuống ngực
+      ctx.bezierCurveTo(10, -7, 8, -4, 12, 0);
       ctx.closePath();
       ctx.fill();
+      ctx.stroke();
 
-      // Eye
-      ctx.fillStyle = '#0f172a';
+      // 4. Mỏ vịt màu cam tươi uốn cong cười
+      ctx.fillStyle = '#ff6d00';
       ctx.beginPath();
-      ctx.arc(13, -10, 2.2, 0, Math.PI * 2);
+      ctx.moveTo(11, -16);
+      ctx.bezierCurveTo(16, -18, 23, -16, 24, -13);
+      ctx.bezierCurveTo(25, -10, 18, -10, 11, -11);
+      ctx.closePath();
       ctx.fill();
+      ctx.stroke();
+
+      // Mỏ dưới
+      ctx.beginPath();
+      ctx.moveTo(11, -11);
+      ctx.bezierCurveTo(17, -10, 19, -8, 17, -6);
+      ctx.bezierCurveTo(14, -5, 10, -8, 10, -10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 5. Mắt vịt to tròn hoạt hình với tròng đen và đốm sáng
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(14, -11, 0.8, 0, Math.PI * 2);
+      ctx.arc(5, -17, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Con ngươi đen
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(5.8, -16.8, 2.6, 0, Math.PI * 2);
       ctx.fill();
 
-      // If Winner: Draw Crown 👑
+      // Đốm sáng trắng lấp lánh trong mắt
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(7, -18, 1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 6. Miếng số áo đua màu trắng trên cánh vịt (giống hệt ảnh Cô gửi!)
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.ellipse(-8, 3, 9.5, 7.5, -0.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Số áo bên trong miếng trắng
+      ctx.fillStyle = '#111827';
+      ctx.font = 'bold 9px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(duck.num || 1), -8, 3.5);
+
+      // 7. Vương miện vàng 👑 khi về nhất
       if (isWinner) {
-        ctx.font = '16px sans-serif';
+        ctx.font = '18px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('👑', 10, -19);
+        ctx.fillText('👑', 2, -28);
       }
 
+      ctx.restore();
       ctx.restore();
     }
 
