@@ -7515,9 +7515,24 @@
       // TẤT CẢ CÁC CHÚ VỊT CÙNG ĐỨNG CHUNG 1 VỊ TRÍ XUẤT PHÁT (startX)
       const startX = duckRaceState.startLineX;
 
+      // Bộ sưu tập màu sắc đa dạng rực rỡ cho đàn vịt (đủ màu sắc khác nhau)
       const duckColors = [
-        '#facc15', '#fde047', '#eab308', '#fbbf24', 
-        '#f59e0b', '#fef08a', '#fef9c3', '#fcd34d'
+        '#facc15', // Vàng hoàng yến kinh điển
+        '#22c55e', // Xanh lá cây tươi (như ảnh chú vịt xanh trong mẫu)
+        '#06b6d4', // Xanh ngọc lam / Cyan
+        '#ec4899', // Hồng cánh sen rực rỡ
+        '#f97316', // Cam cà rốt nổi bật
+        '#8b5cf6', // Tím hoa cà mộng mơ
+        '#ef4444', // Đỏ ruby tươi tắn
+        '#14b8a6', // Xanh mòng két / Mint Teal
+        '#3b82f6', // Xanh dương da trời
+        '#84cc16', // Xanh cốm non / Lime
+        '#d946ef', // Tím hồng Fuchsia
+        '#fb7185', // Hồng phấn dịu ngọt
+        '#0ea5e9', // Xanh biển sâu Ocean
+        '#eab308', // Vàng hổ phách Amber
+        '#f8fafc', // Trắng tinh khôi Snow White
+        '#6366f1'  // Xanh chàm Indigo
       ];
 
       duckRaceState.ducks = visibleStudents.map((s, idx) => {
@@ -7772,7 +7787,7 @@
       const nameText = `${duck.num}. ${String(duck.name || 'Học sinh')}`;
       ctx.font = 'bold 11px system-ui, -apple-system, sans-serif';
       const textMetrics = ctx.measureText(nameText);
-      const tagW = Math.max(textMetrics.width + 16, 56);
+      const tagW = Math.max(textMetrics.width + 24, 62);
       const tagH = 22;
       const tagX = -26 - tagW;
       const tagY = -11;
@@ -7797,11 +7812,20 @@
       ctx.strokeStyle = isWinner ? '#eab308' : '#334155';
       ctx.stroke();
 
+      // Chấm tròn màu đại diện cho màu chú vịt ở mép trái bảng tên
+      ctx.fillStyle = duck.color || '#facc15';
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(tagX + 9, tagY + tagH / 2, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
       // Chữ tên học sinh
       ctx.fillStyle = isWinner ? '#854d0e' : '#0f172a';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(nameText, tagX + tagW / 2, tagY + tagH / 2 + 1);
+      ctx.fillText(nameText, tagX + 11 + (tagW - 11) / 2, tagY + tagH / 2 + 1);
 
       // --- HÌNH DÁNG CON VỊT CAO SU VÀNG (Y CHANG ẢNH CÔ GỬI) ---
       const duckColor = duck.color || '#facc15';
