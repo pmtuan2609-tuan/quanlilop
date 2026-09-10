@@ -7689,29 +7689,40 @@
       const startX = duckRaceState.startLineX;
       const totalDistance = finishX - startX;
 
-      // Chọn ngẫu nhiên 1 hoặc 2 chú vịt "ngựa non háu đá" (fake leaders) dẫn đầu suốt chặng đầu rồi đuối sức
-      const nonWinners = duckRaceState.ducks.filter(d => !d.isWinner);
-      const fakeLeader1 = nonWinners.length > 0 ? nonWinners[Math.floor(Math.random() * nonWinners.length)] : null;
-      const fakeLeader2 = nonWinners.length > 1 ? nonWinners.find(d => d !== fakeLeader1) : null;
+      // Helper hàm mượt mà (Hermite smoothstep)
+      const smoothStep = (e0, e1, v) => {
+        const t = Math.max(0, Math.min(1, (v - e0) / (e1 - e0)));
+        return t * t * (3 - 2 * t);
+      };
+
+      // Chọn 2 thí sinh dẫn đầu theo từng khoảng thời gian riêng biệt:
+      // Leader 1: Giữ vị trí đầu tiên trong ~38% chặng đầu (khoảng 2 - 2.5s)
+      // Leader 2: Vượt lên và giữ vị trí đầu tiên trong ~34% chặng tiếp theo
+      // Winner: Tăng tốc lội ngược dòng ở 26% chặng cuối và cán đích!
+      const nonWinners = duckRaceState.ducks.filter(d => String(d.id) !== String(winnerStudent.id));
+      const shuffledNonWinners = [...nonWinners].sort(() => Math.random() - 0.5);
+      const duckLeader1 = shuffledNonWinners.length > 0 ? shuffledNonWinners[0] : null;
+      const duckLeader2 = shuffledNonWinners.length > 1 ? shuffledNonWinners[1] : null;
 
       duckRaceState.ducks.forEach(d => {
         d.isWinner = (String(d.id) === String(winnerStudent.id));
+        d.raceRole = d.isWinner ? 'winner' : (d === duckLeader1 ? 'leader1' : (d === duckLeader2 ? 'leader2' : 'pack'));
         d.startX = startX;
         d.speed = 0;
         d.targetSpeed = 0;
         d.accel = 0;
         d.tilt = 0;
-        d.burstCountdown = Math.random() * 600 + 300;
+        d.burstCountdown = Math.random() * 600 + 400;
+        d.burstFactor = 0;
         d.wobblePhase = Math.random() * Math.PI * 2;
         d.seed = Math.random() * 10;
-        d.isFakeLeader = (d === fakeLeader1 || d === fakeLeader2);
 
         // Đích đến so kè suýt soát (photo-finish)
         if (d.isWinner) {
-          d.finalTargetX = finishX + 35;
+          d.finalTargetX = finishX + 40;
         } else {
           // Các vịt khác bám sát phía sau suýt soát
-          d.finalTargetX = finishX - (8 + Math.random() * 26);
+          d.finalTargetX = finishX - (10 + Math.random() * 20);
         }
       });
 
@@ -7731,54 +7742,70 @@
           d.bobTime += dt * 8;
           d.paddleTime += dt * 14;
 
-          // Thay đổi nhịp bơi ngẫu nhiên để các vịt liên tục vượt nhau
+          // Thay đổi nhịp bơi nhẹ nhàng trong đoàn
           d.burstCountdown -= dt * 1000;
           if (d.burstCountdown <= 0) {
-            d.burstFactor = (Math.random() - 0.5) * 32;
-            d.burstCountdown = Math.random() * 600 + 400;
+            d.burstFactor = (Math.random() - 0.5) * 16;
+            d.burstCountdown = Math.random() * 700 + 500;
           }
 
-          // Hiệu ứng sóng nhấp nhô rượt đuổi
-          const overtakeWave = Math.sin(progress * 18 + d.seed * 2.5) * 20;
+          // Dao động tự nhiên trong tốp đông
+          const packJostle = Math.sin(progress * 10 + d.seed * 2.2) * 10 + (d.burstFactor || 0) * 0.3;
 
           let targetX;
           if (progress < 0.72) {
-            // --- GIAI ĐOẠN 1 (0% - 72% chặng đua): KỊCH TÍNH & BẤT NGỜ ---
-            // Cả đàn bơi bám sát nút nhau
-            const baseFlockX = d.startX + (totalDistance * 0.72) * (progress / 0.72);
+            // --- GIAI ĐOẠN 1 & 2 (0% - 72% chặng đua): CÓ KHOẢNG THỜI GIAN RÕ RÀNG DẪN ĐẦU ---
+            const baseFlockX = d.startX + totalDistance * progress;
+            const LEAD_MARGIN = 45; // Khoảng cách bứt phá tạo ngôi đầu rõ ràng
 
-            if (d.isFakeLeader) {
-              // Vịt dẫn đầu sớm: bứt phá dẫn trước đàn từ 15px - 35px, tạo cảm giác sắp thắng chắc!
-              const fakeLeadAdvantage = Math.sin((progress / 0.72) * Math.PI) * 35;
-              targetX = baseFlockX + fakeLeadAdvantage + (d.burstFactor || 0);
-            } else if (d.isWinner) {
-              // Vịt quán quân thực sự: ẩn mình so kè ở giữa hoặc nửa sau của tốp (tạo kịch tính lội ngược dòng)
-              const underdogLag = -14 + Math.sin(progress * 14 + d.seed) * 12;
-              targetX = baseFlockX + underdogLag + (d.burstFactor || 0);
+            let leadOffset = 0;
+            if (duckLeader2) {
+              // 2 chú vịt thay phiên nhau dẫn đầu trong các khoảng thời gian rõ ràng
+              if (d.raceRole === 'leader1') {
+                // Leader 1 dẫn đầu vững vàng suốt ~38% chặng đầu (khoảng 2 - 2.5 giây)
+                const w1 = smoothStep(0.0, 0.10, progress) * (1 - smoothStep(0.36, 0.44, progress));
+                leadOffset = w1 * LEAD_MARGIN;
+              } else if (d.raceRole === 'leader2') {
+                // Leader 2 bứt lên vượt Leader 1 và giữ ngôi đầu suốt 44% - 72% chặng
+                const w2 = smoothStep(0.36, 0.44, progress);
+                leadOffset = w2 * LEAD_MARGIN;
+              } else if (d.raceRole === 'winner') {
+                // Vịt quán quân chạy ẩn mình ở vị trí thứ 3 hoặc thứ 4 trong tốp
+                leadOffset = -10;
+              }
+            } else if (duckLeader1) {
+              // Chỉ có 1 đối thủ: Leader 1 giữ ngôi đầu suốt 0% - 72%
+              if (d.raceRole === 'leader1') {
+                leadOffset = smoothStep(0.0, 0.12, progress) * LEAD_MARGIN;
+              } else if (d.raceRole === 'winner') {
+                leadOffset = -10;
+              }
+            }
+
+            // Gán toạ độ đích: Leader luôn bứt hẳn phía trước đoàn
+            if (d.raceRole === 'leader1' || d.raceRole === 'leader2') {
+              targetX = baseFlockX + leadOffset + packJostle * 0.2;
             } else {
-              // Các vịt khác bám đuổi so kè trong tốp đông
-              targetX = baseFlockX + overtakeWave + (d.burstFactor || 0);
+              targetX = baseFlockX + leadOffset + packJostle;
             }
 
           } else {
-            // --- GIAI ĐOẠN 2 (72% - 100% chặng đua): CÚ LỘI NGƯỢC DÒNG NGOẠN MỤC! ---
-            // Vịt dẫn đầu trước đó đuối sức tụt lại phía sau, vịt thắng từ phía sau vút lên vượt qua tất cả!
+            // --- GIAI ĐOẠN 3 (72% - 100% chặng đua): CÚ LỘI NGƯỢC DÒNG NGOẠN MỤC & VỀ ĐÍCH! ---
             const sprintT = (progress - 0.72) / 0.28;
-            // Smooth ease in-out cho màn rượt đuổi ngoạn mục
             const sprintEase = sprintT * sprintT * (3 - 2 * sprintT);
             const startSprintX = d.startX + totalDistance * 0.72;
 
-            if (d.isWinner) {
-              // VỊT CHIẾN THẮNG TĂNG TỐC THẦN TỐC VƯỢT LÊN TỪ PHÍA SAU!
-              targetX = startSprintX + (d.finalTargetX - startSprintX) * sprintEase + (sprintT * 22);
-            } else if (d.isFakeLeader) {
-              // Vịt dẫn đầu sớm bị hụt hơi, bị vượt qua và về sau
-              const fatigueDrop = Math.sin(sprintT * Math.PI) * -18;
-              targetX = startSprintX + (d.finalTargetX - startSprintX) * sprintEase + fatigueDrop;
+            let sprintFromOffset = 0;
+            if (d.raceRole === 'winner') {
+              sprintFromOffset = -10;
+            } else if (d.raceRole === 'leader2' || (d.raceRole === 'leader1' && !duckLeader2)) {
+              sprintFromOffset = 45;
             } else {
-              // Các vịt khác bám đuổi sít sao tạo màn về đích sát nút
-              targetX = startSprintX + (d.finalTargetX - startSprintX) * sprintEase + overtakeWave * (1 - sprintT * 0.8);
+              sprintFromOffset = packJostle;
             }
+
+            const currentStartPos = startSprintX + sprintFromOffset;
+            targetX = currentStartPos + (d.finalTargetX - currentStartPos) * sprintEase;
           }
 
           // Nội suy mượt mà loại bỏ giật lag
@@ -7796,7 +7823,14 @@
         });
 
         if (leaderDuck && leaderEl) {
-          leaderEl.innerHTML = `🏆 Dẫn đầu: <strong>${leaderDuck.name}</strong>`;
+          const badgeHtml = `🏆 Dẫn đầu: <strong>${leaderDuck.name}</strong>`;
+          if (leaderEl.dataset.lastLeader !== leaderDuck.name) {
+            leaderEl.dataset.lastLeader = leaderDuck.name;
+            leaderEl.innerHTML = badgeHtml;
+            leaderEl.style.transition = "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)";
+            leaderEl.style.transform = "scale(1.15)";
+            setTimeout(() => { if (leaderEl) leaderEl.style.transform = "scale(1)"; }, 260);
+          }
         }
 
         // Camera theo dõi mượt mà (damped smooth camera follow)
@@ -8509,26 +8543,36 @@
 
       playCarEngineSound();
 
-      // Chọn ngẫu nhiên 1 hoặc 2 xe dẫn đầu sớm (fake leader) để dẫn đầu suốt 70% chặng đầu rồi đuối sức bị vượt qua
-      const nonWinningCars = carRaceState.cars.filter(c => !c.isWinner);
-      const fakeLeadCar1 = nonWinningCars.length > 0 ? nonWinningCars[Math.floor(Math.random() * nonWinningCars.length)] : null;
-      const fakeLeadCar2 = nonWinningCars.length > 1 ? nonWinningCars.find(c => c !== fakeLeadCar1) : null;
+      // Helper hàm mượt mà (Hermite smoothstep)
+      const smoothStep = (e0, e1, v) => {
+        const t = Math.max(0, Math.min(1, (v - e0) / (e1 - e0)));
+        return t * t * (3 - 2 * t);
+      };
+
+      // Chọn 2 thí sinh dẫn đầu theo từng khoảng thời gian riêng biệt:
+      // LeadCar 1: Giữ vị trí đầu tiên trong ~38% chặng đầu (khoảng 2 - 2.5s)
+      // LeadCar 2: Vượt lên và giữ vị trí đầu tiên trong ~36% chặng tiếp theo
+      // Winner: Bật nitro lội ngược dòng ở 26% chặng cuối và cán đích!
+      const nonWinningCars = carRaceState.cars.filter(c => String(c.id) !== String(winnerStudent.id));
+      const shuffledCars = [...nonWinningCars].sort(() => Math.random() - 0.5);
+      const leadCar1 = shuffledCars.length > 0 ? shuffledCars[0] : null;
+      const leadCar2 = shuffledCars.length > 1 ? shuffledCars[1] : null;
 
       carRaceState.cars.forEach(c => {
         c.isWinner = (String(c.id) === String(winnerStudent.id));
+        c.raceRole = c.isWinner ? 'winner' : (c === leadCar1 ? 'leader1' : (c === leadCar2 ? 'leader2' : 'pack'));
         c.startX = startX;
         c.vibrateTime = Math.random() * Math.PI * 2;
         c.burstCountdown = Math.random() * 800 + 400;
         c.burstFactor = 0;
         c.seed = Math.random() * 10;
-        c.isFakeLeader = (c === fakeLeadCar1 || c === fakeLeadCar2);
 
         // Khoảng cách cán đích cực kỳ sít sao (photo-finish)
         if (c.isWinner) {
           c.finalTargetX = finishX + 45;
         } else {
           // Các xe bám đuổi suýt soát ngay sau đuôi xe dẫn đầu
-          c.finalTargetX = finishX - (8 + Math.random() * 22);
+          c.finalTargetX = finishX - (10 + Math.random() * 20);
         }
       });
 
@@ -8544,9 +8588,6 @@
         let maxCarX = 0;
         let leaderCar = null;
 
-        // Tiến trình mượt mà dạng S-Curve (khởi đầu đầm chắc, giữa chặng vút nhanh, đích đến kịch tính)
-        const easeOverall = 0.5 * (1 - Math.cos(progress * Math.PI));
-
         carRaceState.cars.forEach(c => {
           c.vibrateTime += dt * 14; // Rung nhẹ êm ái
           c.wheelAngle += dt * 25;  // Bánh xe quay mượt mà
@@ -8554,51 +8595,68 @@
           // Nhịp bứt tốc đổi hướng nhẹ nhàng
           c.burstCountdown -= dt * 1000;
           if (c.burstCountdown <= 0) {
-            c.burstFactor = (Math.random() - 0.5) * 20;
+            c.burstFactor = (Math.random() - 0.5) * 16;
             c.burstCountdown = Math.random() * 800 + 600;
           }
 
-          // Dao động so kè vị trí liên tục giữa các làn xe
-          const overtakeWave = Math.sin(progress * 14 + c.seed * 2.0) * 18;
+          // Dao động so kè vị trí tự nhiên giữa các xe trong tốp đông
+          const packJostle = Math.sin(progress * 10 + c.seed * 2.2) * 10 + (c.burstFactor || 0) * 0.3;
 
           let targetX;
           if (progress < 0.74) {
-            // --- GIAI ĐOẠN 1 (0% - 74% chặng đua): CÁC XE SO KÈ NẢY LỬA ---
-            const basePackX = c.startX + (totalDistance * 0.74) * (progress / 0.74);
+            // --- GIAI ĐOẠN 1 & 2 (0% - 74% chặng đua): CÓ KHOẢNG THỜI GIAN RÕ RÀNG DẪN ĐẦU ---
+            const basePackX = c.startX + totalDistance * progress;
+            const LEAD_MARGIN = 48; // Khoảng cách bứt phá tạo ngôi đầu vững vàng
 
-            if (c.isFakeLeader) {
-              // Xe dẫn đầu sớm: bứt tốc dẫn trước đoàn đua 20px - 35px, liên tục xuất hiện trên bảng "🏆 Dẫn đầu"
-              const fakeLeadBoost = Math.sin((progress / 0.74) * Math.PI) * 32;
-              targetX = basePackX + fakeLeadBoost + (c.burstFactor || 0);
-            } else if (c.isWinner) {
-              // Xe vô địch thực sự: chạy ẩn mình ở vị trí thứ 2 hoặc thứ 3 trong tốp đông
-              const trailingOffset = -10 + Math.sin(progress * 12 + c.seed) * 8;
-              targetX = basePackX + trailingOffset + (c.burstFactor || 0);
+            let leadOffset = 0;
+            if (leadCar2) {
+              // 2 xe thay nhau dẫn đầu 2 khoảng thời gian rõ ràng
+              if (c.raceRole === 'leader1') {
+                // Xe 1 dẫn đầu vững vàng suốt ~38% chặng đầu
+                const w1 = smoothStep(0.0, 0.10, progress) * (1 - smoothStep(0.36, 0.44, progress));
+                leadOffset = w1 * LEAD_MARGIN;
+              } else if (c.raceRole === 'leader2') {
+                // Xe 2 vượt lên và giữ vững vị trí dẫn đầu suốt 44% - 74% chặng đua
+                const w2 = smoothStep(0.36, 0.44, progress);
+                leadOffset = w2 * LEAD_MARGIN;
+              } else if (c.raceRole === 'winner') {
+                // Xe vô địch ẩn mình ở vị trí thứ 3 trong tốp
+                leadOffset = -10;
+              }
+            } else if (leadCar1) {
+              if (c.raceRole === 'leader1') {
+                leadOffset = smoothStep(0.0, 0.12, progress) * LEAD_MARGIN;
+              } else if (c.raceRole === 'winner') {
+                leadOffset = -10;
+              }
+            }
+
+            if (c.raceRole === 'leader1' || c.raceRole === 'leader2') {
+              targetX = basePackX + leadOffset + packJostle * 0.2;
             } else {
-              // Các xe khác bám đuổi quyết liệt thành một khối
-              targetX = basePackX + overtakeWave + (c.burstFactor || 0);
+              targetX = basePackX + leadOffset + packJostle;
             }
 
           } else {
-            // --- GIAI ĐOẠN 2 (74% - 100% chặng đua): BỨT PHÁ LỘI NGƯỢC DÒNG THẦN TỐC! ---
+            // --- GIAI ĐOẠN 3 (74% - 100% chặng đua): BỨT PHÁ LỘI NGƯỢC DÒNG THẦN TỐC! ---
             const sprintT = (progress - 0.74) / 0.26;
             const sprintEase = sprintT * sprintT * (3 - 2 * sprintT);
             const startSprintX = c.startX + totalDistance * 0.74;
 
-            if (c.isWinner) {
-              // XE VÔ ĐỊCH BẬT NITRO TĂNG TỐC VƯỢT QUA XE DẪN ĐẦU CÁN ĐÍCH!
-              targetX = startSprintX + (c.finalTargetX - startSprintX) * sprintEase + (sprintT * 22);
-            } else if (c.isFakeLeader) {
-              // Xe dẫn đầu trước đó bị đuối sức/hụt hơi, tụt lại phía sau nhường ngôi vương
-              const engineFatigue = Math.sin(sprintT * Math.PI) * -18;
-              targetX = startSprintX + (c.finalTargetX - startSprintX) * sprintEase + engineFatigue;
+            let sprintFromOffset = 0;
+            if (c.raceRole === 'winner') {
+              sprintFromOffset = -10;
+            } else if (c.raceRole === 'leader2' || (c.raceRole === 'leader1' && !leadCar2)) {
+              sprintFromOffset = 48;
             } else {
-              // Các xe khác bám sát nút bánh sau
-              targetX = startSprintX + (c.finalTargetX - startSprintX) * sprintEase + overtakeWave * (1 - sprintT * 0.7);
+              sprintFromOffset = packJostle;
             }
+
+            const currentStartPos = startSprintX + sprintFromOffset;
+            targetX = currentStartPos + (c.finalTargetX - currentStartPos) * sprintEase;
           }
 
-          // Dùng hệ số Lerp mượt mà (7 * dt) không bị giật khựng
+          // Dùng hệ số Lerp mượt mà (7.5 * dt) không bị giật khựng
           const lerpFactor = 1 - Math.exp(-7.5 * dt);
           c.x += (targetX - c.x) * lerpFactor;
           c.y = c.baseY + Math.sin(c.vibrateTime) * 0.4;
@@ -8610,7 +8668,14 @@
         });
 
         if (leaderCar && leaderEl) {
-          leaderEl.innerHTML = `🏆 Dẫn đầu: <strong>${leaderCar.name}</strong>`;
+          const badgeHtml = `🏆 Dẫn đầu: <strong>${leaderCar.name}</strong>`;
+          if (leaderEl.dataset.lastLeader !== leaderCar.name) {
+            leaderEl.dataset.lastLeader = leaderCar.name;
+            leaderEl.innerHTML = badgeHtml;
+            leaderEl.style.transition = "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)";
+            leaderEl.style.transform = "scale(1.15)";
+            setTimeout(() => { if (leaderEl) leaderEl.style.transform = "scale(1)"; }, 260);
+          }
         }
 
         // Camera theo dõi mượt mà: Neo vào vị trí trung tâm tốp xe (maxCarX - viewWidth * 0.55)
