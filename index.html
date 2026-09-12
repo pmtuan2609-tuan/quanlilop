@@ -1235,6 +1235,15 @@
                   <option value="3">3 vòng (Kịch tính so kè)</option>
                   <option value="4">4 vòng (Chuyên nghiệp)</option>
                   <option value="5">5 vòng (Đại chiến Grand Prix)</option>
+                  <option value="6">6 vòng</option>
+                  <option value="7">7 vòng</option>
+                  <option value="8">8 vòng</option>
+                  <option value="10">10 vòng (Siêu kinh điển)</option>
+                  <option value="12">12 vòng</option>
+                  <option value="15">15 vòng (Đua đường trường)</option>
+                  <option value="20">20 vòng (Sức bền khốc liệt)</option>
+                  <option value="25">25 vòng</option>
+                  <option value="30">30 vòng (Marathon F1)</option>
                 </select>
               </div>
             </div>
@@ -1303,12 +1312,21 @@
                      <span>🏁</span>
                      <span class="hidden sm:inline">VÒNG:</span>
                      <select id="car-laps-select" onchange="changeCarLaps(this.value)" class="bg-slate-800 text-amber-300 text-[11px] font-bold rounded-lg px-2 py-0.5 border border-amber-500/40 outline-none cursor-pointer hover:bg-slate-700 shadow-inner">
-                       <option value="1">1 vòng</option>
-                       <option value="2" selected>2 vòng</option>
-                       <option value="3">3 vòng</option>
-                       <option value="4">4 vòng</option>
-                       <option value="5">5 vòng</option>
-                     </select>
+                        <option value="1">1 vòng (Nhanh)</option>
+                        <option value="2" selected>2 vòng (Chuẩn)</option>
+                        <option value="3">3 vòng (Kịch tính)</option>
+                        <option value="4">4 vòng</option>
+                        <option value="5">5 vòng (Grand Prix)</option>
+                        <option value="6">6 vòng</option>
+                        <option value="7">7 vòng</option>
+                        <option value="8">8 vòng</option>
+                        <option value="10">10 vòng (Siêu cúp)</option>
+                        <option value="12">12 vòng</option>
+                        <option value="15">15 vòng (Đường trường)</option>
+                        <option value="20">20 vòng (Sức bền)</option>
+                        <option value="25">25 vòng</option>
+                        <option value="30">30 vòng (Marathon)</option>
+                      </select>
                    </div>
                  </div>
 
@@ -1337,6 +1355,73 @@
                  <span id="car-track-tagline" class="bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-lg text-slate-300">🇦🇹 Red Bull Ring: Thánh địa dãy Alps - Khúc cua Remus Hairpin & Cua dốc Castrol</span>
                  <span id="car-leader-badge" class="bg-amber-500 text-slate-950 font-black px-2.5 py-1 rounded-lg shadow-md hidden">🏆 Dẫn đầu: ...</span>
                </div>
+
+                <!-- BANNER VINH DANH QUÁN QUÂN TRỰC TIẾP TRÊN MÀN HÌNH (KHÔNG CẦN THOÁT TOÀN MÀN HÌNH HAY THU NHỎ) -->
+                <div id="car-winner-overlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md hidden flex-col items-center justify-center z-30 p-4 transition-all duration-300 pointer-events-auto">
+                  <div class="relative bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-2 border-amber-400/80 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-[0_0_60px_rgba(245,158,11,0.5)] transform transition-all duration-300 scale-100">
+                    <!-- Nút đóng nhanh -->
+                    <button onclick="closeCarWinnerOverlay(false)" type="button" class="absolute top-3 right-3 text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition" title="Đóng bảng vinh danh">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+
+                    <!-- Cúp vô địch hiệu ứng hào quang -->
+                    <div class="relative mx-auto w-20 h-20 -mt-12 sm:-mt-14 mb-2 flex items-center justify-center">
+                      <div class="absolute inset-0 bg-amber-400 rounded-full blur-xl opacity-60 animate-pulse"></div>
+                      <div class="relative w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-tr from-amber-500 via-yellow-300 to-amber-500 rounded-full flex items-center justify-center text-4xl sm:text-5xl shadow-2xl border-4 border-white animate-bounce">
+                        🏆
+                      </div>
+                    </div>
+
+                    <!-- Tiêu đề chiến thắng -->
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[11px] font-black uppercase tracking-wider mb-2">
+                      <span>🏁</span> QUÁN QUÂN ĐƯỜNG ĐUA F1 <span>🏁</span>
+                    </div>
+
+                    <!-- Thông tin học sinh chiến thắng -->
+                    <div class="my-2 sm:my-3 flex flex-col items-center">
+                      <!-- Avatar học sinh với vương miện -->
+                      <div class="relative mb-2.5">
+                        <div id="car-winner-avatar" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-800 border-4 border-amber-400 shadow-2xl flex items-center justify-center text-5xl sm:text-6xl overflow-hidden ring-4 ring-amber-500/30">
+                          👦
+                        </div>
+                        <span class="absolute -top-3 -right-2 text-2xl filter drop-shadow animate-pulse">👑</span>
+                      </div>
+
+                      <!-- Tên học sinh hiển thị to rõ ràng ngay trên màn hình -->
+                      <h2 id="car-winner-name" class="text-2xl sm:text-3xl md:text-4xl font-black text-amber-300 tracking-tight leading-tight drop-shadow-md">
+                        ...
+                      </h2>
+
+                      <!-- Tên ngắn + ID + Thông số chặng đua -->
+                      <div class="flex items-center justify-center gap-2 mt-2 flex-wrap">
+                        <span id="car-winner-id" class="text-xs font-mono font-bold bg-slate-800/90 text-amber-300 px-3 py-1 rounded-full border border-amber-500/40">
+                          ID: ...
+                        </span>
+                        <span id="car-winner-race-info" class="text-xs font-bold bg-slate-800/90 text-slate-300 px-3 py-1 rounded-full border border-slate-700">
+                          🏎️ Xe số #1 • 2 Vòng
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Các nút thao tác trực tiếp trên màn hình -->
+                    <div class="flex flex-col gap-2.5 mt-4">
+                      <!-- Bấm đua tiếp ngay hoặc phím Space -->
+                      <button id="car-winner-next-btn" onclick="restartCarRaceFromOverlay()" type="button" class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black py-3 px-4 rounded-xl text-sm sm:text-base shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer">
+                        <span>🏎️ ĐUA TIẾP LƯỢT MỚI</span>
+                        <span class="bg-black/30 text-white text-xs px-2 py-0.5 rounded font-mono font-bold">[Space]</span>
+                      </button>
+
+                      <div class="grid grid-cols-2 gap-2">
+                        <button onclick="closeCarWinnerOverlay(false)" type="button" class="bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 px-3 rounded-xl font-bold text-xs border border-slate-700 transition">
+                          👀 Xem đường đua
+                        </button>
+                        <button onclick="closeCarWinnerOverlay(true)" type="button" class="bg-rose-950/70 hover:bg-rose-900/80 text-rose-300 py-2.5 px-3 rounded-xl font-bold text-xs border border-rose-800/60 transition" title="Tạm ẩn học sinh này để các lượt sau gọi bạn khác">
+                          🚫 Tạm ẩn bạn này
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
             </div>
           </div>
         </div>
@@ -8542,7 +8627,7 @@
     // --- HÀM TÙY CHỈNH SỐ VÒNG ĐUA F1 ---
     function changeCarLaps(laps) {
       const parsed = parseInt(laps, 10);
-      carRaceState.totalLaps = (parsed >= 1 && parsed <= 10) ? parsed : 2;
+      carRaceState.totalLaps = (parsed >= 1 && parsed <= 50) ? parsed : 2;
 
       // Đồng bộ cả 2 dropdown nếu tồn tại
       const sel1 = document.getElementById('car-laps-select');
@@ -8629,7 +8714,15 @@
         const isCarVisible = container && !container.classList.contains('hidden');
 
         if (isCarVisible && isCarMode) {
-          // Nếu modal kết quả đang mở thì Space sẽ đóng modal để sẵn sàng cho lần đua tiếp theo
+          // 1. Nếu bảng vinh danh trực tiếp car-winner-overlay đang mở -> Space bắt đầu ngay lượt đua mới!
+          const carWinnerOverlay = document.getElementById('car-winner-overlay');
+          if (carWinnerOverlay && !carWinnerOverlay.classList.contains('hidden')) {
+            e.preventDefault();
+            restartCarRaceFromOverlay();
+            return;
+          }
+
+          // 2. Nếu modal kết quả cũ đang mở thì Space sẽ đóng modal để sẵn sàng cho lần đua tiếp theo
           const resultModal = document.getElementById('result-modal');
           if (resultModal && !resultModal.classList.contains('hidden')) {
             e.preventDefault();
@@ -8828,6 +8921,7 @@
       const canvas = document.getElementById('car-canvas');
       if (!container || !canvas) return;
 
+      closeCarWinnerOverlay(false);
       stopCarAnimations();
 
       const rect = container.getBoundingClientRect();
@@ -9085,6 +9179,8 @@
         spinBtn.classList.add('opacity-70');
       }
 
+      closeCarWinnerOverlay(false);
+
       const stageBtn = document.getElementById('car-stage-spin-btn');
       if (stageBtn) {
         stageBtn.disabled = true;
@@ -9098,8 +9194,16 @@
 
       const durationInput = parseInt(document.getElementById('spin-duration')?.value || 6);
       const baseSec = Math.max(durationInput, 5);
-      // Tự động phân bổ thời lượng theo số vòng đua (tối thiểu ~3.8s/vòng để nhìn rõ các khúc cua)
-      const lapPacedDuration = Math.max(baseSec * 1000 * Math.sqrt(totalLaps / 2), totalLaps * 3800);
+      
+      // Tự động phân bổ thời lượng theo số vòng đua (đảm bảo xe lướt nhanh, kịch tính, không bị lê thê khi chọn nhiều vòng)
+      let secPerLap;
+      if (totalLaps <= 2) secPerLap = 3.8;
+      else if (totalLaps <= 5) secPerLap = 3.0;
+      else if (totalLaps <= 10) secPerLap = 2.4;
+      else if (totalLaps <= 20) secPerLap = 1.9;
+      else secPerLap = 1.6;
+
+      const lapPacedDuration = Math.max(baseSec * 1000, Math.round(totalLaps * secPerLap * 1000));
       const validDuration = (typeof raceDuration === 'number' && raceDuration > 500) 
         ? raceDuration 
         : lapPacedDuration;
@@ -9353,34 +9457,111 @@
             if (typeof callback === 'function') {
               callback();
             } else {
-              currentWinner = winnerStudent;
-              const nameEl = document.getElementById('winner-name');
-              if (nameEl) nameEl.innerText = winnerStudent.name; 
-              const avEl = document.getElementById('winner-avatar');
-              if (avEl) avEl.innerHTML = getAvatarHtml(winnerStudent.avatar); 
-              const idEl = document.getElementById('winner-id');
-              if (idEl) idEl.innerText = "ID: " + (winnerStudent.code || "...");
-              openModalUi('result-modal', 'result-content');
-
-              const spinBtn = document.getElementById('spin-btn');
-              if (spinBtn) {
-                spinBtn.disabled = false;
-                spinBtn.innerHTML = "🏎️ BẮT ĐẦU ĐUA XE";
-                spinBtn.classList.remove('opacity-70');
-              }
-
-              const stageBtn = document.getElementById('car-stage-spin-btn');
-              if (stageBtn) {
-                stageBtn.disabled = false;
-                stageBtn.innerHTML = '<span>🏎️ ĐUA NGAY</span><span class="bg-black/25 text-white text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">[Space]</span>';
-                stageBtn.classList.remove('opacity-70', 'pointer-events-none');
-              }
+              showCarWinnerOverlay(winnerStudent, winningCar);
             }
-          }, 1200);
+          }, 900);
         }
       }
 
       carRaceState.animId = requestAnimationFrame(carRaceLoop);
+    }
+
+    // --- HÀM VINH DANH QUÁN QUÂN TRỰC TIẾP TRÊN MÀN HÌNH (IN-SCREEN CELEBRATION - KHÔNG CẦN THU NHỎ) ---
+    function showCarWinnerOverlay(winnerStudent, winningCar) {
+      currentWinner = winnerStudent;
+
+      // Cập nhật dữ liệu gốc để giữ đồng bộ hệ thống
+      const nameEl = document.getElementById('winner-name');
+      if (nameEl) nameEl.innerText = winnerStudent.name; 
+      const avEl = document.getElementById('winner-avatar');
+      if (avEl) avEl.innerHTML = getAvatarHtml(winnerStudent.avatar); 
+      const idEl = document.getElementById('winner-id');
+      if (idEl) idEl.innerText = "ID: " + (winnerStudent.code || "...");
+
+      // Cập nhật dữ liệu vào bảng vinh danh trực tiếp trên sân khấu đường đua
+      const overlay = document.getElementById('car-winner-overlay');
+      if (overlay) {
+        const oName = document.getElementById('car-winner-name');
+        const oAvatar = document.getElementById('car-winner-avatar');
+        const oId = document.getElementById('car-winner-id');
+        const oRaceInfo = document.getElementById('car-winner-race-info');
+
+        if (oName) oName.innerText = winnerStudent.name;
+        if (oAvatar) oAvatar.innerHTML = getAvatarHtml(winnerStudent.avatar);
+        if (oId) oId.innerText = "Mã ID: " + (winnerStudent.code || "...");
+
+        if (oRaceInfo) {
+          const curTrack = F1_CIRCUITS.find(c => c.id === carRaceState.currentTrackId) || { name: "F1 Grand Prix" };
+          const carNum = winningCar ? winningCar.num : 1;
+          const totalLaps = carRaceState.totalLaps || 2;
+          oRaceInfo.innerHTML = "🏎️ Xe số #" + carNum + " • " + curTrack.name + " • " + totalLaps + " Vòng";
+        }
+
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+      }
+
+      playF1VictoryFanfareSound();
+
+      // Mở lại các nút điều khiển
+      const spinBtn = document.getElementById('spin-btn');
+      if (spinBtn) {
+        spinBtn.disabled = false;
+        spinBtn.innerHTML = "🏎️ BẮT ĐẦU ĐUA XE";
+        spinBtn.classList.remove('opacity-70');
+      }
+
+      const stageBtn = document.getElementById('car-stage-spin-btn');
+      if (stageBtn) {
+        stageBtn.disabled = false;
+        stageBtn.innerHTML = '<span>🏎️ ĐUA TIẾP</span><span class="bg-black/25 text-white text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">[Space]</span>';
+        stageBtn.classList.remove('opacity-70', 'pointer-events-none');
+      }
+    }
+
+    function closeCarWinnerOverlay(removeStudent) {
+      const overlay = document.getElementById('car-winner-overlay');
+      if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+      }
+      if (removeStudent && currentWinner) {
+        hiddenWheelIds.push(currentWinner.id);
+        initCarRace();
+      }
+    }
+
+    function restartCarRaceFromOverlay() {
+      closeCarWinnerOverlay(false);
+      startSpin();
+    }
+
+    // Âm thanh vinh quang ăn mừng quán quân F1 (Web Audio API)
+    function playF1VictoryFanfareSound() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const actx = new AudioContext();
+        if (actx.state === 'suspended') actx.resume();
+
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = actx.createOscillator();
+          const gain = actx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, actx.currentTime + idx * 0.11);
+
+          gain.gain.setValueAtTime(0.001, actx.currentTime + idx * 0.11);
+          gain.gain.exponentialRampToValueAtTime(0.20, actx.currentTime + idx * 0.11 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + idx * 0.11 + (idx === 3 ? 0.65 : 0.22));
+
+          osc.connect(gain);
+          gain.connect(actx.destination);
+
+          osc.start(actx.currentTime + idx * 0.11);
+          osc.stop(actx.currentTime + idx * 0.11 + (idx === 3 ? 0.70 : 0.25));
+        });
+      } catch (err) {}
     }
 
     function startCarCelebrateLoop(winnerCar) {
@@ -10352,6 +10533,7 @@
     }
 
     function closeResultModal(removeStudent) { 
+      closeCarWinnerOverlay(false);
       if (removeStudent && currentWinner) { 
         hiddenWheelIds.push(currentWinner.id); 
       } 
