@@ -1313,6 +1313,12 @@
                  </div>
 
                  <div class="flex items-center gap-2 pointer-events-auto flex-wrap justify-end">
+                   <!-- NÚT BẮT ĐẦU ĐUA TRÊN SÂN KHẤU (BẤM SPACE) -->
+                   <button id="car-stage-spin-btn" onclick="startSpin()" type="button" title="Bắt đầu cuộc đua (Phím Space)" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black px-3.5 py-1.5 rounded-full shadow-lg border border-amber-300 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all">
+                     <span>🏎️ ĐUA NGAY</span>
+                     <span class="bg-black/25 text-white text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">[Space]</span>
+                   </button>
+
                    <div id="car-race-status" class="text-xs font-bold text-white bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-amber-500/40 shadow-sm flex items-center gap-1.5">
                      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                      <span>Sẵn sàng vạch xuất phát</span>
@@ -8611,6 +8617,32 @@
           disableCustomFullscreen(container);
         }
       }
+
+      // Nhấn phím Space để bắt đầu đua xe F1 (đặc biệt hữu ích khi phóng to toàn màn hình)
+      if (e.code === 'Space' || e.key === ' ') {
+        const tag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable)) return;
+
+        const container = document.getElementById('car-race-container');
+        const modeSelect = document.getElementById('spin-mode');
+        const isCarMode = modeSelect && modeSelect.value === 'car';
+        const isCarVisible = container && !container.classList.contains('hidden');
+
+        if (isCarVisible && isCarMode) {
+          // Nếu modal kết quả đang mở thì Space sẽ đóng modal để sẵn sàng cho lần đua tiếp theo
+          const resultModal = document.getElementById('result-modal');
+          if (resultModal && !resultModal.classList.contains('hidden')) {
+            e.preventDefault();
+            closeModalUi('result-modal', 'result-content');
+            return;
+          }
+
+          if (!carRaceState.isRunning) {
+            e.preventDefault();
+            startSpin();
+          }
+        }
+      }
     });
 
     // --- HÀM TẠO BẢNG TRA CỨU ĐƯỜNG CONG CATMULL-ROM PHÓNG TO TỐI ĐA (VẼ TO ĐỂ CHẠY LÂU) ---
@@ -8837,12 +8869,12 @@
       const circuitData = buildCircuitLookupTable(curTrack.pts, w, h);
       carRaceState.circuitLookup = circuitData;
 
-      // Thiết lập làn đua và kích thước xe rộng rãi
-      const numLanes = Math.min(Math.max(count, 3), 6);
-      const maxRoadW = Math.min(h * 0.22, 80);
-      const laneW = Math.min(Math.max(maxRoadW / numLanes, 15), 24);
+      // Thiết lập số làn đua: Giảm còn tối đa 4 làn theo yêu cầu
+      const numLanes = Math.min(Math.max(count, 1), 4);
+      const maxRoadW = Math.min(h * 0.20, 76);
+      const laneW = Math.min(Math.max(maxRoadW / numLanes, 17), 26);
       const roadW = numLanes * laneW;
-      const carScale = Math.min(Math.max(laneW / 24, 0.58), 0.86);
+      const carScale = Math.min(Math.max(laneW / 24, 0.62), 0.88);
 
       carRaceState.numLanes = numLanes;
       carRaceState.laneW = laneW;
@@ -8873,8 +8905,8 @@
         const laneIdx = count <= numLanes ? idx : (idx % numLanes);
         const laneOffset = (laneIdx + 0.5 - numLanes / 2) * laneW;
         const row = Math.floor(idx / numLanes);
-        // Xuất phát xếp hàng so-le F1 trước vạch xuất phát
-        const stagger = -(row * 28 + (idx % 2 === 0 ? 0 : 14)) - 24;
+        // Xuất phát xếp hàng so-le F1 trước vạch xuất phát (tối đa 4 làn)
+        const stagger = -(row * 30 + (idx % 2 === 0 ? 0 : 15)) - 24;
         const pt = getCircuitPoint(circuitData.table, P1, stagger);
 
         const initialX = pt.x + laneOffset * pt.nx;
@@ -8912,7 +8944,7 @@
       if (statusEl) {
         statusEl.dataset.breakaway = "";
         statusEl.className = "text-xs font-bold text-white bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-amber-500/40 shadow-sm flex items-center gap-1.5";
-        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sẵn sàng (' + count + ' xe đua)';
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sẵn sàng (' + count + ' xe - 4 làn)';
       }
       const leaderEl = document.getElementById('car-leader-badge');
       if (leaderEl) leaderEl.classList.add('hidden');
@@ -8922,6 +8954,13 @@
         spinBtn.disabled = false;
         spinBtn.innerHTML = "🏎️ BẮT ĐẦU ĐUA XE";
         spinBtn.classList.remove('opacity-70');
+      }
+
+      const stageBtn = document.getElementById('car-stage-spin-btn');
+      if (stageBtn) {
+        stageBtn.disabled = false;
+        stageBtn.innerHTML = '<span>🏎️ ĐUA NGAY</span><span class="bg-black/25 text-white text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">[Space]</span>';
+        stageBtn.classList.remove('opacity-70', 'pointer-events-none');
       }
 
       startCarIdleLoop();
@@ -9044,6 +9083,13 @@
         spinBtn.disabled = true;
         spinBtn.innerHTML = "🏎️ ĐANG SO KÈ NGHẸT THỞ...";
         spinBtn.classList.add('opacity-70');
+      }
+
+      const stageBtn = document.getElementById('car-stage-spin-btn');
+      if (stageBtn) {
+        stageBtn.disabled = true;
+        stageBtn.innerHTML = "🏎️ ĐANG ĐUA...";
+        stageBtn.classList.add('opacity-70', 'pointer-events-none');
       }
 
       // Xác định số vòng đua và thời lượng đua xe (chạy lâu, đã mắt)
@@ -9321,6 +9367,13 @@
                 spinBtn.disabled = false;
                 spinBtn.innerHTML = "🏎️ BẮT ĐẦU ĐUA XE";
                 spinBtn.classList.remove('opacity-70');
+              }
+
+              const stageBtn = document.getElementById('car-stage-spin-btn');
+              if (stageBtn) {
+                stageBtn.disabled = false;
+                stageBtn.innerHTML = '<span>🏎️ ĐUA NGAY</span><span class="bg-black/25 text-white text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">[Space]</span>';
+                stageBtn.classList.remove('opacity-70', 'pointer-events-none');
               }
             }
           }, 1200);
@@ -10097,6 +10150,12 @@
         const durationInput = parseInt(document.getElementById('spin-duration')?.value || 6);
         const duration = Math.max(durationInput, 5) * 1000;
         btn.innerHTML = "🏎️ ĐANG ĐUA XE...";
+        const stageBtn = document.getElementById('car-stage-spin-btn');
+        if (stageBtn) {
+          stageBtn.disabled = true;
+          stageBtn.innerHTML = "🏎️ ĐANG ĐUA...";
+          stageBtn.classList.add('opacity-70', 'pointer-events-none');
+        }
         startCarRace(selected, duration, () => {
           currentWinner = selected;
           confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }});
@@ -10108,6 +10167,11 @@
             btn.disabled = false; 
             btn.innerHTML = "🏎️ BẮT ĐẦU ĐUA XE"; 
             btn.classList.remove('opacity-70');
+            if (stageBtn) {
+              stageBtn.disabled = false;
+              stageBtn.innerHTML = '<span>🏎️ ĐUA NGAY</span><span class="bg-black/25 text-white text-[10px] px-1.5 py-0.5 rounded font-mono font-bold">[Space]</span>';
+              stageBtn.classList.remove('opacity-70', 'pointer-events-none');
+            }
           }, 800);
         });
         return;
