@@ -8870,6 +8870,12 @@
         spinBtn.classList.add('opacity-70');
       }
 
+      // Xác định thời lượng đua xe chuẩn xác
+      const durationInput = parseInt(document.getElementById('spin-duration')?.value || 6);
+      const validDuration = (typeof raceDuration === 'number' && raceDuration > 500) 
+        ? raceDuration 
+        : Math.max(durationInput, 5) * 1000;
+
       const statusEl = document.getElementById('car-race-status');
       if (statusEl) {
         statusEl.dataset.breakaway = "";
@@ -8881,7 +8887,7 @@
       carRaceState.isFinished = false;
       carRaceState.winner = winnerStudent;
       carRaceState.raceStartTime = performance.now();
-      carRaceState.raceDuration = raceDuration;
+      carRaceState.raceDuration = validDuration;
       carRaceState.tapeBroken = false;
       carRaceState.currentLap = 1;
 
@@ -8930,7 +8936,7 @@
         lastFrameTime = currentTime;
 
         const elapsed = currentTime - carRaceState.raceStartTime;
-        const progress = Math.min(elapsed / raceDuration, 1);
+        const progress = Math.min(Math.max(0, elapsed / carRaceState.raceDuration), 1);
         carRaceState.progress = progress;
 
         // Cập nhật số vòng đua
@@ -9055,8 +9061,26 @@
           startCarCelebrateLoop(winningCar);
 
           setTimeout(() => {
-            if (typeof callback === 'function') callback();
-          }, 800);
+            if (typeof callback === 'function') {
+              callback();
+            } else {
+              currentWinner = winnerStudent;
+              const nameEl = document.getElementById('winner-name');
+              if (nameEl) nameEl.innerText = winnerStudent.name; 
+              const avEl = document.getElementById('winner-avatar');
+              if (avEl) avEl.innerHTML = getAvatarHtml(winnerStudent.avatar); 
+              const idEl = document.getElementById('winner-id');
+              if (idEl) idEl.innerText = "ID: " + (winnerStudent.code || "...");
+              openModalUi('result-modal', 'result-content');
+
+              const spinBtn = document.getElementById('spin-btn');
+              if (spinBtn) {
+                spinBtn.disabled = false;
+                spinBtn.innerHTML = "🏎️ BẮT ĐẦU ĐUA XE";
+                spinBtn.classList.remove('opacity-70');
+              }
+            }
+          }, 1200);
         }
       }
 
@@ -9790,7 +9814,22 @@
 
       // If car mode, perform exhilarating F1 car race!
       if (mode === 'car') {
-        startCarRace(selected);
+        const durationInput = parseInt(document.getElementById('spin-duration')?.value || 6);
+        const duration = Math.max(durationInput, 5) * 1000;
+        btn.innerHTML = "🏎️ ĐANG ĐUA XE...";
+        startCarRace(selected, duration, () => {
+          currentWinner = selected;
+          confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }});
+          setTimeout(() => {
+            document.getElementById('winner-name').innerText = selected.name; 
+            document.getElementById('winner-avatar').innerHTML = getAvatarHtml(selected.avatar); 
+            document.getElementById('winner-id').innerText = "ID: " + (selected.code || "...");
+            openModalUi('result-modal', 'result-content');
+            btn.disabled = false; 
+            btn.innerHTML = "🏎️ BẮT ĐẦU ĐUA XE"; 
+            btn.classList.remove('opacity-70');
+          }, 800);
+        });
         return;
       }
 
