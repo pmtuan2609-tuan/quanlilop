@@ -9431,7 +9431,7 @@
       carRaceState.celebrateAnimId = requestAnimationFrame(celebrateLoop);
     }
 
-    // --- HÀM VẼ CHI TIẾT XE ĐUA F1 BROADCAST CHUYÊN NGHIỆP ---
+    // --- HÀM VẼ CHI TIẾT XE ĐUA F1: GÓC NHÌN TỪ TRÊN XUỐNG (TOP-DOWN BIRD'S EYE VIEW) ---
     function drawF1Car(ctx, car, isWinner) {
       ctx.save();
       const screenX = car.x;
@@ -9439,181 +9439,234 @@
       ctx.translate(screenX, screenY);
       ctx.rotate(car.angle || 0);
 
-      const scale = car.scale || 0.72;
+      const scale = (car.scale || 0.72) * 1.15;
       ctx.scale(scale, scale);
 
       const theme = car.theme || { primary: '#ef4444', secondary: '#991b1b', accent: '#fde047' };
 
-      // 1. Vệt khói lửa phía sau xe khi bứt tốc
-      if (car.burstFactor > 0.1) {
+      // 1. Bóng đổ xe nhìn từ trên xuống (Car shadow top-down)
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.40)';
+      ctx.beginPath();
+      ctx.ellipse(-2, 1.5, 30, 16, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // 2. Vệt lửa phụt ống xả khi bứt tốc (Exhaust flame)
+      if (car.burstFactor > 0.08) {
         ctx.save();
-        ctx.fillStyle = 'rgba(249, 115, 22, 0.75)';
+        const flameLen = 14 + Math.random() * 10;
+        const flameGrad = ctx.createLinearGradient(-26, 0, -26 - flameLen, 0);
+        flameGrad.addColorStop(0, '#fef08a');
+        flameGrad.addColorStop(0.3, '#f97316');
+        flameGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = flameGrad;
         ctx.beginPath();
-        ctx.moveTo(-34, -2);
-        ctx.lineTo(-48 - Math.random() * 12, 0);
-        ctx.lineTo(-34, 2);
+        ctx.moveTo(-26, -3);
+        ctx.lineTo(-26 - flameLen, 0);
+        ctx.lineTo(-26, 3);
         ctx.closePath();
         ctx.fill();
         ctx.restore();
       }
 
-      // 2. Bóng đổ xe đua (Car shadow)
+      // 3. Càng treo carbon chữ A (Suspension wishbones)
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      // Càng trước trái & phải
+      ctx.moveTo(14, -4); ctx.lineTo(15, -13);
+      ctx.moveTo(8, -4); ctx.lineTo(15, -13);
+      ctx.moveTo(14, 4); ctx.lineTo(15, 13);
+      ctx.moveTo(8, 4); ctx.lineTo(15, 13);
+      // Càng sau trái & phải
+      ctx.moveTo(-12, -5); ctx.lineTo(-18, -14);
+      ctx.moveTo(-6, -5); ctx.lineTo(-18, -14);
+      ctx.moveTo(-12, 5); ctx.lineTo(-18, 14);
+      ctx.moveTo(-6, 5); ctx.lineTo(-18, 14);
+      ctx.stroke();
+
+      // 4. Bốn bánh xe F1 lốp trơn thể thao nhìn từ trên xuống (4 Slick Tyres)
+      const tyres = [
+        { x: 15, y: -15.5, w: 13, h: 7.5 },  // Trước trái
+        { x: 15, y: 15.5, w: 13, h: 7.5 },   // Trước phải
+        { x: -18, y: -16.5, w: 15, h: 9.0 }, // Sau trái (bánh sau rộng hơn)
+        { x: -18, y: 16.5, w: 15, h: 9.0 }   // Sau phải
+      ];
+      tyres.forEach(t => {
+        ctx.save();
+        ctx.translate(t.x, t.y);
+        ctx.fillStyle = '#090d16';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.4;
+        drawRoundRect(ctx, -t.w / 2, -t.h / 2, t.w, t.h, 2.5);
+        ctx.fill();
+        ctx.stroke();
+
+        // Viền màu Pirelli đặc trưng trên lốp
+        ctx.fillStyle = theme.accent;
+        ctx.fillRect(-t.w / 2 + 2, -t.h / 2 + 1.2, t.w - 4, 1.2);
+        ctx.fillRect(-t.w / 2 + 2, t.h / 2 - 2.4, t.w - 4, 1.2);
+
+        // Mâm xe hợp kim carbon
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(-2, -1.5, 4, 3);
+        ctx.restore();
+      });
+
+      // 5. Cánh gió trước nhìn từ trên xuống (Front Wing top-down)
       ctx.save();
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
-      ctx.beginPath();
-      ctx.ellipse(0, 10, 36, 12, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // 3. Cánh gió sau (Rear Wing)
-      ctx.fillStyle = theme.secondary;
-      ctx.strokeStyle = '#0f172a';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.roundRect(-35, -14, 8, 20, 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = theme.accent;
-      ctx.beginPath();
-      ctx.roundRect(-36, -15, 3, 22, 1.5);
-      ctx.fill();
-
-      // 4. Cột đỡ cánh sau (Endplates)
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(-32, -6, 6, 12);
-
-      // 5. Thân xe khí động học (Aerodynamic Monocoque Chassis)
-      ctx.fillStyle = theme.primary;
-      ctx.strokeStyle = '#0f172a';
-      ctx.lineWidth = 2.0;
-
-      ctx.beginPath();
-      ctx.moveTo(38, 2);
-      ctx.bezierCurveTo(46, 5, 52, 7, 52, 10);
-      ctx.lineTo(36, 11);
-      ctx.bezierCurveTo(24, 12, 14, 13, 0, 13);
-      ctx.bezierCurveTo(-14, 13, -22, 12, -30, 9);
-      ctx.lineTo(-30, 0);
-      ctx.bezierCurveTo(-22, -3, -14, -4, 0, -4);
-      ctx.bezierCurveTo(14, -4, 24, -2, 38, 2);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      // 6. Điểm nhấn decal / sọc sơn thể thao
-      ctx.fillStyle = theme.accent;
-      ctx.beginPath();
-      ctx.moveTo(-18, 5);
-      ctx.lineTo(16, 5);
-      ctx.lineTo(34, 10);
-      ctx.lineTo(-12, 10);
-      ctx.closePath();
-      ctx.fill();
-
-      // Hốc lấy gió trên đầu tay đua (Air Intake)
-      ctx.fillStyle = theme.secondary;
-      ctx.beginPath();
-      ctx.moveTo(-12, -7);
-      ctx.lineTo(-6, -15);
-      ctx.lineTo(2, -7);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.ellipse(-1, -9, 3, 2, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Mũ bảo hiểm của tay đua (Driver Helmet)
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(3, -5, 5.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#0f172a';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.arc(4.5, -5.5, 3.2, -0.4, 0.8);
-      ctx.lineTo(4.5, -4);
-      ctx.closePath();
-      ctx.fill();
-
-      // Thanh bảo vệ Halo
-      ctx.strokeStyle = '#334155';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(1, -5, 8.5, -Math.PI * 0.75, -Math.PI * 0.1);
-      ctx.stroke();
-
-      // 7. Cánh gió trước (Front Wing)
       ctx.fillStyle = theme.secondary;
       ctx.strokeStyle = '#0f172a';
       ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.moveTo(36, 8);
-      ctx.lineTo(52, 8);
-      ctx.lineTo(54, 12);
-      ctx.lineTo(36, 12);
+      ctx.moveTo(25, -17);
+      ctx.lineTo(29, -16);
+      ctx.lineTo(31, 0);
+      ctx.lineTo(29, 16);
+      ctx.lineTo(25, 17);
+      ctx.lineTo(23, 14);
+      ctx.lineTo(27, 0);
+      ctx.lineTo(23, -14);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
+      // Endplates 2 bên cánh trước
       ctx.fillStyle = theme.accent;
-      ctx.fillRect(50, 6, 4, 7);
+      ctx.fillRect(23, -17.5, 7, 2);
+      ctx.fillRect(23, 15.5, 7, 2);
+      ctx.restore();
 
-      // Bánh xe F1 thể thao
-      const wheelPositions = [-28, 26];
-      wheelPositions.forEach(wx => {
-        ctx.save();
-        ctx.translate(wx, 11);
+      // 6. Cánh gió sau nhìn từ trên xuống (Rear Wing top-down)
+      ctx.save();
+      ctx.fillStyle = theme.secondary;
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.6;
+      drawRoundRect(ctx, -27, -15, 6, 30, 2);
+      ctx.fill();
+      ctx.stroke();
 
-        ctx.fillStyle = '#090d16';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 10, 8.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#1e293b';
-        ctx.lineWidth = 1.8;
-        ctx.stroke();
+      // Cánh mở DRS màu accent
+      ctx.fillStyle = theme.accent;
+      ctx.fillRect(-26, -12, 3, 24);
 
-        ctx.strokeStyle = theme.accent;
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
-        ctx.stroke();
+      // Endplates cánh sau
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-28, -16, 8, 2.5);
+      ctx.fillRect(-28, 13.5, 8, 2.5);
 
-        ctx.rotate(car.wheelAngle || 0);
-        ctx.fillStyle = '#475569';
-        ctx.beginPath();
-        ctx.arc(0, 0, 5, 0, Math.PI * 2);
-        ctx.fill();
+      // Đèn mưa an toàn đỏ F1 nhấp nháy ở đuôi
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(-27.5, 0, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
 
-        ctx.strokeStyle = '#cbd5e1';
-        ctx.lineWidth = 1.2;
-        for (let a = 0; a < 4; a++) {
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(Math.cos(a * Math.PI / 2) * 5, Math.sin(a * Math.PI / 2) * 5);
-          ctx.stroke();
-        }
+      // 7. Thân xe khí động học dáng chai Coca (Monocoque Chassis)
+      ctx.save();
+      ctx.fillStyle = theme.primary;
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.8;
 
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc(0, 0, 2, 0, Math.PI * 2);
-        ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(30, 0); // Đỉnh mũi xe
+      // Mạn trái (nửa trên y < 0)
+      ctx.bezierCurveTo(27, -2.5, 20, -3.5, 14, -4);
+      ctx.bezierCurveTo(11, -7, 8, -12, 2, -12.5);   // Sidepod phình rộng
+      ctx.bezierCurveTo(-5, -12.5, -9, -11, -13, -8); // Thắt eo chai
+      ctx.bezierCurveTo(-17, -6, -21, -4.5, -24, -4); // Đuôi sau
+      ctx.lineTo(-24, 4);
+      // Mạn phải (nửa dưới y > 0)
+      ctx.bezierCurveTo(-21, 4.5, -17, 6, -13, 8);
+      ctx.bezierCurveTo(-9, 11, -5, 12.5, 2, 12.5);
+      ctx.bezierCurveTo(8, 12, 11, 7, 14, 4);
+      ctx.bezierCurveTo(20, 3.5, 27, 2.5, 30, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
 
-        ctx.restore();
-      });
+      // Hốc hút gió Sidepods 2 bên
+      ctx.fillStyle = '#090d16';
+      ctx.beginPath();
+      ctx.ellipse(8, -9.5, 3, 2, 0, 0, Math.PI * 2);
+      ctx.ellipse(8, 9.5, 3, 2, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-      ctx.restore(); // Kết thúc thân xe xoay
+      // Sọc sơn thể thao accent dọc sống xe
+      ctx.fillStyle = theme.accent;
+      ctx.beginPath();
+      ctx.moveTo(27, 0);
+      ctx.lineTo(13, -2);
+      ctx.lineTo(-14, -2.5);
+      ctx.lineTo(-22, -1);
+      ctx.lineTo(-22, 1);
+      ctx.lineTo(-14, 2.5);
+      ctx.lineTo(13, 2);
+      ctx.closePath();
+      ctx.fill();
 
-      // 8. Bảng tên học sinh luôn nằm ngang, hiển thị rõ ràng: TÊN LÓT + TÊN (BỎ HỌ)
+      // Vây cá mập Shark Fin
+      ctx.strokeStyle = theme.secondary;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(-6, 0);
+      ctx.lineTo(-22, 0);
+      ctx.stroke();
+
+      // 8. Khoang lái (Cockpit) & Mũ bảo hiểm & Khung Halo nhìn từ trên xuống
+      ctx.fillStyle = '#090d16';
+      ctx.beginPath();
+      ctx.ellipse(2, 0, 7.5, 4.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mũ bảo hiểm tròn
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0.5, 0, 3.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+
+      // Kính bảo hộ đen của mũ hướng ra trước
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(1.5, 0, 2.6, -Math.PI * 0.45, Math.PI * 0.45);
+      ctx.fill();
+
+      // Khung an toàn Halo chữ Y
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(7.5, 0);
+      ctx.lineTo(3.5, 0);
+      ctx.lineTo(-1.5, -4);
+      ctx.moveTo(3.5, 0);
+      ctx.lineTo(-1.5, 4);
+      ctx.stroke();
+
+      // Cửa lấy gió trên đầu tay đua (Airbox Scoop)
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.ellipse(-3.5, 0, 2, 2.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 9. Số xe in nổi bật trên mũi xe
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(car.num || 1), 20, 0.5);
+
+      ctx.restore();
+
+      ctx.restore(); // Kết thúc xoay thân xe
+
+      // 10. Bảng tên học sinh luôn nằm ngang, hiển thị rõ ràng: TÊN LÓT + TÊN (BỎ HỌ)
       ctx.save();
       const tagWorldX = screenX;
-      const tagWorldY = screenY - 25 * (car.scale || 1.0);
+      const tagWorldY = screenY - 26 * (car.scale || 1.0);
 
       const dispName = car.displayName || getStudentDisplayName(car.name) || 'Học sinh';
       const nameText = car.num + '. ' + dispName;
