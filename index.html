@@ -190,9 +190,29 @@
         display: inline-flex !important;
       }
     }
+
+    /* Thanh cuộn siêu mảnh cho Thanh Menu Ngang */
+    .hnav-glass-container {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+      -webkit-overflow-scrolling: touch;
+    }
+    .hnav-glass-container::-webkit-scrollbar {
+      height: 4px;
+    }
+    .hnav-glass-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .hnav-glass-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 9999px;
+    }
+    .hnav-glass-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.45);
+    }
   </style>
   <script>
-    if (localStorage.getItem('sidebar_pinned') === 'false') {
+    if (localStorage.getItem('sidebar_pinned') === 'false' || localStorage.getItem('sidebar_pinned') === null) {
       document.documentElement.classList.add('sidebar-unpinned');
     }
   </script>
@@ -412,6 +432,9 @@
 
     <div id="tab-container" class="p-4 md:p-8 flex-1 overflow-y-auto custom-scrollbar relative">
       
+      <!-- KHE CẮM THANH MENU KHI CUỘN HOẶC Ở CÁC TAB KHÁC -->
+      <div id="tab-container-nav-slot" class="sticky top-0 z-40 w-full mb-3"></div>
+      
       <!-- TAB TỔNG QUAN -->
       <section id="tab-overview" class="tab-section space-y-4 md:space-y-6">
         <!-- STUDENT HOME PAGE CONTAINER -->
@@ -506,8 +529,8 @@
               <input type="file" id="cover-upload-new" accept="image/*" class="hidden" onchange="handleCoverUpload(event)">
             </label>
 
-            <!-- Thanh đáy: Bên trái chỉ có Avatar GVCN phóng to, bên phải là 4 nút chức năng -->
-            <div class="relative z-10 flex items-end justify-between gap-4 w-full">
+            <!-- Thanh đáy: Bên trái là Avatar GVCN, bên phải là Thanh Menu nằm ngang trên ảnh bìa -->
+            <div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-3 w-full">
               
               <!-- Ảnh đại diện GVCN (to hơn, đặt ở góc đáy, viền trắng sang trọng) -->
               <div class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-3xl overflow-hidden border-4 border-white/95 shadow-xl shrink-0 relative group/avatar cursor-pointer transition transform hover:scale-105" onclick="document.getElementById('avatar-upload').click()" title="Bấm để đổi ảnh đại diện">
@@ -530,12 +553,101 @@
                 <span id="teacher-banner-sub"></span>
               </div>
 
-              <!-- Các nút hành động bên phải -->
-              <div class="flex flex-wrap gap-2.5 shrink-0">
-                <button onclick="switchTab('tab-attendance')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5"><i data-lucide="user-check" class="w-4 h-4"></i> Điểm danh</button>
-                <button onclick="switchTab('tab-notebook')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5"><i data-lucide="contact" class="w-4 h-4"></i> Sổ theo dõi</button>
-                <button onclick="openSubjectTeachersModal()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4"></i> GVBM</button>
-                <button onclick="openTeacherInfoModal()" class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-lg hover:scale-[1.03] active:scale-95 transition flex items-center gap-1.5" title="Xem và sửa thông tin GVCN"><i data-lucide="user-check" class="w-4 h-4"></i> Thông tin GVCN</button>
+              <!-- KHE CẮM THANH MENU NẰM NGANG TRÊN ẢNH BÌA -->
+              <div id="teacher-banner-nav-slot" class="flex-1 min-w-0 flex justify-end">
+                <nav id="horizontal-navbar" class="w-full max-w-full transition-all duration-300">
+                  <div class="hnav-glass-container bg-slate-950/75 hover:bg-slate-950/85 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl p-1.5 flex items-center gap-1.5 overflow-x-auto custom-scrollbar max-w-full">
+                    <!-- 1. Tổng quan -->
+                    <button onclick="switchTab('tab-overview')" id="btn-hnav-tab-overview" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 whitespace-nowrap bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950">
+                      <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                      <span>Tổng quan</span>
+                    </button>
+                    <!-- 2. Điểm danh -->
+                    <button onclick="switchTab('tab-attendance')" id="btn-hnav-tab-attendance" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i>
+                      <span>Điểm danh</span>
+                    </button>
+                    <!-- 3. Học sinh -->
+                    <button onclick="switchTab('tab-students')" id="btn-hnav-tab-students" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="users" class="w-4 h-4 text-blue-400"></i>
+                      <span>Học sinh</span>
+                    </button>
+                    <!-- 4. Thời khóa biểu -->
+                    <button onclick="switchTab('tab-timetable')" id="btn-hnav-tab-timetable" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="table" class="w-4 h-4 text-indigo-400"></i>
+                      <span>TKB</span>
+                    </button>
+                    <!-- 5. Sơ đồ lớp -->
+                    <button onclick="switchTab('tab-seating')" id="btn-hnav-tab-seating" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="layout-grid" class="w-4 h-4 text-purple-400"></i>
+                      <span>Sơ đồ lớp</span>
+                    </button>
+                    <!-- 6. Sổ theo dõi -->
+                    <button onclick="switchTab('tab-notebook')" id="btn-hnav-tab-notebook" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="contact" class="w-4 h-4 text-teal-400"></i>
+                      <span>Sổ theo dõi</span>
+                    </button>
+                    <!-- 7. Đua xe F1 -->
+                    <button onclick="switchTab('tab-wheel')" id="btn-hnav-tab-wheel" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="dices" class="w-4 h-4 text-amber-400"></i>
+                      <span>Đua xe F1</span>
+                    </button>
+                    <!-- 8. Tuyên dương -->
+                    <button onclick="switchTab('tab-praise')" id="btn-hnav-tab-praise" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="award" class="w-4 h-4 text-yellow-400"></i>
+                      <span>Tuyên dương</span>
+                    </button>
+                    <!-- 9. Quà tặng -->
+                    <button onclick="switchTab('tab-gifts')" id="btn-hnav-tab-gifts" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="gift" class="w-4 h-4 text-rose-400"></i>
+                      <span>Quà tặng</span>
+                    </button>
+                    <!-- 10. Thông báo -->
+                    <button onclick="switchTab('tab-announcements')" id="btn-hnav-tab-announcements" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="bell" class="w-4 h-4 text-orange-400"></i>
+                      <span>Thông báo</span>
+                    </button>
+                    <!-- Tab Khen thưởng (HS) -->
+                    <button onclick="switchTab('tab-student-history')" id="btn-hnav-tab-student-history" type="button" class="hnav-btn hidden px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                      <span>Khen thưởng</span>
+                    </button>
+                    <!-- Tab Hồ sơ (HS) -->
+                    <button onclick="openMyProfile()" id="btn-hnav-tab-my-profile" type="button" class="hnav-btn hidden px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="user-cog" class="w-4 h-4 text-teal-400"></i>
+                      <span>Hồ sơ</span>
+                    </button>
+                    <!-- 11. Cài đặt -->
+                    <button onclick="switchTab('tab-settings')" id="btn-hnav-tab-settings" type="button" class="hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15">
+                      <i data-lucide="settings" class="w-4 h-4 text-slate-300"></i>
+                      <span>Cài đặt</span>
+                    </button>
+
+                    <!-- Phân cách -->
+                    <div class="h-5 w-px bg-white/20 mx-0.5 shrink-0"></div>
+
+                    <!-- 12. GVBM (từ ảnh của người dùng) -->
+                    <button onclick="openSubjectTeachersModal()" id="btn-hnav-gvbm" type="button" class="bg-amber-500/30 hover:bg-amber-500 text-amber-300 hover:text-white border border-amber-400/40 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer" title="Danh sách Giáo viên bộ môn">
+                      <i data-lucide="users" class="w-4 h-4"></i>
+                      <span>GVBM</span>
+                    </button>
+
+                    <!-- 13. Thông tin GVCN (từ ảnh của người dùng) -->
+                    <button onclick="openTeacherInfoModal()" id="btn-hnav-gvcn" type="button" class="bg-sky-500/30 hover:bg-sky-500 text-sky-300 hover:text-white border border-sky-400/40 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 whitespace-nowrap cursor-pointer" title="Xem và sửa thông tin GVCN">
+                      <i data-lucide="user-check" class="w-4 h-4"></i>
+                      <span>Thông tin GVCN</span>
+                    </button>
+
+                    <!-- Phân cách -->
+                    <div class="h-5 w-px bg-white/20 mx-0.5 shrink-0"></div>
+
+                    <!-- 14. Nút Ghim / Bỏ ghim thanh menu -->
+                    <button onclick="togglePinHorizontalNav()" id="btn-pin-hnav" type="button" class="shrink-0 transition flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer bg-amber-500 text-slate-950 shadow-md border border-amber-300" title="Đang ghim menu trên đầu trang khi cuộn (Bấm để bỏ ghim)">
+                      <i id="icon-pin-hnav" data-lucide="pin" class="w-4 h-4 text-slate-950 rotate-45"></i>
+                      <span id="text-pin-hnav" class="text-[11px] font-bold">Đã ghim</span>
+                    </button>
+                  </div>
+                </nav>
               </div>
 
             </div>
@@ -1220,6 +1332,10 @@
                   <option value="redbull">🇦🇹 Red Bull Ring (Áo - Hairpin & Dốc)</option>
                   <option value="silverstone">🇬🇧 Silverstone (Anh - Khúc cua chữ S)</option>
                   <option value="monaco">🇲🇨 Monaco GP (Monte Carlo - Cua tay áo)</option>
+                  <option value="spa">🇧🇪 Spa-Francorchamps (Bỉ - Eau Rouge & Ardennes)</option>
+                  <option value="hungaroring">🇭🇺 Hungaroring (Hungary - Mê cung Budapest)</option>
+                  <option value="montreal">🇨🇦 Gilles Villeneuve (Canada - Wall of Champions)</option>
+                  <option value="madrid">🇪🇸 Madrid GP (Tây Ban Nha - Đấu trường IFEMA)</option>
                   <option value="singapore">🇸🇬 Marina Bay (Singapore - Đua đêm rực rỡ)</option>
                   <option value="abudhabi">🇦🇪 Yas Marina (Abu Dhabi - Hoàng hôn biển)</option>
                   <option value="closed_oval">🏟️ Sân Vận Động F1 (Oval Stadium)</option>
@@ -1298,13 +1414,17 @@
                      <span class="text-base">🏎️</span>
                      <span class="hidden sm:inline">ĐƯỜNG ĐUA:</span>
                      <select id="car-track-select" onchange="changeCarTrack(this.value)" class="bg-slate-800 text-amber-300 text-[11px] font-bold rounded-lg px-2 py-0.5 border border-amber-500/40 outline-none cursor-pointer hover:bg-slate-700 shadow-inner">
-                        <option value="redbull">🇦🇹 Red Bull Ring (Áo)</option>
-                        <option value="silverstone">🇬🇧 Silverstone (Anh)</option>
-                        <option value="monaco">🇲🇨 Monaco GP (Monte Carlo)</option>
-                        <option value="singapore">🇸🇬 Marina Bay (Singapore)</option>
-                        <option value="abudhabi">🇦🇪 Yas Marina (Abu Dhabi)</option>
-                        <option value="closed_oval">🏟️ Sân Vận Động (Oval)</option>
-                      </select>
+                         <option value="redbull">🇦🇹 Red Bull Ring (Áo)</option>
+                         <option value="silverstone">🇬🇧 Silverstone (Anh)</option>
+                         <option value="monaco">🇲🇨 Monaco GP (Monte Carlo)</option>
+                         <option value="spa">🇧🇪 Spa-Francorchamps (Bỉ)</option>
+                         <option value="hungaroring">🇭🇺 Hungaroring (Hungary)</option>
+                         <option value="montreal">🇨🇦 Gilles Villeneuve (Canada)</option>
+                         <option value="madrid">🇪🇸 Madrid GP (Tây Ban Nha)</option>
+                         <option value="singapore">🇸🇬 Marina Bay (Singapore)</option>
+                         <option value="abudhabi">🇦🇪 Yas Marina (Abu Dhabi)</option>
+                         <option value="closed_oval">🏟️ Sân Vận Động (Oval)</option>
+                       </select>
                    </div>
 
                    <!-- SỐ VÒNG ĐUA SELECT -->
@@ -2884,7 +3004,7 @@
 
     let isSupabaseConnected = null; // Holds { url, key } when connected, otherwise null
 
-    window.onload = () => { lucide.createIcons(); applySidebarPinState(); initSupabase(); checkAuth(); renderEmptySeatingGrid(); };
+    window.onload = () => { lucide.createIcons(); applySidebarPinState(); applyNavbarPinState(); setupHnavScrollListener(); initSupabase(); checkAuth(); renderEmptySeatingGrid(); };
 
     function initSupabase() {
         // Tự động nhận diện cấu hình đám mây từ URL khi mở qua Link Đồng Bộ trên trình duyệt mới
@@ -4975,7 +5095,7 @@
         }).join('');
         lucide.createIcons();
     }
-    let isSidebarPinned = localStorage.getItem('sidebar_pinned') !== 'false';
+    let isSidebarPinned = localStorage.getItem('sidebar_pinned') === 'true';
 
     function isSidebarOpen() {
         const sidebar = document.getElementById('main-sidebar');
@@ -5042,6 +5162,106 @@
         applySidebarPinState();
     }
 
+    // --- HỆ THỐNG THANH MENU NẰM NGANG TRÊN ẢNH BÌA & TÙY CHỌN GHIM / BỎ GHIM ---
+    let isNavbarPinned = localStorage.getItem('navbar_pinned') !== 'false';
+
+    function applyNavbarPinState() {
+        const pinBtn = document.getElementById('btn-pin-hnav');
+        const pinIcon = document.getElementById('icon-pin-hnav');
+        const pinText = document.getElementById('text-pin-hnav');
+        const topSlot = document.getElementById('tab-container-nav-slot');
+
+        if (isNavbarPinned) {
+            if (pinBtn) {
+                pinBtn.className = "shrink-0 transition flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer bg-amber-500 text-slate-950 shadow-md border border-amber-300";
+                pinBtn.setAttribute('title', 'Đang ghim menu trên đầu trang khi cuộn (Bấm để bỏ ghim)');
+            }
+            if (pinIcon) {
+                pinIcon.setAttribute('data-lucide', 'pin');
+                pinIcon.className = "w-4 h-4 text-slate-950 rotate-45";
+            }
+            if (pinText) pinText.innerText = "Đã ghim";
+            if (topSlot) {
+                topSlot.className = "sticky top-0 z-40 w-full mb-3";
+            }
+        } else {
+            if (pinBtn) {
+                pinBtn.className = "shrink-0 transition flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer bg-white/10 hover:bg-white/20 text-white/70 hover:text-white border border-white/10";
+                pinBtn.setAttribute('title', 'Bỏ ghim menu (Menu cuộn theo trang - Bấm để ghim)');
+            }
+            if (pinIcon) {
+                pinIcon.setAttribute('data-lucide', 'pin-off');
+                pinIcon.className = "w-4 h-4 text-white/70";
+            }
+            if (pinText) pinText.innerText = "Bỏ ghim";
+            if (topSlot) {
+                topSlot.className = "w-full mb-3 relative";
+            }
+        }
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function togglePinHorizontalNav() {
+        isNavbarPinned = !isNavbarPinned;
+        localStorage.setItem('navbar_pinned', isNavbarPinned ? 'true' : 'false');
+        applyNavbarPinState();
+        showNotification(isNavbarPinned ? "📌 Đã ghim thanh menu trên đầu trang khi cuộn" : "📌 Đã bỏ ghim thanh menu", isNavbarPinned ? "success" : "info");
+    }
+
+    function updateHnavPlacement(tabId) {
+        const hnav = document.getElementById('horizontal-navbar');
+        const bannerSlot = document.getElementById('teacher-banner-nav-slot');
+        const topSlot = document.getElementById('tab-container-nav-slot');
+        if (!hnav || !bannerSlot || !topSlot) return;
+
+        if (tabId === 'tab-overview') {
+            if (hnav.parentElement !== bannerSlot) {
+                bannerSlot.appendChild(hnav);
+            }
+        } else {
+            if (hnav.parentElement !== topSlot) {
+                topSlot.appendChild(hnav);
+            }
+        }
+    }
+
+    function setupHnavScrollListener() {
+        const tabContainer = document.getElementById('tab-container');
+        if (!tabContainer || tabContainer.dataset.hnavListener) return;
+        tabContainer.dataset.hnavListener = "true";
+
+        tabContainer.addEventListener('scroll', () => {
+            const currentActiveSec = document.querySelector('.tab-section:not(.hidden)');
+            if (!currentActiveSec || currentActiveSec.id !== 'tab-overview') return;
+
+            const hnav = document.getElementById('horizontal-navbar');
+            const bannerSlot = document.getElementById('teacher-banner-nav-slot');
+            const topSlot = document.getElementById('tab-container-nav-slot');
+            const banner = document.getElementById('teacher-banner-cover');
+            if (!hnav || !bannerSlot || !topSlot || !banner) return;
+
+            if (!isNavbarPinned) {
+                if (hnav.parentElement !== bannerSlot) {
+                    bannerSlot.appendChild(hnav);
+                }
+                return;
+            }
+
+            const bannerRect = banner.getBoundingClientRect();
+            const containerRect = tabContainer.getBoundingClientRect();
+
+            if (bannerRect.bottom <= containerRect.top + 60) {
+                if (hnav.parentElement !== topSlot) {
+                    topSlot.appendChild(hnav);
+                }
+            } else {
+                if (hnav.parentElement !== bannerSlot) {
+                    bannerSlot.appendChild(hnav);
+                }
+            }
+        });
+    }
+
     function switchTab(tabId) {
         document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -5065,6 +5285,16 @@
             activeBtn.classList.remove('hover:bg-white/10', 'text-white/70');
             activeBtn.classList.add('bg-theme-grad', 'text-white', 'shadow-lg', 'font-bold');
         }
+
+        // Cập nhật vị trí và highlight tab trên thanh menu nằm ngang
+        updateHnavPlacement(tabId);
+        document.querySelectorAll('.hnav-btn').forEach(btn => {
+            if (btn.id === 'btn-hnav-' + tabId) {
+                btn.className = "hnav-btn px-3.5 py-2 rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 whitespace-nowrap bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950";
+            } else if (btn.id && btn.id.startsWith('btn-hnav-tab-')) {
+                btn.className = "hnav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer text-white/80 hover:text-white hover:bg-white/15";
+            }
+        });
         
         const titles = {
             'tab-overview': 'Tổng Quan Lớp',
@@ -8582,6 +8812,100 @@
         ]
       },
       {
+        id: 'spa',
+        name: 'Spa-Francorchamps',
+        country: 'Bỉ',
+        icon: '🇧🇪',
+        tagline: '🇧🇪 Spa-Francorchamps: Thung lũng Ardennes - Cua dốc Eau Rouge, Raidillon & Pouhon',
+        bgColor: '#022c22',
+        bgGrad: ['#064e3b', '#022c22', '#01140f'],
+        infieldColor: '#14532d',
+        asphaltDark: '#1e293b',
+        curbRed: '#ef4444',
+        curbWhite: '#ffffff',
+        accentColor: '#fbbf24',
+        pts: [
+          { x: 0.38, y: 0.88 }, { x: 0.58, y: 0.88 },
+          { x: 0.72, y: 0.86, label: 'La Source' }, { x: 0.82, y: 0.78 },
+          { x: 0.90, y: 0.65, label: 'Eau Rouge' }, { x: 0.88, y: 0.48, label: 'Raidillon' },
+          { x: 0.82, y: 0.30 }, { x: 0.76, y: 0.14, label: 'Kemmel' },
+          { x: 0.64, y: 0.12, label: 'Les Combes' }, { x: 0.56, y: 0.16 },
+          { x: 0.52, y: 0.28, label: 'Bruxelles' }, { x: 0.46, y: 0.38 },
+          { x: 0.36, y: 0.36 }, { x: 0.24, y: 0.44, label: 'Pouhon' },
+          { x: 0.16, y: 0.54 }, { x: 0.12, y: 0.66, label: 'Stavelot' },
+          { x: 0.18, y: 0.76 }, { x: 0.26, y: 0.84, label: 'Blanchimont' },
+          { x: 0.32, y: 0.88, label: 'Bus Stop' }
+        ]
+      },
+      {
+        id: 'hungaroring',
+        name: 'Hungaroring',
+        country: 'Hungary',
+        icon: '🇭🇺',
+        tagline: '🇭🇺 Hungaroring: Mê cung Budapest - Cua dốc Turn 1, khúc cua chữ S & Vòng xoáy kỹ thuật',
+        bgColor: '#0f172a',
+        bgGrad: ['#1e293b', '#0f172a', '#020617'],
+        infieldColor: '#166534',
+        asphaltDark: '#1e293b',
+        curbRed: '#ef4444',
+        curbWhite: '#ffffff',
+        accentColor: '#38bdf8',
+        pts: [
+          { x: 0.26, y: 0.85 }, { x: 0.55, y: 0.85 },
+          { x: 0.80, y: 0.85, label: 'T1 Hairpin' }, { x: 0.88, y: 0.70, label: 'T2' },
+          { x: 0.82, y: 0.54 }, { x: 0.70, y: 0.40, label: 'T4' },
+          { x: 0.78, y: 0.26 }, { x: 0.68, y: 0.14, label: 'Chicane T6-7' },
+          { x: 0.56, y: 0.18 }, { x: 0.44, y: 0.28, label: 'T8' },
+          { x: 0.32, y: 0.20, label: 'T11' }, { x: 0.16, y: 0.32, label: 'T12' },
+          { x: 0.14, y: 0.55, label: 'T13 Hairpin' }, { x: 0.16, y: 0.75, label: 'T14' }
+        ]
+      },
+      {
+        id: 'montreal',
+        name: 'Circuit Gilles Villeneuve',
+        country: 'Canada',
+        icon: '🇨🇦',
+        tagline: '🇨🇦 Circuit Gilles Villeneuve: Đảo nhân tạo Montreal - Bức tường Wall of Champions & Hairpin',
+        bgColor: '#082f49',
+        bgGrad: ['#0c4a6e', '#075985', '#022336'],
+        infieldColor: '#0e7490',
+        asphaltDark: '#0f172a',
+        curbRed: '#ef4444',
+        curbWhite: '#ffffff',
+        accentColor: '#f43f5e',
+        pts: [
+          { x: 0.36, y: 0.80 }, { x: 0.55, y: 0.82 },
+          { x: 0.70, y: 0.85, label: 'Senna S' }, { x: 0.78, y: 0.74 },
+          { x: 0.85, y: 0.58, label: 'T3-T4' }, { x: 0.78, y: 0.40, label: 'T6 Pont' },
+          { x: 0.66, y: 0.32 }, { x: 0.52, y: 0.22, label: 'Casino Straight' },
+          { x: 0.18, y: 0.14, label: 'Hairpin Epingle' }, { x: 0.12, y: 0.28 },
+          { x: 0.15, y: 0.48 }, { x: 0.18, y: 0.66, label: 'DRS Straight' },
+          { x: 0.24, y: 0.76, label: 'Wall of Champions' }
+        ]
+      },
+      {
+        id: 'madrid',
+        name: 'Madrid Grand Prix',
+        country: 'Tây Ban Nha',
+        icon: '🇪🇸',
+        tagline: '🇪🇸 Madrid GP: Đấu trường IFEMA - Khúc cua nghiêng siêu tốc Valdebebas & Đoạn hầm triển lãm',
+        bgColor: '#1c1917',
+        bgGrad: ['#292524', '#1c1917', '#0c0a09'],
+        infieldColor: '#78350f',
+        asphaltDark: '#18181b',
+        curbRed: '#dc2626',
+        curbWhite: '#fde047',
+        accentColor: '#eab308',
+        pts: [
+          { x: 0.32, y: 0.84 }, { x: 0.56, y: 0.84 },
+          { x: 0.80, y: 0.84, label: 'T1 IFEMA' }, { x: 0.88, y: 0.68 },
+          { x: 0.82, y: 0.50 }, { x: 0.72, y: 0.28, label: 'Banked Turn' },
+          { x: 0.60, y: 0.14 }, { x: 0.42, y: 0.16, label: 'Tunnel' },
+          { x: 0.28, y: 0.30, label: 'Stadium' }, { x: 0.18, y: 0.46 },
+          { x: 0.14, y: 0.62, label: 'Chicane' }, { x: 0.20, y: 0.76 }
+        ]
+      },
+      {
         id: 'closed_oval',
         name: 'Sân Vận Động Oval',
         country: 'Sân Vận Động',
@@ -10710,7 +11034,27 @@
                 if (buttonConfig[id]) btn.classList.remove('hidden');
                 else btn.classList.add('hidden');
             }
+            const hnavBtn = document.getElementById('btn-hnav-' + id.replace('btn-', ''));
+            if (hnavBtn) {
+                if (buttonConfig[id]) hnavBtn.classList.remove('hidden');
+                else hnavBtn.classList.add('hidden');
+            }
         });
+
+        const hnavGvbm = document.getElementById('btn-hnav-gvbm');
+        const hnavGvcn = document.getElementById('btn-hnav-gvcn');
+        if (hnavGvbm) {
+            if (isStudent) hnavGvbm.classList.add('hidden');
+            else hnavGvbm.classList.remove('hidden');
+        }
+        if (hnavGvcn) {
+            if (isStudent || isGVBM) hnavGvcn.classList.add('hidden');
+            else hnavGvcn.classList.remove('hidden');
+        }
+
+        applyNavbarPinState();
+        updateHnavPlacement('tab-overview');
+        setupHnavScrollListener();
         
         const dividers = document.querySelectorAll('#main-sidebar nav div');
         dividers.forEach(div => {
